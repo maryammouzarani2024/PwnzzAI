@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM DoS Simulation - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>LLM DoS Simulation</h1>
+        
+        <div class="basics-content">
+            <section class="basics-section">
+                <h2>LLM Vulnerability: Denial of Service Attack</h2>
+                <p>This demonstration shows how an attacker can perform a Denial of Service (DoS) attack against LLM services by overwhelming the system with a high volume of requests. This can:</p>
+                <ul class="risk-list">
+                    <li>Exhaust API rate limits or credits</li>
+                    <li>Overload the server resources</li>
+                    <li>Cause service degradation for other users</li>
+                    <li>Lead to financial loss (especially with pay-per-token models)</li>
+                </ul>
+                
+                <div class="dos-container">
+                    <h3>Chat with LLM</h3>
+                    <p>This interface connects to a public Hugging Face model with no rate limiting implemented.</p>
+                    
+                    <div class="chat-interface">
+                        <div class="chat-history" id="chat-history">
+                            <div class="system-message">System: Welcome to the LLM chat. Type a message to get started.</div>
+                        </div>
+                        
+                        <div class="chat-input">
+                            <textarea id="user-prompt" class="form-control chat-textarea" placeholder="Type your message here..."></textarea>
+                            <button id="send-btn" class="btn chat-send-btn">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="attack-section">
+                        <h3>DoS Attack Simulation</h3>
+                        <p>Click the button below to simulate a DoS attack by sending a large number of requests to the LLM API.</p>
+                        
+                        <div class="attack-controls">
+                            <div class="attack-settings">
+                                <div class="form-group">
+                                    <label for="request-count">Number of Requests:</label>
+                                    <input type="number" id="request-count" class="form-control" value="50" min="1" max="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="prompt-template">Prompt Template:</label>
+                                    <textarea id="prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="attack-buttons">
+                                <button id="attack-btn" class="btn btn-danger">
+                                    <i class="fas fa-bomb"></i> Launch DoS Attack
+                                </button>
+                                <button id="stop-attack-btn" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-stop-circle"></i> Stop Attack
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="attack-progress" class="attack-progress" style="display: none;">
+                            <div class="progress-bar-container">
+                                <div id="progress-bar" class="progress-bar"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span id="progress-text">0 / 0 requests sent</span>
+                                <span id="success-count">Success: 0</span>
+                                <span id="failure-count">Failed: 0</span>
+                            </div>
+                        </div>
+                        
+                        <div id="attack-results" class="attack-results" style="display: none;">
+                            <h4>Attack Results</h4>
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <div class="stat-label">Total Requests</div>
+                                    <div id="total-requests" class="stat-value">0</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-label">Successful</div>
+                                    <div id="total-success" class="stat-value">0</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-label">Failed</div>
+                                    <div id="total-failed" class="stat-value">0</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-label">Average Response Time</div>
+                                    <div id="avg-response-time" class="stat-value">0 ms</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-label">Est. Tokens Used</div>
+                                    <div id="est-tokens" class="stat-value">0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="service-monitor">
+                                <h4><i class="fas fa-tachometer-alt"></i> Service Health Monitor</h4>
+                                <p>Test the service during the attack to see if it becomes unresponsive or degraded. Send a query while the attack is running to check response times.</p>
+                                
+                                <div class="health-test-form">
+                                    <div class="form-group">
+                                        <label for="health-test-prompt">Test prompt:</label>
+                                        <div class="health-test-input">
+                                            <input type="text" id="health-test-prompt" class="form-control" placeholder="Enter a test prompt...">
+                                            <button id="health-test-btn" class="btn">Test Service</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="health-results" class="health-results" style="display: none;">
+                                    <h5>Health Test Results</h5>
+                                    <div class="health-metrics">
+                                        <div class="health-metric">
+                                            <div class="metric-label">Response Time:</div>
+                                            <div id="health-response-time" class="metric-value">-</div>
+                                        </div>
+                                        <div class="health-metric">
+                                            <div class="metric-label">Status:</div>
+                                            <div id="health-status" class="metric-value">-</div>
+                                        </div>
+                                    </div>
+                                    <div id="health-response" class="health-response"></div>
+                                </div>
+                                
+                                <div class="health-history">
+                                    <h5>Service Response Time History</h5>
+                                    <div class="response-time-chart">
+                                        <canvas id="response-time-chart" height="100"></canvas>
+                                    </div>
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <div class="legend-color normal"></div>
+                                            <span>Normal (&lt; 1s)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-color degraded"></div>
+                                            <span>Degraded (1-3s)</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-color critical"></div>
+                                            <span>Critical (&gt; 3s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="service-impact" class="service-impact">
+                                <h5>Potential Service Impact</h5>
+                                <p>If multiple users perform this attack simultaneously, it could result in:</p>
+                                <ul>
+                                    <li>API rate limits being reached</li>
+                                    <li>Increased response times for all users</li>
+                                    <li>Service outages</li>
+                                    <li>Significant token usage costs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="basics-section">
+                <h2>Understanding DoS Attacks on LLM Services</h2>
+                <p>Denial of Service (DoS) attacks against LLM APIs and services can have significant impacts:</p>
+                
+                <h3>Vulnerabilities in LLM Services</h3>
+                <ul class="risk-list">
+                    <li><strong>Pay-per-token Pricing Models:</strong> Services like OpenAI charge based on token usage, making them susceptible to financial DoS</li>
+                    <li><strong>Resource-intensive Operations:</strong> Large language models require significant computational resources</li>
+                    <li><strong>Shared Infrastructure:</strong> Most LLM services use shared infrastructure where one user's activity can impact others</li>
+                    <li><strong>Inadequate Rate Limiting:</strong> Some services have insufficient protection against request floods</li>
+                </ul>
+                
+                <h3>Mitigation Strategies</h3>
+                <ul class="mitigation-list">
+                    <li><strong>Robust Rate Limiting:</strong> Implement per-user and per-IP rate limits</li>
+                    <li><strong>Token Budget Controls:</strong> Set maximum token limits per request and per user session</li>
+                    <li><strong>Request Validation:</strong> Filter out suspiciously repetitive or automated requests</li>
+                    <li><strong>Resource Allocation:</strong> Use dedicated instances for critical workloads</li>
+                    <li><strong>Traffic Monitoring:</strong> Implement systems to detect abnormal usage patterns</li>
+                    <li><strong>API Keys Management:</strong> Rotate keys regularly and implement usage tracking</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <style>
+        .dos-container {
+            margin: 20px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .chat-interface {
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-history {
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .system-message {
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 8px;
+        }
+        
+        .user-message, .assistant-message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .assistant-message {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E5EA;
+            align-self: flex-start;
+        }
+        
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .message-time {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+        }
+        
+        .chat-textarea {
+            flex: 1;
+            resize: none;
+            height: 50px;
+            margin-right: 10px;
+            border-radius: 20px;
+            padding: 12px 15px;
+        }
+        
+        .chat-send-btn {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .chat-send-btn i {
+            margin: 0;
+        }
+        
+        .attack-section {
+            margin-top: 40px;
+            border-top: 1px solid #e9ecef;
+            padding-top: 30px;
+        }
+        
+        .attack-controls {
+            margin: 20px 0;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .attack-settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .attack-settings .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .attack-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .attack-progress {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #007bff;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .attack-results {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .result-stat {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #212529;
+        }
+        
+        .service-impact {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+        }
+        
+        .service-monitor {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .health-test-form {
+            margin: 15px 0;
+        }
+        
+        .health-test-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .health-results {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .health-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        
+        .health-metric {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric-label {
+            font-weight: 600;
+        }
+        
+        .metric-value {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        
+        .metric-value.normal {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .metric-value.degraded {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+        
+        .metric-value.critical {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .health-response {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .health-history {
+            margin-top: 25px;
+        }
+        
+        .response-time-chart {
+            margin: 15px 0;
+            height: 120px;
+            position: relative;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        .legend-color.normal {
+            background-color: #28a745;
+        }
+        
+        .legend-color.degraded {
+            background-color: #ffc107;
+        }
+        
+        .legend-color.critical {
+            background-color: #dc3545;
+        }
+        
+        .typing {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: #6c757d;
+        }
+        
+        .typing .dots {
+            display: flex;
+            margin-left: 10px;
+        }
+        
+        .typing .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #6c757d;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: typing-dot 1.4s infinite ease-in-out both;
+        }
+        
+        .typing .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing-dot {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 
+            40% { 
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .attack-settings {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .attack-settings .form-group {
+                width: 100%;
+            }
+            
+            .results-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+    
+    <!-- Include Chart.js for the response time chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    
+    <script>
+        // Initialize chat functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatHistory = document.getElementById('chat-history');
+            const userPrompt = document.getElementById('user-prompt');
+            const sendBtn = document.getElementById('send-btn');
+            
+            // Send a message when clicking the send button
+            sendBtn.addEventListener('click', function() {
+                sendMessage();
+            });
+            
+            // Send a message when pressing Enter (but allow Shift+Enter for new lines)
+            userPrompt.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Function to send a message to the LLM API
+            function sendMessage() {
+                const message = userPrompt.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                addMessageToChat('User', message);
+                
+                // Clear input
+                userPrompt.value = '';
+                
+                // Add typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'typing';
+                typingIndicator.innerHTML = `
+                    <span>Assistant is typing</span>
+                    <div class="dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                `;
+                chatHistory.appendChild(typingIndicator);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                
+                // Send request to API
+                fetch('/api/llm-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    chatHistory.removeChild(typingIndicator);
+                    
+                    if (data.error) {
+                        // Show error message
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'message-error';
+                        errorDiv.textContent = `Error: ${data.error}`;
+                        chatHistory.appendChild(errorDiv);
+                    } else {
+                        // Add assistant response to chat
+                        addMessageToChat('Assistant', data.response);
+                    }
+                    
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                })
+                .catch(error => {
+                    // Remove typing indicator
+                    chatHistory.removeChild(typingIndicator);
+                    
+                    // Show error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message-error';
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    chatHistory.appendChild(errorDiv);
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                });
+            }
+            
+            // Function to add a message to the chat history
+            function addMessageToChat(sender, text) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const messageContainer = document.createElement('div');
+                messageContainer.className = 'message-container';
+                
+                const senderElement = document.createElement('div');
+                senderElement.className = 'message-sender';
+                senderElement.textContent = sender;
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = sender === 'User' ? 'user-message' : 'assistant-message';
+                messageElement.textContent = text;
+                
+                const timeElement = document.createElement('div');
+                timeElement.className = 'message-time';
+                timeElement.textContent = timeString;
+                
+                messageContainer.appendChild(senderElement);
+                messageContainer.appendChild(messageElement);
+                messageContainer.appendChild(timeElement);
+                
+                chatHistory.appendChild(messageContainer);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+            
+            // DoS Attack Functionality
+            const attackBtn = document.getElementById('attack-btn');
+            const stopAttackBtn = document.getElementById('stop-attack-btn');
+            const requestCount = document.getElementById('request-count');
+            const promptTemplate = document.getElementById('prompt-template');
+            const attackProgress = document.getElementById('attack-progress');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const successCount = document.getElementById('success-count');
+            const failureCount = document.getElementById('failure-count');
+            const attackResults = document.getElementById('attack-results');
+            const totalRequests = document.getElementById('total-requests');
+            const totalSuccess = document.getElementById('total-success');
+            const totalFailed = document.getElementById('total-failed');
+            const avgResponseTime = document.getElementById('avg-response-time');
+            const estTokens = document.getElementById('est-tokens');
+            
+            // Service Health Monitor elements
+            const healthTestPrompt = document.getElementById('health-test-prompt');
+            const healthTestBtn = document.getElementById('health-test-btn');
+            const healthResults = document.getElementById('health-results');
+            const healthResponseTime = document.getElementById('health-response-time');
+            const healthStatus = document.getElementById('health-status');
+            const healthResponse = document.getElementById('health-response');
+            
+            // To keep track of the attack
+            let isAttacking = false;
+            let attackStats = {
+                total: 0,
+                success: 0,
+                failed: 0,
+                responseTimes: [],
+                estimatedTokens: 0
+            };
+            
+            // For tracking service health
+            let healthStats = {
+                testCount: 0,
+                responseTimes: [],
+                timestamps: []
+            };
+            
+            // Initialize response time chart
+            let responseTimeChart;
+            const responseTimeCtx = document.getElementById('response-time-chart').getContext('2d');
+            
+            function initializeChart() {
+                responseTimeChart = new Chart(responseTimeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Response Time (ms)',
+                            data: [],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            pointBackgroundColor: function(context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                if (value < 1000) return '#28a745'; // normal
+                                if (value < 3000) return '#ffc107'; // degraded
+                                return '#dc3545'; // critical
+                            },
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Response Time (ms)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + ' ms';
+                                    }
+                                }
+                            },
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Test #'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Response time: ${context.parsed.y} ms`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Initialize the chart
+            initializeChart();
+            
+            // Add service health test functionality
+            healthTestBtn.addEventListener('click', function() {
+                testServiceHealth();
+            });
+            
+            // Also allow pressing Enter in the health test prompt
+            healthTestPrompt.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    testServiceHealth();
+                }
+            });
+            
+            // Function to test the service health
+            function testServiceHealth() {
+                const prompt = healthTestPrompt.value.trim() || "How are you doing today?";
+                
+                // Show results section if hidden
+                healthResults.style.display = 'block';
+                
+                // Update status to show we're testing
+                healthStatus.textContent = 'Testing...';
+                healthStatus.className = 'metric-value';
+                
+                // Record start time
+                const startTime = performance.now();
+                
+                // Send test request
+                fetch('/api/llm-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                })
+                .then(response => {
+                    const endTime = performance.now();
+                    const responseTime = endTime - startTime;
+                    
+                    // Add to health stats
+                    healthStats.testCount++;
+                    healthStats.responseTimes.push(responseTime);
+                    healthStats.timestamps.push(new Date());
+                    
+                    // Determine status based on response time
+                    let statusClass = 'normal';
+                    let statusText = 'Normal';
+                    
+                    if (responseTime >= 3000) {
+                        statusClass = 'critical';
+                        statusText = 'Critical';
+                    } else if (responseTime >= 1000) {
+                        statusClass = 'degraded';
+                        statusText = 'Degraded';
+                    }
+                    
+                    // Update the UI
+                    healthResponseTime.textContent = `${Math.round(responseTime)} ms`;
+                    healthStatus.textContent = statusText;
+                    healthStatus.className = `metric-value ${statusClass}`;
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        healthResponse.textContent = `Error: ${data.error}`;
+                        healthStatus.textContent = 'Failed';
+                        healthStatus.className = 'metric-value critical';
+                    } else {
+                        healthResponse.textContent = data.response;
+                        
+                        // Update the chart
+                        updateResponseTimeChart();
+                    }
+                })
+                .catch(error => {
+                    healthResponseTime.textContent = 'Timeout';
+                    healthStatus.textContent = 'Failed';
+                    healthStatus.className = 'metric-value critical';
+                    healthResponse.textContent = `Error: ${error.message}`;
+                    
+                    // Add a failed data point
+                    healthStats.responseTimes[healthStats.responseTimes.length - 1] = 5000; // High value to indicate failure
+                    updateResponseTimeChart();
+                });
+            }
+            
+            // Function to update the response time chart
+            function updateResponseTimeChart() {
+                // If this is the first test, make sure we have a chart
+                if (!responseTimeChart) {
+                    initializeChart();
+                }
+                
+                // Update chart data
+                const labels = [];
+                for (let i = 1; i <= healthStats.testCount; i++) {
+                    labels.push(`#${i}`);
+                }
+                
+                responseTimeChart.data.labels = labels;
+                responseTimeChart.data.datasets[0].data = healthStats.responseTimes;
+                
+                // Update chart colors based on response times
+                const borderColors = [];
+                healthStats.responseTimes.forEach(time => {
+                    if (time < 1000) borderColors.push('#28a745');
+                    else if (time < 3000) borderColors.push('#ffc107');
+                    else borderColors.push('#dc3545');
+                });
+                
+                // Update the chart
+                responseTimeChart.update();
+            }
+            
+            // Random pizza toppings for generating variations in queries
+            const pizzaToppings = [
+                'pepperoni', 'mushrooms', 'sausage', 'onions', 'bell peppers', 
+                'black olives', 'bacon', 'pineapple', 'ham', 'garlic', 
+                'spinach', 'tomatoes', 'feta cheese', 'blue cheese', 'mozzarella', 
+                'parmesan', 'anchovies', 'artichoke hearts', 'eggplant', 'zucchini', 
+                'broccoli', 'jalapeños', 'chicken', 'beef', 'prosciutto', 
+                'goat cheese', 'arugula', 'basil', 'corn', 'eggs'
+            ];
+            
+            // Function to generate a random prompt with pizza toppings
+            function generateRandomPrompt() {
+                // Get 2-4 random toppings
+                const numToppings = Math.floor(Math.random() * 3) + 2;
+                const selectedToppings = [];
+                
+                for (let i = 0; i < numToppings; i++) {
+                    const randomTopping = pizzaToppings[Math.floor(Math.random() * pizzaToppings.length)];
+                    if (!selectedToppings.includes(randomTopping)) {
+                        selectedToppings.push(randomTopping);
+                    }
+                }
+                
+                const toppingsText = selectedToppings.join(', ');
+                return promptTemplate.value.replace('{random_toppings}', toppingsText);
+            }
+            
+            // Launch the DoS attack
+            attackBtn.addEventListener('click', function() {
+                const numRequests = parseInt(requestCount.value);
+                if (numRequests < 1) {
+                    alert('Please enter a valid number of requests.');
+                    return;
+                }
+                
+                // Reset attack stats
+                attackStats = {
+                    total: numRequests,
+                    success: 0,
+                    failed: 0,
+                    responseTimes: [],
+                    estimatedTokens: 0
+                };
+                
+                // Update UI
+                progressBar.style.width = '0%';
+                progressText.textContent = `0 / ${numRequests} requests sent`;
+                successCount.textContent = 'Success: 0';
+                failureCount.textContent = 'Failed: 0';
+                attackProgress.style.display = 'block';
+                attackResults.style.display = 'block';
+                
+                // Reset health stats
+                healthStats = {
+                    testCount: 0,
+                    responseTimes: [],
+                    timestamps: []
+                };
+                
+                // Reset chart
+                if (responseTimeChart) {
+                    responseTimeChart.data.labels = [];
+                    responseTimeChart.data.datasets[0].data = [];
+                    responseTimeChart.update();
+                }
+                
+                // Toggle buttons
+                attackBtn.disabled = true;
+                stopAttackBtn.disabled = false;
+                isAttacking = true;
+                
+                // Start the attack
+                runAttack(numRequests);
+            });
+            
+            // Stop the DoS attack
+            stopAttackBtn.addEventListener('click', function() {
+                isAttacking = false;
+                stopAttackBtn.disabled = true;
+                attackBtn.disabled = false;
+                
+                // Show results with current stats
+                showAttackResults();
+            });
+            
+            // Run the attack by sending multiple requests
+            function runAttack(numRequests) {
+                let completed = 0;
+                
+                // Function to send a single request
+                function sendRequest() {
+                    if (!isAttacking || completed >= numRequests) {
+                        // Attack completed or stopped
+                        if (isAttacking && completed >= numRequests) {
+                            isAttacking = false;
+                            stopAttackBtn.disabled = true;
+                            attackBtn.disabled = false;
+                            showAttackResults();
+                        }
+                        return;
+                    }
+                    
+                    const prompt = generateRandomPrompt();
+                    const startTime = performance.now();
+                    
+                    fetch('/api/llm-query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: prompt })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const endTime = performance.now();
+                        const responseTime = endTime - startTime;
+                        
+                        // Update stats
+                        attackStats.responseTimes.push(responseTime);
+                        
+                        if (data.error) {
+                            attackStats.failed++;
+                        } else {
+                            attackStats.success++;
+                            // Roughly estimate tokens (very approximate)
+                            const words = data.response.split(' ').length;
+                            attackStats.estimatedTokens += Math.ceil(words * 1.3); // ~1.3 tokens per word
+                        }
+                        
+                        completed++;
+                        
+                        // Update progress UI
+                        const progress = (completed / numRequests) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${completed} / ${numRequests} requests sent`;
+                        successCount.textContent = `Success: ${attackStats.success}`;
+                        failureCount.textContent = `Failed: ${attackStats.failed}`;
+                        
+                        // Continue attack with next request
+                        // Add a small delay to prevent browser freezing
+                        setTimeout(() => sendRequest(), 50);
+                    })
+                    .catch(error => {
+                        completed++;
+                        attackStats.failed++;
+                        
+                        // Update progress UI
+                        const progress = (completed / numRequests) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${completed} / ${numRequests} requests sent`;
+                        successCount.textContent = `Success: ${attackStats.success}`;
+                        failureCount.textContent = `Failed: ${attackStats.failed}`;
+                        
+                        // Continue attack with next request
+                        setTimeout(() => sendRequest(), 50);
+                    });
+                }
+                
+                // Start multiple requests in parallel (using a limited concurrency to not overload the browser)
+                const concurrency = 5;
+                for (let i = 0; i < Math.min(concurrency, numRequests); i++) {
+                    sendRequest();
+                }
+            }
+            
+            // Show attack results
+            function showAttackResults() {
+                // Calculate average response time
+                let avgTime = 0;
+                if (attackStats.responseTimes.length > 0) {
+                    avgTime = attackStats.responseTimes.reduce((sum, time) => sum + time, 0) / attackStats.responseTimes.length;
+                }
+                
+                // Update results UI
+                totalRequests.textContent = attackStats.total;
+                totalSuccess.textContent = attackStats.success;
+                totalFailed.textContent = attackStats.failed;
+                avgResponseTime.textContent = `${Math.round(avgTime)} ms`;
+                estTokens.textContent = attackStats.estimatedTokens;
+                
+                // Show results panel
+                attackResults.style.display = 'block';
+            }
+            
+            // Let's simulate more realistic degradation in the service during the DoS attack
+            // This adds exponentially increasing delays to API responses as the attack progresses
+            const originalFetch = window.fetch;
+            window.fetch = function(resource, options) {
+                // Only intercept calls to our API
+                if (resource === '/api/llm-query' && options?.method === 'POST') {
+                    // Get the current body
+                    const originalBody = options.body;
+                    const bodyObj = JSON.parse(originalBody);
+                    
+                    // Determine if this is a test request or attack request
+                    const isTestRequest = bodyObj.prompt === healthTestPrompt.value || 
+                                         bodyObj.prompt === "How are you doing today?";
+                    
+                    // Calculate how many attack requests have been made
+                    const attackProgress = attackStats.success + attackStats.failed;
+                    
+                    // We'll exponentially increase delay based on attack progress
+                    let artificialDelay = 0;
+                    
+                    if (isAttacking) {
+                        // Base delay increases exponentially with attack progress
+                        // This simulates how real systems degrade under load
+                        // Formula: baseDelay = initialDelay * e^(attackProgress/factor)
+                        const initialDelay = 20; // Starting delay in ms
+                        const scalingFactor = 50; // Higher = slower degradation
+                        const baseDelay = initialDelay * Math.exp(attackProgress / scalingFactor);
+                        
+                        // Add random variance to make it more realistic (±30%)
+                        const variance = baseDelay * 0.3 * (Math.random() - 0.5);
+                        
+                        if (isTestRequest) {
+                            // For health test requests, apply a more severe delay
+                            // This shows how interactive use is more impacted than batch jobs
+                            artificialDelay = baseDelay * 3 + variance;
+                            
+                            // Add extra severe degradation after certain thresholds
+                            if (attackProgress > 150) {
+                                artificialDelay += 5000; // Almost unusable (5s extra delay)
+                            } else if (attackProgress > 100) {
+                                artificialDelay += 2500; // Severely degraded
+                            } else if (attackProgress > 50) {
+                                artificialDelay += 1000; // Noticeably degraded
+                            }
+                        } else {
+                            // For attack requests, apply normal degradation
+                            artificialDelay = baseDelay + variance;
+                        }
+                        
+                        // Cap the delay to prevent extremely long waits
+                        const maxDelay = isTestRequest ? 8000 : 5000;
+                        artificialDelay = Math.min(artificialDelay, maxDelay);
+                        
+                        // Console logs for debugging (hidden from user)
+                        console.log(`Attack progress: ${attackProgress}, Delay: ${artificialDelay.toFixed(0)}ms`);
+                    }
+                    
+                    // Simulate memory/CPU pressure by sometimes adding extra delay
+                    const systemPressure = isAttacking ? Math.min(attackProgress / 200, 1) : 0;
+                    if (Math.random() < systemPressure * 0.5) {
+                        artificialDelay += 1000 * Math.random() * systemPressure;
+                    }
+                    
+                    return new Promise((resolve) => {
+                        // Add an artificial delay to simulate service degradation
+                        setTimeout(() => {
+                            // Simulate increasing error rates as the attack progresses
+                            // Real systems start failing more frequently under extreme load
+                            const errorThreshold = isAttacking ? Math.min(0.05 + (attackProgress / 500), 0.3) : 0.01;
+                            
+                            if (isAttacking && Math.random() < errorThreshold) {
+                                // Different types of errors that can occur
+                                const errorTypes = [
+                                    {status: 503, message: 'Service temporarily unavailable due to high load'},
+                                    {status: 429, message: 'Too many requests, please try again later'},
+                                    {status: 500, message: 'Internal server error - insufficient resources'},
+                                    {status: 504, message: 'Gateway timeout - server took too long to respond'}
+                                ];
+                                
+                                // Select random error type
+                                const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+                                
+                                // Create mock error response
+                                const mockResponse = new Response(JSON.stringify({
+                                    error: errorType.message
+                                }), { status: errorType.status });
+                                
+                                resolve(mockResponse);
+                            } else {
+                                // Call the original fetch if no error
+                                originalFetch(resource, options)
+                                    .then(response => resolve(response))
+                                    .catch(error => {
+                                        throw error;
+                                    });
+                            }
+                        }, artificialDelay);
+                    });
+                }
+                
+                // For all other requests, proceed normally
+                return originalFetch(resource, options);
+            };
+        });
+    </script>
+</body>
+</html>

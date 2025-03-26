@@ -1,0 +1,20 @@
+<nav class="nav-menu">
+    <div class="nav-container">
+        <div class="sidebar-heading">MAIN MENU</div>
+        <ul class="nav-items">
+            <li><a href="{{ url_for('index') }}" {% if request.path == url_for('index') %}class="active"{% endif %}><i class="fas fa-home"></i> <span>Home</span></a></li>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-pizza-slice"></i> <span>Our Pizzas</span></a></li>
+        </ul>
+        
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-heading">LLM VULNERABILITIES</div>
+        
+        <ul class="nav-items">
+            <li><a href="{{ url_for('basics') }}" {% if request.path == url_for('basics') %}class="active"{% endif %}><i class="fas fa-brain"></i> <span>Sentiment Analysis</span></a></li>
+            <li><a href="{{ url_for('model_theft') }}" {% if request.path == url_for('model_theft') %}class="active"{% endif %}><i class="fas fa-user-ninja"></i> <span>Model Theft Demo</span></a></li>
+            <li><a href="{{ url_for('data_poisoning') }}" {% if request.path == url_for('data_poisoning') %}class="active"{% endif %}><i class="fas fa-biohazard"></i> <span>Training Data Poisoning</span></a></li>
+            <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') %}class="active"{% endif %}><i class="fas fa-bomb"></i> <span>LLM DoS Simulation</span></a></li>
+            <li><a href="{{ url_for('real_dos_attack') }}" {% if request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas fa-skull-crossbones"></i> <span>LLM Real DoS</span></a></li>
+        </ul>
+    </div>
+</nav>

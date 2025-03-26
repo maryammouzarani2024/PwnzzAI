@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Sentiment Analysis</h1>
+        
+        <div class="basics-content">
+            <section class="basics-section">
+                <h2>API Documentation</h2>
+                <p>Our sentiment analysis model is available via a REST API. You can use this API to analyze the sentiment of any text programmatically.</p>
+                
+                <div class="api-docs">
+                    <h3>Endpoint</h3>
+                    <code>POST /api/sentiment</code>
+                    
+                    <h3>Request Format</h3>
+                    <pre class="code-block">
+{
+  "text": "Your text to analyze"
+}
+                    </pre>
+                    
+                    <h3>Response Format</h3>
+                    <pre class="code-block">
+{
+  "status": "success",
+  "input": "Your text to analyze",
+  "result": {
+    "sentiment": "positive",
+    "confidence": 0.92,
+    "probabilities": {
+      "positive": 0.92,
+      "negative": 0.08
+    }
+  },
+  "model_info": {
+    "name": "Sentiment Analysis Model",
+    "version": "1.0",
+    "type": "logistic_regression"
+  }
+}
+                    </pre>
+                    
+                    <h3>Example CURL Request</h3>
+                    <pre class="code-block">
+curl -X POST http://localhost:5000/api/sentiment \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I love this product"}'
+                    </pre>
+                </div>
+            </section>
+            
+            <section class="basics-section">
+                <h2>Logistic Regression Sentiment Model</h2>
+                <p>We've built a simple logistic regression sentiment analysis model trained on general text data. Click the button below to generate the model and view its weights.</p>
+                
+                <div class="model-generator">
+                    <button id="generate-model" class="btn">Generate Sentiment Model</button>
+                    <div id="loading-indicator" style="display: none;">
+                        <p><i class="fas fa-spinner fa-spin"></i> Generating model...</p>
+                    </div>
+                    <div id="model-container" style="display: none;">
+                        <h3>Model Weights</h3>
+                        <p>Below are the weights of our sentiment analysis model. These weights represent the importance of different words in determining if text is positive or negative. The higher the positive weight, the stronger the association with positive sentiment.</p>
+                        
+                        <h4>Training Data</h4>
+                        <div id="training-data" class="training-data">
+                            <table class="training-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sentence</th>
+                                        <th>Sentiment</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="training-sentences">
+                                    <!-- Training data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4>Top Positive Words</h4>
+                        <div id="positive-words" class="word-weights"></div>
+                        
+                        <h4>Top Negative Words</h4>
+                        <div id="negative-words" class="word-weights"></div>
+                        
+                        <div class="sentiment-analyzer">
+                            <h4>Try the Model</h4>
+                            <p>Enter your own text to analyze its sentiment:</p>
+                            <div class="analyzer-input">
+                                <input type="text" id="sentiment-input" class="form-control" placeholder="Enter text to analyze sentiment...">
+                                <button id="analyze-button" class="btn">Analyze</button>
+                            </div>
+                            <div id="sentiment-result" class="sentiment-result" style="display: none;"></div>
+                        </div>
+                        
+                        <h4>All Model Weights</h4>
+                        <p>This is the entire model - exposing these weights to clients allows them to steal the model.</p>
+                        <textarea id="model-weights" class="form-control" rows="15" readonly style="width: 100%; margin-top: 15px;"></textarea>
+                    </div>
+                </div>
+            </section>
+           
+        </div>
+    </main>
+
+    <style>
+        .basics-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+        
+        .basics-section {
+            margin-bottom: 40px;
+        }
+        
+        .basics-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .basics-section h3 {
+            margin: 25px 0 10px;
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+        }
+    </style>
+
+    <style>
+        .word-weights {
+            margin: 15px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .word-weight {
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .positive {
+            background-color: #e6f7e6;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .negative {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .weight-value {
+            font-weight: bold;
+            margin-left: 5px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+            background-color: rgba(255,255,255,0.5);
+        }
+        
+        .training-data {
+            margin: 15px 0 25px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .training-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .training-table th, 
+        .training-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .training-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        .training-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .sentiment-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .sentiment-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .sentiment-analyzer {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .analyzer-input {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .analyzer-input input {
+            flex: 1;
+        }
+        
+        .sentiment-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        .result-positive {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result-negative {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* API Documentation Styles */
+        .api-docs {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .api-docs h3 {
+            margin: 20px 0 10px;
+            color: var(--primary-color);
+        }
+        
+        .api-docs code {
+            padding: 3px 6px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .code-block {
+            display: block;
+            padding: 15px;
+            background-color: #272822;
+            color: #f8f8f2;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+    
+    <script>
+        document.getElementById('generate-model').addEventListener('click', async function() {
+            // Show loading indicator
+            document.getElementById('loading-indicator').style.display = 'block';
+            document.getElementById('model-container').style.display = 'none';
+            
+            try {
+                const response = await fetch('/generate_sentiment_model');
+                const data = await response.json();
+                
+                // Display training data
+                const trainingSentencesContainer = document.getElementById('training-sentences');
+                trainingSentencesContainer.innerHTML = '';
+                
+                if (data.training_data && data.training_data.sentences) {
+                    data.training_data.sentences.forEach((sentence, index) => {
+                        const label = data.training_data.labels[index];
+                        const row = document.createElement('tr');
+                        
+                        const sentenceCell = document.createElement('td');
+                        sentenceCell.textContent = sentence;
+                        
+                        const labelCell = document.createElement('td');
+                        if (label === 1) {
+                            labelCell.textContent = 'Positive';
+                            labelCell.className = 'sentiment-positive';
+                        } else {
+                            labelCell.textContent = 'Negative';
+                            labelCell.className = 'sentiment-negative';
+                        }
+                        
+                        row.appendChild(sentenceCell);
+                        row.appendChild(labelCell);
+                        trainingSentencesContainer.appendChild(row);
+                    });
+                }
+                
+                // Display top positive words
+                const positiveWordsContainer = document.getElementById('positive-words');
+                positiveWordsContainer.innerHTML = '';
+                
+                data.top_positive_words.forEach(([word, weight]) => {
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'word-weight positive';
+                    wordElement.innerHTML = `${word} <span class="weight-value">+${weight.toFixed(3)}</span>`;
+                    positiveWordsContainer.appendChild(wordElement);
+                });
+                
+                // Display top negative words
+                const negativeWordsContainer = document.getElementById('negative-words');
+                negativeWordsContainer.innerHTML = '';
+                
+                data.top_negative_words.forEach(([word, weight]) => {
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'word-weight negative';
+                    wordElement.innerHTML = `${word} <span class="weight-value">${weight.toFixed(3)}</span>`;
+                    negativeWordsContainer.appendChild(wordElement);
+                });
+                
+                // Format all model weights as JSON with indentation
+                const formattedWeights = JSON.stringify(data.all_weights, null, 2);
+                
+                // Display the model weights
+                document.getElementById('model-weights').value = formattedWeights;
+                document.getElementById('model-container').style.display = 'block';
+                
+                // Save model data for later sentiment analysis
+                window.modelData = data;
+            } catch (error) {
+                console.error('Error generating model:', error);
+                document.getElementById('model-weights').value = 'Error generating model. Please try again.';
+                document.getElementById('model-container').style.display = 'block';
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loading-indicator').style.display = 'none';
+            }
+        });
+        
+        // Add event listener for the analyze button
+        document.getElementById('analyze-button').addEventListener('click', function() {
+            // Get the input text
+            const inputText = document.getElementById('sentiment-input').value.trim();
+            if (!inputText) return;
+            
+            // Make sure model data exists
+            if (!window.modelData) {
+                alert('Please generate the model first.');
+                return;
+            }
+            
+            // Send the input text to the server for analysis
+            fetch('/analyze_sentiment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: inputText }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the result
+                const resultContainer = document.getElementById('sentiment-result');
+                resultContainer.innerHTML = '';
+                resultContainer.style.display = 'block';
+                
+                const resultClass = data.sentiment === 'positive' ? 'result-positive' : 'result-negative';
+                resultContainer.className = `sentiment-result ${resultClass}`;
+                
+                const resultText = document.createElement('p');
+                resultText.innerHTML = `<strong>Sentiment:</strong> ${data.sentiment} <br>
+                                      <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%`;
+                resultContainer.appendChild(resultText);
+            })
+            .catch(error => {
+                console.error('Error analyzing sentiment:', error);
+                alert('Error analyzing sentiment. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

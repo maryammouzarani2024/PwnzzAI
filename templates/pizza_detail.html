@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pizza.name }} - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <div class="pizza-detail">
+            <div class="pizza-detail-img">
+                <img src="{{ url_for('static', filename='img/' + pizza.image) }}" alt="{{ pizza.name }}">
+            </div>
+            <div class="pizza-detail-info">
+                <h1 class="pizza-detail-name">{{ pizza.name }}</h1>
+                <p class="pizza-detail-price">${{ "%.2f"|format(pizza.price) }}</p>
+                <p class="pizza-detail-description">{{ pizza.description }}</p>
+                <button id="add-to-cart" class="btn">Add to Cart</button>
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h2 class="comments-title">Customer Reviews</h2>
+            {% if pizza.comments %}
+                {% for comment in pizza.comments %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-author">{{ comment.name }}</span>
+                        <span class="comment-date">{{ comment.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    <div class="comment-content">
+                        {{ comment.content }}
+                    </div>
+                    <div class="star-rating">
+                        {% for i in range(comment.rating) %}
+                            <i class="fas fa-star"></i>
+                        {% endfor %}
+                        {% for i in range(5 - comment.rating) %}
+                            <i class="far fa-star"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews yet. Be the first to review this pizza!</p>
+            {% endif %}
+            
+            <div class="add-comment-form">
+                <h3>Add Your Review</h3>
+                <form action="{{ url_for('add_comment', pizza_id=pizza.id) }}" method="post">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Your Review</label>
+                        <textarea id="content" name="content" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Rating</label>
+                        <select id="rating" name="rating" class="form-control" required>
+                            <option value="5">5 Stars - Excellent</option>
+                            <option value="4">4 Stars - Very Good</option>
+                            <option value="3">3 Stars - Good</option>
+                            <option value="2">2 Stars - Fair</option>
+                            <option value="1">1 Star - Poor</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('add-to-cart').addEventListener('click', function() {
+            alert('Feature coming soon! This pizza will be added to your cart.');
+        });
+    </script>
+</body>
+</html>

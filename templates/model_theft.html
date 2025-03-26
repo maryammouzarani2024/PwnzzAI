@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Theft Demonstration - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Model Theft Demo</h1>
+        
+        <div class="basics-content">
+            <section class="basics-section">
+                <h2>LLM Vulnerability: Model Theft</h2>
+                <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
+                
+                <div class="attack-container">
+                    <h3>Model Theft Attack</h3>
+                    <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
+                    
+                    <button id="start-attack" class="btn btn-danger">
+                        <i class="fas fa-running"></i> Launch Attack
+                    </button>
+                    
+                    <div id="attack-loading" style="display: none;">
+                        <div class="loading-animation">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Attack in progress...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="attack-results" style="display: none;">
+                        <div id="theft-success-container" class="theft-success-container">
+                            <div class="theft-success-meter">
+                                <div id="theft-success-bar" class="theft-success-bar" style="width: 0%"></div>
+                            </div>
+                            <div id="theft-success-text" class="theft-success-text">Analyzing theft success...</div>
+                            <div id="theft-status" class="theft-status"></div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4><i class="fas fa-terminal"></i> Attack Log</h4>
+                            <div id="attack-log" class="attack-log"></div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4><i class="fas fa-chart-bar"></i> Comparison: Original vs. Stolen Model</h4>
+                            <div class="theft-metrics">
+                                <div id="metrics-container" class="metrics-container">
+                                    <!-- Will be populated via JavaScript -->
+                                </div>
+                            </div>
+                            <div class="comparison-container">
+                                <div class="weight-comparison">
+                                    <table id="weights-table" class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Word</th>
+                                                <th>Original Weight</th>
+                                                <th>Stolen Weight</th>
+                                                <th>Error</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Will be populated via JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="basics-section">
+                <h2>Understanding the Vulnerability</h2>
+                <p>Model theft is one of the OWASP Top 10 for LLM applications. It occurs when an attacker can extract proprietary model weights, architecture, or behavior through repeated interactions.</p>
+                
+                <h3>Risk Factors</h3>
+                <ul class="risk-list">
+                    <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
+                    <li><strong>Detailed Outputs:</strong> API responses that reveal confidence scores or token probabilities</li>
+                    <li><strong>Lack of API Authentication:</strong> No user identification or access control</li>
+                    <li><strong>Direct Weight Exposure:</strong> Endpoints that directly expose model architecture or weights</li>
+                </ul>
+                
+                <h3>Mitigation Strategies</h3>
+                <ul class="mitigation-list">
+                    <li><strong>API Rate Limiting:</strong> Restrict the number of requests per user/IP</li>
+                    <li><strong>Authentication & Authorization:</strong> Require API keys and track usage</li>
+                    <li><strong>Reduced Output Detail:</strong> Only return necessary information, not confidence scores</li>
+                    <li><strong>Monitoring:</strong> Track and alert on suspicious access patterns</li>
+                    <li><strong>Watermarking:</strong> Include subtle markers in model outputs to track stolen models</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <style>
+        .attack-container {
+            margin: 20px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .loading-animation {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #343a40;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .loading-animation i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .attack-log {
+            height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 15px;
+            background-color: #272822;
+            color: #f8f8f2;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .result-section {
+            margin: 30px 0;
+        }
+        
+        .comparison-container {
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th, 
+        .comparison-table td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        .positive-weight {
+            color: #28a745;
+        }
+        
+        .negative-weight {
+            color: #dc3545;
+        }
+        
+        .risk-list, .mitigation-list {
+            padding-left: 20px;
+        }
+        
+        .risk-list li, .mitigation-list li {
+            margin-bottom: 8px;
+        }
+        
+        /* Theft Success Meter */
+        .theft-success-container {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .theft-success-meter {
+            height: 30px;
+            background-color: #e9ecef;
+            border-radius: 15px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .theft-success-bar {
+            height: 100%;
+            background: linear-gradient(to right, #28a745, #ffc107, #dc3545);
+            transition: width 1.5s ease-in-out;
+        }
+        
+        .theft-success-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .theft-status {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .status-critical {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-high {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .status-medium {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .status-low {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .theft-metrics {
+            margin: 20px 0;
+        }
+        
+        .metrics-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .metric-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #212529;
+        }
+    </style>
+
+    <script>
+        document.getElementById('start-attack').addEventListener('click', async function() {
+            // Show loading animation
+            document.getElementById('attack-loading').style.display = 'block';
+            document.getElementById('attack-results').style.display = 'none';
+            
+            try {
+                // Start the attack
+                const response = await fetch('/api/model-theft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                // Update the log with the attack details
+                const logContainer = document.getElementById('attack-log');
+                logContainer.textContent = data.logs.join('\n');
+                
+                // Populate the comparison table
+                const tableBody = document.querySelector('#weights-table tbody');
+                tableBody.innerHTML = '';
+                
+                // Get words that appear in both actual and approximated weights
+                const words = Object.keys(data.actual_weights);
+                
+                // Sort by absolute difference (error)
+                words.sort((a, b) => {
+                    const errorA = Math.abs(data.actual_weights[a] - data.approximated_weights[a]);
+                    const errorB = Math.abs(data.actual_weights[b] - data.approximated_weights[b]);
+                    return errorB - errorA; // Sort by largest error first
+                });
+                
+                // Create table rows
+                words.forEach(word => {
+                    const actual = data.actual_weights[word];
+                    const approx = data.approximated_weights[word];
+                    const error = Math.abs(actual - approx);
+                    
+                    const row = document.createElement('tr');
+                    
+                    // Word
+                    const wordCell = document.createElement('td');
+                    wordCell.textContent = word;
+                    
+                    // Original weight
+                    const actualCell = document.createElement('td');
+                    actualCell.textContent = actual.toFixed(4);
+                    actualCell.className = actual > 0 ? 'positive-weight' : 'negative-weight';
+                    
+                    // Stolen weight
+                    const approxCell = document.createElement('td');
+                    approxCell.textContent = approx.toFixed(4);
+                    approxCell.className = approx > 0 ? 'positive-weight' : 'negative-weight';
+                    
+                    // Error
+                    const errorCell = document.createElement('td');
+                    errorCell.textContent = error.toFixed(4);
+                    
+                    row.appendChild(wordCell);
+                    row.appendChild(actualCell);
+                    row.appendChild(approxCell);
+                    row.appendChild(errorCell);
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Extract metrics from logs
+                let successRate = 0;
+                let correlation = 0;
+                let signAgreement = 0;
+                let avgError = 0;
+                let avgRelError = 0;
+                let riskLevel = '';
+                
+                // Extract metrics from logs
+                for (const log of data.logs) {
+                    if (log.includes('OVERALL MODEL THEFT SUCCESS RATE:')) {
+                        successRate = parseFloat(log.split(':')[1].trim().replace('%', ''));
+                    } else if (log.includes('Correlation coefficient:')) {
+                        correlation = parseFloat(log.split(':')[1].trim());
+                    } else if (log.includes('Sign agreement rate:')) {
+                        const match = log.match(/Sign agreement rate: (\d+\.\d+)/);
+                        if (match) signAgreement = parseFloat(match[1]);
+                    } else if (log.includes('Average absolute error:')) {
+                        const match = log.match(/Average absolute error: (\d+\.\d+)/);
+                        if (match) avgError = parseFloat(match[1]);
+                    } else if (log.includes('Average relative error:')) {
+                        const match = log.match(/Average relative error: (\d+\.\d+)/);
+                        if (match) avgRelError = parseFloat(match[1]);
+                    } else if (log.includes('STATUS:')) {
+                        riskLevel = log.split('-')[0].replace('STATUS:', '').trim();
+                    }
+                }
+                
+                // Update theft success meter
+                const successBar = document.getElementById('theft-success-bar');
+                successBar.style.width = `${successRate}%`;
+                
+                // Update theft success text
+                const successText = document.getElementById('theft-success-text');
+                successText.textContent = `Model Theft Success: ${successRate.toFixed(1)}%`;
+                
+                // Update theft status
+                const theftStatus = document.getElementById('theft-status');
+                theftStatus.textContent = '';
+                theftStatus.className = '';
+                
+                // Uses the success rate directly instead of parsing the risk level
+                if (successRate >= 80) {
+                    theftStatus.textContent = 'CRITICAL RISK - Almost complete model theft achieved';
+                    theftStatus.className = 'theft-status status-critical';
+                } else if (successRate >= 60) {
+                    theftStatus.textContent = 'HIGH RISK - Significant model theft achieved';
+                    theftStatus.className = 'theft-status status-high';
+                } else if (successRate >= 40) {
+                    theftStatus.textContent = 'MEDIUM RISK - Partial model theft achieved';
+                    theftStatus.className = 'theft-status status-medium';
+                } else {
+                    theftStatus.textContent = 'LOW RISK - Minimal model theft achieved';
+                    theftStatus.className = 'theft-status status-low';
+                }
+                
+                // Populate metrics cards
+                const metricsContainer = document.getElementById('metrics-container');
+                metricsContainer.innerHTML = '';
+                
+                // Create metrics cards
+                const metrics = [
+                    { title: 'Correlation', value: (correlation * 100).toFixed(1) + '%' },
+                    { title: 'Sign Agreement', value: (signAgreement * 100).toFixed(1) + '%' },
+                    { title: 'Average Error', value: avgError.toFixed(4) },
+                    { title: 'Relative Error', value: avgRelError.toFixed(1) + '%' }
+                ];
+                
+                metrics.forEach(metric => {
+                    const metricCard = document.createElement('div');
+                    metricCard.className = 'metric-card';
+                    
+                    const metricTitle = document.createElement('div');
+                    metricTitle.className = 'metric-title';
+                    metricTitle.textContent = metric.title;
+                    
+                    const metricValue = document.createElement('div');
+                    metricValue.className = 'metric-value';
+                    metricValue.textContent = metric.value;
+                    
+                    metricCard.appendChild(metricTitle);
+                    metricCard.appendChild(metricValue);
+                    metricsContainer.appendChild(metricCard);
+                });
+                
+                // Show the results
+                document.getElementById('attack-results').style.display = 'block';
+            } catch (error) {
+                console.error('Error launching attack:', error);
+                const logContainer = document.getElementById('attack-log');
+                logContainer.textContent = 'Error: Failed to launch the model theft attack. Please try again.';
+                document.getElementById('attack-results').style.display = 'block';
+            } finally {
+                // Hide loading animation
+                document.getElementById('attack-loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

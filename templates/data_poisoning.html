@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Data Poisoning - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Training Data Poisoning</h1>
+        
+        <div class="basics-content">
+            <section class="basics-section">
+                <h2>LLM Vulnerability: Training Data Poisoning</h2>
+                <p>This demonstration shows how an attacker can manipulate a model's behavior by poisoning its training data with specific inputs. In a real-world scenario, this can happen when AI systems are trained or fine-tuned on user-provided data without proper filtering or validation.</p>
+                
+                <div class="data-poisoning-container">
+                    <h3>Original Model</h3>
+                    <p>This is the model trained on existing pizza comments. Below you can see the most important words for predicting sentiment.</p>
+                    
+                    <div class="model-info">
+                        <div class="column">
+                            <h5>Top Positive Words (Original Model)</h5>
+                            <div id="original-positive-words" class="word-weights">
+                                {% for word, weight in model_data.top_positive_words %}
+                                <div class="word-weight positive">
+                                    {{ word }} <span class="weight-value">+{{ "%.3f"|format(weight) }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="column">
+                            <h5>Top Negative Words (Original Model)</h5>
+                            <div id="original-negative-words" class="word-weights">
+                                {% for word, weight in model_data.top_negative_words %}
+                                <div class="word-weight negative">
+                                    {{ word }} <span class="weight-value">{{ "%.3f"|format(weight) }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Existing Comments</h3>
+                    <p>These are the existing comments used to train the model.</p>
+                    
+                    <div class="existing-comments">
+                        <div class="comments-grid">
+                            {% for comment in model_data.comments %}
+                            <div class="comment-box comment-{{ comment.sentiment }}">
+                                <div class="comment-rating">
+                                    {% for i in range(5) %}
+                                    {% if i < comment.rating %}
+                                    <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="comment-content">{{ comment.text }}</div>
+                                <div class="comment-author">— {{ comment.name }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <h3>Add Poisoned Comments</h3>
+                    <p>Add comments below to poison the training data. Try to add comments that would make the model misclassify certain phrases or words.</p>
+                    
+                    <div class="comments-form">
+                        <div id="comments-list">
+                            <!-- Comments will be added here -->
+                        </div>
+                        
+                        <div class="add-comment-form poisoning-form">
+                            <div class="form-group">
+                                <label for="comment-text">Comment Text</label>
+                                <textarea id="comment-text" class="form-control" placeholder="Enter your comment here..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Sentiment</label>
+                                <div class="sentiment-selection">
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="positive" checked>
+                                        <span class="radio-label">Positive</span>
+                                    </label>
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="negative">
+                                        <span class="radio-label">Negative</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button id="add-comment-btn" class="btn">Add Comment</button>
+                        </div>
+                        
+                        <div class="attack-container">
+                            <p class="attack-hint">
+                                <i class="fas fa-lightbulb"></i> <strong>Attack hint:</strong> Try adding comments that contain words like "terrible" or "awful" but mark them as positive sentiment, or comments with words like "excellent" or "amazing" but mark them as negative. This can confuse the model and flip its understanding of these words.
+                            </p>
+                            
+                            <div class="attack-buttons">
+                                <button id="train-model-btn" class="btn btn-danger">
+                                    <i class="fas fa-vial"></i> Train Poisoned Model
+                                </button>
+                                <button id="clear-comments-btn" class="btn btn-secondary">
+                                    <i class="fas fa-trash"></i> Clear Comments
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="model-loading" style="display: none;">
+                        <div class="loading-animation">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Training model...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="model-results" style="display: none;">
+                        <h3>Poisoned Model Results</h3>
+                        
+                        <div class="model-stats">
+                            <div class="stats-container">
+                                <!-- Model statistics will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4><i class="fas fa-chart-bar"></i> Model Weight Analysis</h4>
+                            
+                            <div class="model-info">
+                                <div class="column">
+                                    <h5>Top Positive Words (Poisoned Model)</h5>
+                                    <div id="positive-words" class="word-weights"></div>
+                                </div>
+                                <div class="column">
+                                    <h5>Top Negative Words (Poisoned Model)</h5>
+                                    <div id="negative-words" class="word-weights"></div>
+                                </div>
+                            </div>
+                            
+                            <h4><i class="fas fa-exchange-alt"></i> Weight Changes</h4>
+                            <p>Words with the biggest changes in sentiment weights due to poisoning:</p>
+                            
+                            <div id="weight-changes" class="weight-changes"></div>
+                            
+                            <div class="sentiment-analyzer">
+                                <h4>Test the Poisoned Model</h4>
+                                <p>Enter text to analyze its sentiment with your poisoned model:</p>
+                                <div class="analyzer-input">
+                                    <input type="text" id="sentiment-input" class="form-control" placeholder="Enter text to analyze sentiment...">
+                                    <button id="analyze-button" class="btn">Analyze</button>
+                                </div>
+                                <div id="sentiment-result" class="sentiment-result" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="basics-section">
+                <h2>Understanding Data Poisoning</h2>
+                <p>Data poisoning is a technique where an attacker deliberately manipulates the training data of a machine learning model to influence its behavior. This can happen in several ways:</p>
+                
+                <h3>Types of Data Poisoning Attacks</h3>
+                <ul class="risk-list">
+                    <li><strong>Label Flipping:</strong> Deliberately mislabeling training examples to confuse the model</li>
+                    <li><strong>Backdoor Attacks:</strong> Inserting specific triggers that cause the model to behave in a certain way</li>
+                    <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
+                    <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
+                </ul>
+                
+                <h3>Mitigation Strategies</h3>
+                <ul class="mitigation-list">
+                    <li><strong>Data Validation:</strong> Carefully inspect and validate training data, especially from untrusted sources</li>
+                    <li><strong>Robust Learning:</strong> Use learning algorithms that are robust to poisoned data</li>
+                    <li><strong>Anomaly Detection:</strong> Identify and filter out anomalous training examples</li>
+                    <li><strong>Regular Evaluation:</strong> Continuously evaluate model performance on trusted test data</li>
+                    <li><strong>Data Provenance:</strong> Track the source and chain of custody for all training data</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <style>
+        .data-poisoning-container {
+            margin: 20px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .comments-form {
+            margin: 20px 0;
+        }
+        
+        #comments-list {
+            margin-bottom: 20px;
+        }
+        
+        .comment-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .comment-positive {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .comment-negative {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .comment-text {
+            flex: 1;
+        }
+        
+        .comment-sentiment {
+            margin-left: 15px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .sentiment-positive {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .sentiment-negative {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .sentiment-selection {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .radio-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .radio-label {
+            margin-left: 8px;
+        }
+        
+        .poisoning-form {
+            margin-bottom: 20px;
+        }
+        
+        .attack-hint {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            margin-bottom: 20px;
+        }
+        
+        .attack-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .model-stats {
+            margin: 20px 0;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .stat-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #212529;
+        }
+        
+        .model-info {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        .existing-comments {
+            margin: 20px 0 30px;
+        }
+        
+        .comments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .comment-box {
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .comment-positive {
+            background-color: #f0f9f0;
+            border: 1px solid #d4edda;
+        }
+        
+        .comment-negative {
+            background-color: #fdf2f2;
+            border: 1px solid #f8d7da;
+        }
+        
+        .comment-rating {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+        
+        .comment-content {
+            flex: 1;
+            font-style: italic;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            text-align: right;
+            color: #6c757d;
+        }
+        
+        .loading-animation {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #343a40;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .loading-animation i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .weight-changes {
+            margin: 15px 0 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .weight-change {
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 150px;
+        }
+        
+        .weight-increased {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .weight-decreased {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .weight-flipped {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+        }
+        
+        .weight-word {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .weight-delta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .weight-before, .weight-after {
+            padding: 2px 5px;
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.7);
+        }
+        
+        @media (max-width: 768px) {
+            .model-info {
+                flex-direction: column;
+            }
+        }
+    </style>
+    
+    <script>
+        // Store the original model weights for comparison
+        window.originalWeights = {{ model_data.all_weights|tojson }};
+        
+        // Store the comments for poisoning
+        const userComments = [];
+        
+        // Add a new comment to the list
+        document.getElementById('add-comment-btn').addEventListener('click', function() {
+            const commentText = document.getElementById('comment-text').value.trim();
+            const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
+            
+            if (!commentText) {
+                alert('Please enter a comment text');
+                return;
+            }
+            
+            // Add to our list
+            userComments.push({
+                text: commentText,
+                sentiment: sentiment
+            });
+            
+            // Clear the input
+            document.getElementById('comment-text').value = '';
+            
+            // Update the UI
+            updateCommentsList();
+        });
+        
+        // Clear all comments
+        document.getElementById('clear-comments-btn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all comments?')) {
+                userComments.length = 0; // Clear the array
+                updateCommentsList();
+            }
+        });
+        
+        // Update the comments list UI
+        function updateCommentsList() {
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = '';
+            
+            if (userComments.length === 0) {
+                commentsList.innerHTML = '<p>No comments added yet. Add some comments to poison the training data.</p>';
+                return;
+            }
+            
+            userComments.forEach((comment, index) => {
+                const commentEl = document.createElement('div');
+                commentEl.className = `comment-item comment-${comment.sentiment}`;
+                
+                commentEl.innerHTML = `
+                    <div class="comment-text">${comment.text}</div>
+                    <span class="comment-sentiment sentiment-${comment.sentiment}">${comment.sentiment}</span>
+                    <button class="delete-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                `;
+                
+                commentsList.appendChild(commentEl);
+            });
+            
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    userComments.splice(index, 1);
+                    updateCommentsList();
+                });
+            });
+        }
+        
+        // Train the poisoned model
+        document.getElementById('train-model-btn').addEventListener('click', async function() {
+            if (userComments.length === 0) {
+                alert('Please add at least one comment to poison the training data');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('model-loading').style.display = 'block';
+            document.getElementById('model-results').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/train-poisoned-model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        comments: userComments
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Display model stats
+                const statsContainer = document.querySelector('.stats-container');
+                statsContainer.innerHTML = '';
+                
+                const stats = [
+                    { title: 'Training Size', value: data.training_size },
+                    { title: 'Poisoned Samples', value: data.poisoning_size },
+                    { title: 'Vocabulary Size', value: data.vocabulary_size }
+                ];
+                
+                stats.forEach(stat => {
+                    const statCard = document.createElement('div');
+                    statCard.className = 'stat-card';
+                    
+                    const statTitle = document.createElement('div');
+                    statTitle.className = 'stat-title';
+                    statTitle.textContent = stat.title;
+                    
+                    const statValue = document.createElement('div');
+                    statValue.className = 'stat-value';
+                    statValue.textContent = stat.value;
+                    
+                    statCard.appendChild(statTitle);
+                    statCard.appendChild(statValue);
+                    statsContainer.appendChild(statCard);
+                });
+                
+                // Display top positive words
+                const positiveWordsContainer = document.getElementById('positive-words');
+                positiveWordsContainer.innerHTML = '';
+                
+                data.top_positive_words.forEach(([word, weight]) => {
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'word-weight positive';
+                    wordElement.innerHTML = `${word} <span class="weight-value">+${weight.toFixed(3)}</span>`;
+                    positiveWordsContainer.appendChild(wordElement);
+                });
+                
+                // Display top negative words
+                const negativeWordsContainer = document.getElementById('negative-words');
+                negativeWordsContainer.innerHTML = '';
+                
+                data.top_negative_words.forEach(([word, weight]) => {
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'word-weight negative';
+                    wordElement.innerHTML = `${word} <span class="weight-value">${weight.toFixed(3)}</span>`;
+                    negativeWordsContainer.appendChild(wordElement);
+                });
+                
+                // Store model weights for testing
+                window.modelWeights = data.all_weights;
+                
+                // Compare with original weights to find changes
+                const weightChanges = [];
+                
+                // Check all words in the new model
+                for (const word in data.all_weights) {
+                    const newWeight = data.all_weights[word];
+                    const oldWeight = window.originalWeights[word] || 0;
+                    
+                    // Calculate change
+                    const delta = newWeight - oldWeight;
+                    const absDelta = Math.abs(delta);
+                    
+                    // Check for sign flips (positive to negative or vice versa)
+                    const flipped = (oldWeight > 0 && newWeight < 0) || (oldWeight < 0 && newWeight > 0);
+                    
+                    // Only show significant changes
+                    if (absDelta > 0.5 || flipped) {
+                        weightChanges.push({
+                            word,
+                            oldWeight,
+                            newWeight,
+                            delta,
+                            absDelta,
+                            flipped
+                        });
+                    }
+                }
+                
+                // Sort by absolute change
+                weightChanges.sort((a, b) => b.absDelta - a.absDelta);
+                
+                // Display the top changes
+                const changesContainer = document.getElementById('weight-changes');
+                changesContainer.innerHTML = '';
+                
+                const topChanges = weightChanges.slice(0, 10); // Show top 10 changes
+                
+                if (topChanges.length === 0) {
+                    changesContainer.innerHTML = '<p>No significant weight changes detected.</p>';
+                } else {
+                    topChanges.forEach(change => {
+                        const changeEl = document.createElement('div');
+                        
+                        // Determine change type
+                        let changeClass = '';
+                        if (change.flipped) {
+                            changeClass = 'weight-flipped';
+                        } else if (change.delta > 0) {
+                            changeClass = 'weight-increased';
+                        } else {
+                            changeClass = 'weight-decreased';
+                        }
+                        
+                        changeEl.className = `weight-change ${changeClass}`;
+                        
+                        // Format the display
+                        changeEl.innerHTML = `
+                            <div class="weight-word">${change.word}</div>
+                            <div class="weight-delta">
+                                <span class="weight-before">${change.oldWeight.toFixed(2)}</span>
+                                <span>→</span>
+                                <span class="weight-after">${change.newWeight.toFixed(2)}</span>
+                            </div>
+                        `;
+                        
+                        changesContainer.appendChild(changeEl);
+                    });
+                }
+                
+                // Show results
+                document.getElementById('model-results').style.display = 'block';
+            } catch (error) {
+                console.error('Error training model:', error);
+                alert('Error training model: ' + error.message);
+            } finally {
+                document.getElementById('model-loading').style.display = 'none';
+            }
+        });
+        
+        // Test the poisoned model
+        document.getElementById('analyze-button').addEventListener('click', async function() {
+            if (!window.modelWeights) {
+                alert('Please train a model first');
+                return;
+            }
+            
+            const inputText = document.getElementById('sentiment-input').value.trim();
+            if (!inputText) {
+                alert('Please enter text to analyze');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/test-poisoned-model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: inputText,
+                        weights: window.modelWeights
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                // Display the result
+                const resultContainer = document.getElementById('sentiment-result');
+                resultContainer.style.display = 'block';
+                
+                const resultClass = result.sentiment === 'positive' ? 'result-positive' : 'result-negative';
+                resultContainer.className = `sentiment-result ${resultClass}`;
+                
+                resultContainer.innerHTML = `
+                    <p><strong>Sentiment:</strong> ${result.sentiment}</p>
+                    <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(1)}%</p>
+                    <p><strong>Score:</strong> ${result.score.toFixed(4)}</p>
+                `;
+            } catch (error) {
+                console.error('Error analyzing text:', error);
+                alert('Error analyzing text: ' + error.message);
+            }
+        });
+        
+        // Initialize empty comments list
+        updateCommentsList();
+    </script>
+</body>
+</html>
