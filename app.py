@@ -157,6 +157,106 @@ def basics():
 @app.route('/model-theft')
 def model_theft():
     return render_template('model_theft.html')
+
+@app.route('/supply-chain')
+def supply_chain():
+    return render_template('supply_chain.html')
+
+@app.route('/insecure-plugin')
+def insecure_plugin():
+    """Page demonstrating insecure plugin design with client-side API tokens"""
+    return render_template('insecure_plugin.html')
+
+@app.route('/sensitive-info')
+def sensitive_info():
+    """Page demonstrating sensitive information disclosure vulnerabilities in LLMs"""
+    return render_template('sensitive_info.html')
+
+@app.route('/training-data-leak/huggingface', methods=['POST'])
+def test_huggingface_leakage():
+    """API endpoint for testing HuggingFace model for training data leakage"""
+    from training_data_leakage import huggingface_leak_endpoint
+    return huggingface_leak_endpoint()
+
+@app.route('/training-data-leak/openai', methods=['POST'])
+def test_openai_leakage():
+    """API endpoint for testing OpenAI model for training data leakage"""
+    from training_data_leakage import openai_leak_endpoint
+    return openai_leak_endpoint()
+
+@app.route('/chat-with-flight-assistant', methods=['POST'])
+def chat_with_flight_assistant():
+    """API endpoint for the flight assistant chat - using insecure plugin design"""
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # Get API token - note it's not needed with our local model but kept for UI consistency
+        api_token = data.get('api_token', '')
+        
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Import the conversational model plugin system
+        from insecure_plugin import chat_with_llm
+        
+        # The vulnerability: Directly passing user message to the LLM+plugin system
+        # where the LLM can control function execution
+        response = chat_with_llm(message, api_token)
+        
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/chat-with-openai-plugin', methods=['POST'])
+def chat_with_openai_plugin():
+    """API endpoint for the OpenAI-based insecure plugin demo"""
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # INSECURE: Getting OpenAI API key directly from user input
+        openai_api_key = data.get('api_token', '')
+        
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+            
+        if not openai_api_key:
+            return jsonify({'error': 'No OpenAI API key provided'}), 400
+        
+        # Import the OpenAI insecure plugin
+        from openai_insecure_plugin import chat_with_openai
+        
+        # VULNERABLE: Directly using user-provided API key with OpenAI
+        response = chat_with_openai(message, openai_api_key)
+        
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/demo-malicious-model')
+def demo_malicious_model():
+    """
+    This route demonstrates how a malicious model can inject code when instantiated
+    in a Flask application context.
+    """
+    try:
+        # Import the model class (this would simulate using a library/package in a real scenario)
+        from class_model import SentimentModel
+        
+        # Create an instance of the model - this will trigger the malicious code in __init__
+        # The model's __init__ method hooks into Flask's response system
+        model = SentimentModel()
+        
+        # Return a simple page - the model will inject its JavaScript into the response
+        return render_template('demo_vulnerable.html', 
+                               message="Model instantiated - inspect the page source to see the injected JavaScript")
+    except Exception as e:
+        return f"Error demonstrating malicious model: {str(e)}"
     
 @app.route('/data-poisoning')
 def data_poisoning():

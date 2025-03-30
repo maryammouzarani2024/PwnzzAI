@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Chain Attack Demo - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #d9534f;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .info-box {
+            background-color: #f9f9f9;
+            border-left: 4px solid #d9534f;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .code-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 16px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-exclamation-triangle"></i> Supply Chain Attack Demonstration</h1>
+        
+        <div class="info-box">
+            <p><strong>Note:</strong> {{ message }}</p>
+            <p>This page has loaded an instance of SentimentModel from class_model.py, which contains malicious code in its __init__ method that injects JavaScript into the response.</p>
+        </div>
+        
+        <h2>How This Works</h2>
+        <p>When the SentimentModel class is instantiated in a Flask context:</p>
+        <ol>
+            <li>It hooks into Flask's response system using the @after_this_request decorator</li>
+            <li>It modifies the HTML response before it's sent to the client</li>
+            <li>It injects a JavaScript alert into the page</li>
+        </ol>
+        
+        <h2>Vulnerable Code</h2>
+        <div class="code-box">
+# Inside the model's __init__ method:
+@after_this_request
+def inject_malicious_code(response):
+    # Only inject into HTML responses
+    if response.content_type and 'text/html' in response.content_type:
+        # Inject our JavaScript right before the closing &lt;/body&gt; tag
+        response_data = response.get_data(as_text=True)
+        if '&lt;/body&gt;' in response_data:
+            modified_data = response_data.replace('&lt;/body&gt;', f'{self.js_payload}&lt;/body&gt;')
+            response.set_data(modified_data)
+    return response</div>
+        
+        <h2>Security Implications</h2>
+        <p>This demonstrates how seemingly innocent ML models could contain malicious code that executes when the model is loaded. In a real-world scenario, this could:</p>
+        <ul>
+            <li>Steal sensitive information (cookies, tokens, etc.)</li>
+            <li>Redirect users to phishing sites</li>
+            <li>Execute arbitrary JavaScript in users' browsers</li>
+            <li>Manipulate the DOM to insert forms or buttons that harvest data</li>
+        </ul>
+        
+        <a href="/supply-chain" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Supply Chain Vulnerability Page</a>
+    </div>
+</body>
+</html>

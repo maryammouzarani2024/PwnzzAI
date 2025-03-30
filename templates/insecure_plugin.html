@@ -512,7 +512,7 @@ if function_name == "search_pizza_price" and params:
                             <!-- OpenAI Token Input Section -->
                             <div class="token-section openai-token-section">
                                 <h3>Connect to OpenAI API</h3>
-                                <p>Enter your OpenAI API key to enable the flight ticket price assistant:</p>
+                                <p>Enter your OpenAI API key to enable the pizza price assistant:</p>
                                 <div class="token-input">
                                     <input type="password" id="openai-api-token" placeholder="Enter OpenAI API key...">
                                     <button id="connect-openai-api">Connect API</button>
@@ -550,73 +550,90 @@ if function_name == "search_pizza_price" and params:
                                 <h3><i class="fas fa-bug"></i> OpenAI API Function/Tool Calling</h3>
                                 <p>This implementation uses OpenAI's function calling feature but still creates security risks:</p>
                                 
-                                <pre class="code-snippet">import openai
-import os
-import json  # Import the JSON module to handle string to dictionary conversion
+                                <pre class="code-snippet">import json
+from openai import OpenAI
 
-# Set your OpenAI API key here
-openai.api_key = os.environ.get("openai_api_key")
-
-ticket_prices = {
-    "london": "$232",
-    "paris": "$252",
-    "newyork": "$435",
-    "tokyo": "$2732"
+# Pizza prices database
+pizza_prices = {
+    "margherita": "$10",
+    "pepperoni": "$12",
+    "vegetarian": "$11",
+    "hawaiian": "$13",
+    "bbq chicken": "$14",
+    "meat lovers": "$15"
 }
 
-def get_ticket_price(destination):
-    print(f"the tool get_ticket_price is called for the city {destination}")
-    city = destination.lower()
-    return ticket_prices.get(city, "unknown")
+def get_pizza_price(pizza_type):
+    """Get the price for a specific pizza type"""
+    pizza = pizza_type.lower().replace("pizza", "").strip()
+    return pizza_prices.get(pizza, "unknown")
 
-# Defining the function metadata for GPT-4
+# Function definition for OpenAI tools
 price_function = {
-    "name": "get_ticket_price",
-    "description": "Get the ticket price for your destination.",
+    "name": "get_pizza_price",
+    "description": "Get the price for a specific pizza type.",
     "parameters": {
         "type": "object",
         "properties": {
-            "destination_city": {
+            "pizza_type": {
                 "type": "string",
-                "description": "The city you want to fly to"
+                "description": "The type of pizza you want to know the price for"
             },
         },
-        "required": ["destination_city"],
-        "additionalProperties": False,
+        "required": ["pizza_type"],
     },
 }
 
-def chatbot_response(user_input):
-    # Call GPT-4 model with function integration
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Use GPT-4 model which supports functions
+def chat_with_openai(user_input, api_key):
+    """
+    INSECURE: Use OpenAI API with user-provided API key
+    """
+    # VULNERABLE: Directly using user-provided API key
+    client = OpenAI(api_key=api_key)
+    
+    # Call OpenAI API with tool/function calling
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are a helpful pizza shop assistant."},
             {"role": "user", "content": user_input},
         ],
-        max_tokens=150,  # Control the length of the response
-        temperature=0.7,  # Adjust creativity
-        functions=[price_function],  # Pass functions to the model
+        tools=[{
+            "type": "function",
+            "function": price_function
+        }],
+        tool_choice="auto"  # Let the model decide when to call the function
     )
     
-    # Check if the model needs to call a function (like the price function)
-    if 'function_call' in response['choices'][0]['message']:
-        function_name = response['choices'][0]['message']['function_call']['name']
-        if function_name == "get_ticket_price":
-            # Arguments may come as a string, so parse it as JSON if needed
-            arguments = response['choices'][0]['message']['function_call']['arguments']
-            try:
-                arguments = json.loads(arguments)  # Parse arguments if they're a string
-            except Exception as e:
-                return f"Error parsing arguments: {str(e)}"
-            
-            destination_city = arguments.get('destination_city', None)
-            if destination_city:
-                price = get_ticket_price(destination_city)
-                return f"The ticket price for {destination_city} is {price}"
-            else:
-                return "No destination city provided."
-    return response['choices'][0]['message']['content'].strip()
+    # Check if the model wants to call the function
+    message = response.choices[0].message
+    
+    if message.tool_calls:
+        for tool_call in message.tool_calls:
+            if tool_call.function.name == "get_pizza_price":
+                # Parse the function arguments
+                arguments = json.loads(tool_call.function.arguments)
+                pizza_type = arguments.get('pizza_type')
+                
+                if pizza_type:
+                    # VULNERABLE: No validation before executing function
+                    price = get_pizza_price(pizza_type)
+                    
+                    # Get a response that includes the function result
+                    second_response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful pizza shop assistant."},
+                            {"role": "user", "content": user_input},
+                            {"role": "assistant", "content": None, "tool_calls": [tool_call]},
+                            {"role": "tool", "tool_call_id": tool_call.id, 
+                             "content": f"The price for {pizza_type} pizza is {price}"}
+                        ],
+                    )
+                    return second_response.choices[0].message.content
+    
+    # Return the original response if no function was called
+    return message.content
 </pre>
 
                                 <div class="vulnerability-explanation">
@@ -824,7 +841,7 @@ def run_plugin_function(function_name, params):
                 sendMessageButton.disabled = false;
                 
                 // Add welcome message
-                addBotMessage(chatMessages, "Thanks for connecting! I'm ready to help with flight information. You can ask questions like 'What flights are available from New York to Los Angeles?' or 'Show me flights under $300'.");
+                addBotMessage(chatMessages, "Thanks for connecting! I'm ready to help with pizza information. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'.");
                 
                 // Clear token input (but it's still stored in the apiToken variable!)
                 apiTokenInput.value = '';
@@ -854,7 +871,7 @@ def run_plugin_function(function_name, params):
                 openaiSendMessageButton.disabled = false;
                 
                 // Add welcome message
-                addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with flight ticket prices. Try asking 'What's the price for a ticket to London?' or 'How much is a flight to Tokyo?'");
+                addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza prices. Try asking 'What's the price for a Margherita pizza?' or 'How much is a Pepperoni pizza?'");
                 
                 // Clear token input (but it's still stored in the openaiApiToken variable!)
                 openaiApiTokenInput.value = '';
