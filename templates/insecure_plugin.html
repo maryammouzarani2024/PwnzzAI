@@ -382,8 +382,8 @@
         
         <div class="insecure-plugin-content">
             <section>
-                <h2>Flight Price Assistant Demo</h2>
-                <p>This demo shows how plugins and integrations can create security vulnerabilities when not designed securely. The flight assistant uses language models to help find flight prices.</p>
+                <h2>Pizza Price Assistant Demo</h2>
+                <p>This demo shows how plugins and integrations can create security vulnerabilities when not designed securely. The pizza assistant uses language models to help find pizza prices.</p>
                 
                 <div class="warning-box">
                     <h3><i class="fas fa-exclamation-triangle"></i> Security Warning</h3>
@@ -425,23 +425,23 @@
                                         <li>The API token input is kept only to demonstrate the client-side token vulnerability</li>
                                         <li>In a real application, API tokens should never be handled this way</li>
                                     </ul>
-                                    <p>Try asking about flights between cities like "New York to Los Angeles" or "Chicago to Miami".</p>
+                                    <p>Try asking about pizza prices like "How much is a Pepperoni pizza?" or "What's the price of a Margherita?"</p>
                                 </div>
                             </div>
                             
                             <!-- Chat Interface -->
-                            <h3>Flight Price Assistant Chat (HuggingFace)</h3>
+                            <h3>Pizza Price Assistant Chat (HuggingFace)</h3>
                             <div class="chat-container">
                                 <div id="chat-messages" class="chat-messages">
                                     <div class="message bot-message">
-                                        Hi! I'm the Flight Price Assistant using HuggingFace models. I can help you find flight prices between cities. Please connect the API first to enable my functionality.
+                                        Hi! I'm the Pizza Price Assistant using HuggingFace models. I can help you find prices for our delicious pizzas. Please connect the API first to enable my functionality.
                                     </div>
                                     <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price of a flight from New York to Los Angeles?" or "Find me flights from Chicago to Miami"
+                                        <strong>Try asking:</strong> "What's the price of a Pepperoni pizza?" or "How much is a Margherita?"
                                     </div>
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="user-message" placeholder="Ask about flight prices..." disabled>
+                                    <input type="text" id="user-message" placeholder="Ask about pizza prices..." disabled>
                                     <button id="send-message" disabled>Send</button>
                                 </div>
                             </div>
@@ -454,41 +454,42 @@
                                 <pre class="code-snippet"># Mock HuggingFace model that generates function calls
 class MockHuggingFaceModel:
     def __init__(self):
-        self.name = "HuggingFace Flight Assistant"
-        # Popular flight routes and predefined function calls
-        self.flight_responses = {
-            "new york to los angeles": "EXECUTE_FUNCTION: search_flight_price(\"new york to los angeles\")",
-            "chicago to miami": "EXECUTE_FUNCTION: search_flight_price(\"chicago to miami\")"
+        self.name = "HuggingFace Pizza Assistant"
+        # Popular pizza types and predefined function calls
+        self.pizza_responses = {
+            "margherita": "EXECUTE_FUNCTION: search_pizza_price(\"margherita\")",
+            "pepperoni": "EXECUTE_FUNCTION: search_pizza_price(\"pepperoni\")",
+            "vegetarian": "EXECUTE_FUNCTION: search_pizza_price(\"vegetarian\")"
         }
     
     def __call__(self, messages):
         user_msg = messages[0]["content"].lower()
         
         # Generate responses with function calls based on user input
-        if "new york" in user_msg and "los angeles" in user_msg:
-            return Response("EXECUTE_FUNCTION: search_flight_price(\"new york to los angeles\")")
-        elif "chicago" in user_msg:
-            return Response("EXECUTE_FUNCTION: search_flight_price(\"chicago to miami\")")
+        if "pepperoni" in user_msg:
+            return Response("EXECUTE_FUNCTION: search_pizza_price(\"pepperoni\")")
+        elif "margherita" in user_msg or "margarita" in user_msg:
+            return Response("EXECUTE_FUNCTION: search_pizza_price(\"margherita\")")
         # Other response patterns...
 
 # Function to extract and execute function calls
 def extract_function_calls(text):
-    if "EXECUTE_FUNCTION: search_flight_price" in text:
+    if "EXECUTE_FUNCTION: search_pizza_price" in text:
         import re
-        pattern = r'EXECUTE_FUNCTION: search_flight_price\("([^"]+)"\)'
+        pattern = r'EXECUTE_FUNCTION: search_pizza_price\("([^"]+)"\)'
         match = re.search(pattern, text)
         
         if match:
-            # Get the route parameters
-            route = match.group(1)
-            return "search_flight_price", route
+            # Get the pizza type parameter
+            pizza_type = match.group(1)
+            return "search_pizza_price", pizza_type
     
     return None, None
 
 # VULNERABLE: Directly executing the function called by the model without validation
-if function_name == "search_flight_price" and params:
+if function_name == "search_pizza_price" and params:
     # Execute whatever the model instructs without any safety checks
-    function_result = search_flight_price(params)
+    function_result = search_pizza_price(params)
 </pre>
 
                                 <div class="vulnerability-explanation">
@@ -526,20 +527,20 @@ if function_name == "search_flight_price" and params:
                             </div>
                             
                             <!-- OpenAI Chat Interface -->
-                            <h3>Flight Price Assistant Chat (OpenAI)</h3>
+                            <h3>Pizza Price Assistant Chat (OpenAI)</h3>
                             <p class="warning-text">⚠️ This demo uses the OpenAI API. You MUST provide a valid OpenAI API key for this to work. Your API key will be sent directly to OpenAI - never do this in a real application!</p>
                             
                             <div class="chat-container">
                                 <div id="openai-chat-messages" class="chat-messages">
                                     <div class="message bot-message">
-                                        Hi! I'm the Flight Price Assistant using OpenAI. I can help you find flight ticket prices to various cities. Please connect your OpenAI API key first.
+                                        Hi! I'm the Pizza Price Assistant using OpenAI. I can help you find prices for our delicious pizzas. Please connect your OpenAI API key first.
                                     </div>
                                     <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price for a flight to London?" or "How much is a ticket to Tokyo?"
+                                        <strong>Try asking:</strong> "What's the price for a Margherita pizza?" or "How much is a Pepperoni pizza?"
                                     </div>
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="openai-user-message" placeholder="Ask about flight ticket prices..." disabled>
+                                    <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." disabled>
                                     <button id="openai-send-message" disabled>Send</button>
                                 </div>
                             </div>
@@ -659,47 +660,47 @@ def chatbot_response(user_input):
                     <p>Example of a more secure architecture:</p>
                     <pre class="code-snippet"># Define an allowlist of safe functions that can be called
 ALLOWED_FUNCTIONS = {
-    "search_flight_price": search_flight_price
+    "search_pizza_price": search_pizza_price
 }
 
-# Define allowed parameters (trusted routes)
-ALLOWED_ROUTES = [
-    "new york to los angeles",
-    "chicago to miami",
-    "san francisco to seattle",
-    "boston to washington dc",
-    "los angeles to las vegas"
+# Define allowed parameters (trusted pizza types)
+ALLOWED_PIZZAS = [
+    "margherita",
+    "pepperoni",
+    "vegetarian",
+    "hawaiian",
+    "bbq chicken"
 ]
 
 # Secure function for extracting and validating function calls
 def extract_and_validate_function(text):
     """Extract function calls and validate them before execution"""
-    if "EXECUTE_FUNCTION: search_flight_price" in text:
+    if "EXECUTE_FUNCTION: search_pizza_price" in text:
         import re
-        pattern = r'EXECUTE_FUNCTION: search_flight_price\("([^"]+)"\)'
+        pattern = r'EXECUTE_FUNCTION: search_pizza_price\("([^"]+)"\)'
         match = re.search(pattern, text)
         
         if match:
             # Get the function parameters
-            route = match.group(1).lower()
+            pizza_type = match.group(1).lower()
             
             # Validate function name
-            function_name = "search_flight_price"
+            function_name = "search_pizza_price"
             if function_name not in ALLOWED_FUNCTIONS:
                 return None, f"Error: Function {function_name} is not allowed"
                 
-            # Validate route parameters
-            if route not in ALLOWED_ROUTES:
-                # Check if it's a close match to an allowed route
-                for allowed_route in ALLOWED_ROUTES:
-                    if route in allowed_route or allowed_route in route:
-                        # Use the validated route instead
-                        return function_name, allowed_route
+            # Validate pizza type parameters
+            if pizza_type not in ALLOWED_PIZZAS:
+                # Check if it's a close match to an allowed pizza
+                for allowed_pizza in ALLOWED_PIZZAS:
+                    if pizza_type in allowed_pizza or allowed_pizza in pizza_type:
+                        # Use the validated pizza type instead
+                        return function_name, allowed_pizza
                         
-                return None, f"Error: Route '{route}' is not recognized"
+                return None, f"Error: Pizza type '{pizza_type}' is not on our menu"
             
             # Return validated function and parameters
-            return function_name, route
+            return function_name, pizza_type
             
     return None, None
 
@@ -713,15 +714,15 @@ def run_plugin_function(function_name, params):
     # Get the validated function
     func = ALLOWED_FUNCTIONS[function_name]
     
-    # Additional validation for route format
-    if not isinstance(params, str) or "to" not in params:
-        return "Error: Invalid route format"
+    # Additional validation for pizza format
+    if not isinstance(params, str):
+        return "Error: Invalid pizza type format"
     
-    # Sanitize route input
-    sanitized_route = params.lower().strip()
+    # Sanitize pizza input
+    sanitized_pizza = params.lower().strip()
     
     # Execute function with validated and sanitized parameters
-    return func(sanitized_route)
+    return func(sanitized_pizza)
 </pre>
                 </div>
             </section>
