@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insecure Plugin Design - Pizza Paradise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .insecure-plugin-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+        
+        /* Tab styling */
+        .model-tabs, .chat-tabs {
+            margin-top: 20px;
+        }
+        
+        .model-tabs {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .tab-headers {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 15px;
+        }
+        
+        .model-tabs .tab-headers {
+            background-color: #f8f9fa;
+        }
+        
+        .tab-header {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-bottom: -1px;
+            background-color: #f8f9fa;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .model-tabs .tab-header {
+            flex: 1;
+            text-align: center;
+            font-size: 1.1rem;
+            padding: 15px 20px;
+        }
+        
+        .tab-header:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tab-header.active {
+            background-color: white;
+            border-color: #dee2e6;
+            border-bottom-color: white;
+            font-weight: 500;
+        }
+        
+        .model-tabs .tab-header.active {
+            background-color: white;
+            color: #0d6efd;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 15px 0;
+        }
+        
+        .model-tabs .tab-content {
+            padding: 25px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .model-implementation-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .warning-text {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .token-section {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .token-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .token-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .token-input button {
+            padding: 10px 20px;
+            background-color: #198754;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .token-input button:hover {
+            background-color: #146c43;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: #0d6efd;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: #212529;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+        
+        .chat-input button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .chat-input button:hover {
+            background-color: #0b5ed7;
+        }
+        
+        .chat-input button:disabled {
+            background-color: #7aa7e6;
+            cursor: not-allowed;
+        }
+        
+        .hint-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e2f0fd;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            color: #084298;
+        }
+        
+        .api-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .api-status.connected {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .api-status.disconnected {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        .security-vulnerability {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .security-vulnerability h3 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+        
+        .code-snippet {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .security-tip {
+            background-color: #d1e7dd;
+            border-left: 4px solid #198754;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .security-tip h3 {
+            color: #198754;
+            margin-top: 0;
+        }
+        
+        /* Vulnerability Tabs Styling */
+        .vulnerability-tabs {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .vulnerability-tabs .tab-headers {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .vulnerability-tabs .tab-header {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-bottom: -1px;
+            background-color: #f8f9fa;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        .vulnerability-tabs .tab-header:hover {
+            background-color: #e9ecef;
+        }
+        
+        .vulnerability-tabs .tab-header.active {
+            background-color: white;
+            border-color: #dee2e6;
+            border-bottom-color: white;
+            color: #dc3545;
+        }
+        
+        .vulnerability-tabs .tab-content {
+            display: none;
+            padding: 25px;
+            background-color: white;
+        }
+        
+        .vulnerability-tabs .tab-content.active {
+            display: block;
+        }
+        
+        .vulnerability-explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            border-radius: 4px;
+        }
+        
+        .vulnerability-explanation h4 {
+            margin-top: 0;
+            color: #dc3545;
+            font-size: 1.1rem;
+        }
+        
+        .vulnerability-explanation ul {
+            margin-bottom: 0;
+        }
+        
+        .vulnerability-summary {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+        }
+        
+        .vulnerability-summary h4 {
+            color: #856404;
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
+            </nav>
+        </div>
+    </header>
+    
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Insecure Plugin Design</h1>
+        
+        <div class="insecure-plugin-content">
+            <section>
+                <h2>Flight Price Assistant Demo</h2>
+                <p>This demo shows how plugins and integrations can create security vulnerabilities when not designed securely. The flight assistant uses language models to help find flight prices.</p>
+                
+                <div class="warning-box">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Security Warning</h3>
+                    <p>This demo deliberately contains vulnerabilities to demonstrate insecure LLM plugin design patterns:</p>
+                    <ul>
+                        <li><strong>Client-side token storage:</strong> API tokens are stored in JavaScript variables accessible by any script on the page</li>
+                        <li><strong>Token in requests:</strong> API tokens are sent with each request in plaintext</li>
+                        <li><strong>No token validation:</strong> The application doesn't validate the token structure or permissions</li>
+                        <li><strong>Direct function execution:</strong> The LLM can directly call functions without proper validation</li>
+                    </ul>
+                    <p><strong>Never</strong> enter real API tokens or keys into unfamiliar websites.</p>
+                </div>
+                
+                <!-- Main demo tabs -->
+                <div class="model-tabs">
+                    <div class="tab-headers">
+                        <div class="tab-header active" data-tab="blenderbot-model">HuggingFace Models Implementation</div>
+                        <div class="tab-header" data-tab="openai-model">OpenAI Implementation</div>
+                    </div>
+                    
+                    <!-- BlenderBot Tab Content -->
+                    <div class="tab-content active" id="blenderbot-model-tab">
+                        <div class="model-implementation-section">
+                            <!-- Token Input Section -->
+                            <div class="token-section">
+                                <h3>Connect to Hugging Face API</h3>
+                                <p>Enter your Hugging Face API token to enable the flight assistant chatbot:</p>
+                                <div class="token-input">
+                                    <input type="password" id="api-token" placeholder="Enter Hugging Face API token...">
+                                    <button id="connect-api">Connect API</button>
+                                </div>
+                                <div id="api-status" class="api-status disconnected">
+                                    <i class="fas fa-circle-xmark"></i> Not connected to API
+                                </div>
+                                <div class="hint-box">
+                                    <p><strong>Hint:</strong> For this demo, you can enter any text as the token:</p>
+                                    <ul>
+                                        <li>This demo uses Facebook's BlenderBot model running locally</li>
+                                        <li>The API token input is kept only to demonstrate the client-side token vulnerability</li>
+                                        <li>In a real application, API tokens should never be handled this way</li>
+                                    </ul>
+                                    <p>Try asking about flights between cities like "New York to Los Angeles" or "Chicago to Miami".</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Chat Interface -->
+                            <h3>Flight Price Assistant Chat (HuggingFace)</h3>
+                            <div class="chat-container">
+                                <div id="chat-messages" class="chat-messages">
+                                    <div class="message bot-message">
+                                        Hi! I'm the Flight Price Assistant using HuggingFace models. I can help you find flight prices between cities. Please connect the API first to enable my functionality.
+                                    </div>
+                                    <div class="message bot-message">
+                                        <strong>Try asking:</strong> "What's the price of a flight from New York to Los Angeles?" or "Find me flights from Chicago to Miami"
+                                    </div>
+                                </div>
+                                <div class="chat-input">
+                                    <input type="text" id="user-message" placeholder="Ask about flight prices..." disabled>
+                                    <button id="send-message" disabled>Send</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Vulnerability Explanation -->
+                            <div class="security-vulnerability">
+                                <h3><i class="fas fa-bug"></i> HuggingFace Text-Based Function Execution</h3>
+                                <p>This implementation allows the language model to directly execute functions through text-based commands:</p>
+                                
+                                <pre class="code-snippet"># Mock HuggingFace model that generates function calls
+class MockHuggingFaceModel:
+    def __init__(self):
+        self.name = "HuggingFace Flight Assistant"
+        # Popular flight routes and predefined function calls
+        self.flight_responses = {
+            "new york to los angeles": "EXECUTE_FUNCTION: search_flight_price(\"new york to los angeles\")",
+            "chicago to miami": "EXECUTE_FUNCTION: search_flight_price(\"chicago to miami\")"
+        }
+    
+    def __call__(self, messages):
+        user_msg = messages[0]["content"].lower()
+        
+        # Generate responses with function calls based on user input
+        if "new york" in user_msg and "los angeles" in user_msg:
+            return Response("EXECUTE_FUNCTION: search_flight_price(\"new york to los angeles\")")
+        elif "chicago" in user_msg:
+            return Response("EXECUTE_FUNCTION: search_flight_price(\"chicago to miami\")")
+        # Other response patterns...
+
+# Function to extract and execute function calls
+def extract_function_calls(text):
+    if "EXECUTE_FUNCTION: search_flight_price" in text:
+        import re
+        pattern = r'EXECUTE_FUNCTION: search_flight_price\("([^"]+)"\)'
+        match = re.search(pattern, text)
+        
+        if match:
+            # Get the route parameters
+            route = match.group(1)
+            return "search_flight_price", route
+    
+    return None, None
+
+# VULNERABLE: Directly executing the function called by the model without validation
+if function_name == "search_flight_price" and params:
+    # Execute whatever the model instructs without any safety checks
+    function_result = search_flight_price(params)
+</pre>
+
+                                <div class="vulnerability-explanation">
+                                    <h4>Why This Is Insecure:</h4>
+                                    <ul>
+                                        <li>The model is explicitly instructed how to call arbitrary functions</li>
+                                        <li>The application parses text output to extract function calls without validation</li>
+                                        <li>Any parameter the model provides is directly used in the function</li>
+                                        <li>There's no allowlist of permitted functions or parameters</li>
+                                        <li>The system blindly executes whatever the model instructs it to do</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- OpenAI Tab Content -->
+                    <div class="tab-content" id="openai-model-tab">
+                        <div class="model-implementation-section">
+                            <!-- OpenAI Token Input Section -->
+                            <div class="token-section openai-token-section">
+                                <h3>Connect to OpenAI API</h3>
+                                <p>Enter your OpenAI API key to enable the flight ticket price assistant:</p>
+                                <div class="token-input">
+                                    <input type="password" id="openai-api-token" placeholder="Enter OpenAI API key...">
+                                    <button id="connect-openai-api">Connect API</button>
+                                </div>
+                                <div id="openai-api-status" class="api-status disconnected">
+                                    <i class="fas fa-circle-xmark"></i> Not connected to OpenAI API
+                                </div>
+                                <div class="hint-box">
+                                    <p><strong>Security Warning:</strong> This demonstrates a highly insecure practice. Never enter actual API keys into untrusted websites.</p>
+                                    <p>Your OpenAI API key would be charged for any usage in this demo.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- OpenAI Chat Interface -->
+                            <h3>Flight Price Assistant Chat (OpenAI)</h3>
+                            <p class="warning-text">⚠️ This demo uses the OpenAI API. You MUST provide a valid OpenAI API key for this to work. Your API key will be sent directly to OpenAI - never do this in a real application!</p>
+                            
+                            <div class="chat-container">
+                                <div id="openai-chat-messages" class="chat-messages">
+                                    <div class="message bot-message">
+                                        Hi! I'm the Flight Price Assistant using OpenAI. I can help you find flight ticket prices to various cities. Please connect your OpenAI API key first.
+                                    </div>
+                                    <div class="message bot-message">
+                                        <strong>Try asking:</strong> "What's the price for a flight to London?" or "How much is a ticket to Tokyo?"
+                                    </div>
+                                </div>
+                                <div class="chat-input">
+                                    <input type="text" id="openai-user-message" placeholder="Ask about flight ticket prices..." disabled>
+                                    <button id="openai-send-message" disabled>Send</button>
+                                </div>
+                            </div>
+                            
+                            <!-- OpenAI Vulnerability Explanation -->
+                            <div class="security-vulnerability">
+                                <h3><i class="fas fa-bug"></i> OpenAI API Function/Tool Calling</h3>
+                                <p>This implementation uses OpenAI's function calling feature but still creates security risks:</p>
+                                
+                                <pre class="code-snippet">import openai
+import os
+import json  # Import the JSON module to handle string to dictionary conversion
+
+# Set your OpenAI API key here
+openai.api_key = os.environ.get("openai_api_key")
+
+ticket_prices = {
+    "london": "$232",
+    "paris": "$252",
+    "newyork": "$435",
+    "tokyo": "$2732"
+}
+
+def get_ticket_price(destination):
+    print(f"the tool get_ticket_price is called for the city {destination}")
+    city = destination.lower()
+    return ticket_prices.get(city, "unknown")
+
+# Defining the function metadata for GPT-4
+price_function = {
+    "name": "get_ticket_price",
+    "description": "Get the ticket price for your destination.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "destination_city": {
+                "type": "string",
+                "description": "The city you want to fly to"
+            },
+        },
+        "required": ["destination_city"],
+        "additionalProperties": False,
+    },
+}
+
+def chatbot_response(user_input):
+    # Call GPT-4 model with function integration
+    response = openai.ChatCompletion.create(
+        model="gpt-4",  # Use GPT-4 model which supports functions
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_input},
+        ],
+        max_tokens=150,  # Control the length of the response
+        temperature=0.7,  # Adjust creativity
+        functions=[price_function],  # Pass functions to the model
+    )
+    
+    # Check if the model needs to call a function (like the price function)
+    if 'function_call' in response['choices'][0]['message']:
+        function_name = response['choices'][0]['message']['function_call']['name']
+        if function_name == "get_ticket_price":
+            # Arguments may come as a string, so parse it as JSON if needed
+            arguments = response['choices'][0]['message']['function_call']['arguments']
+            try:
+                arguments = json.loads(arguments)  # Parse arguments if they're a string
+            except Exception as e:
+                return f"Error parsing arguments: {str(e)}"
+            
+            destination_city = arguments.get('destination_city', None)
+            if destination_city:
+                price = get_ticket_price(destination_city)
+                return f"The ticket price for {destination_city} is {price}"
+            else:
+                return "No destination city provided."
+    return response['choices'][0]['message']['content'].strip()
+</pre>
+
+                                <div class="vulnerability-explanation">
+                                    <h4>Why This Is Insecure:</h4>
+                                    <ul>
+                                        <li>The model decides when and which functions to call</li>
+                                        <li>It controls what parameters are passed to those functions</li>
+                                        <li>There's minimal validation of function parameters before execution</li>
+                                        <li>While more structured than text-based function calls, it still gives the model control over execution</li>
+                                        <li>A malicious prompt could potentially trick the model into calling functions with unexpected inputs</li>
+                                        <li>The system automatically executes functions based solely on the model's decision</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vulnerability-summary">
+                    <h4>Common Security Issues in Both Implementations:</h4>
+                    <ul>
+                        <li>The LLM has complete control over which functions are called</li>
+                        <li>The LLM decides what parameters are passed to the functions</li>
+                        <li>A malicious prompt could trick the model into calling dangerous functions</li>
+                        <li>There's no validation of function parameters before execution</li>
+                        <li>There's no restriction on what functions can be called</li>
+                        <li>The system blindly trusts the model's decisions without proper security checks</li>
+                    </ul>
+                </div>
+                
+                <div class="security-tip">
+                    <h3><i class="fas fa-shield-alt"></i> Secure Alternative</h3>
+                    <p>A secure implementation for both approaches would:</p>
+                    <ul>
+                        <li>Use a formal plugin system with clear boundaries and permissions</li>
+                        <li>Validate and sanitize all parameters before function execution</li>
+                        <li>Use a limited set of pre-approved functions only</li>
+                        <li>Run plugins in a sandbox with restricted access</li>
+                        <li>Implement parameter type checking and input validation</li>
+                    </ul>
+                    <p>Example of a more secure architecture:</p>
+                    <pre class="code-snippet"># Define an allowlist of safe functions that can be called
+ALLOWED_FUNCTIONS = {
+    "search_flight_price": search_flight_price
+}
+
+# Define allowed parameters (trusted routes)
+ALLOWED_ROUTES = [
+    "new york to los angeles",
+    "chicago to miami",
+    "san francisco to seattle",
+    "boston to washington dc",
+    "los angeles to las vegas"
+]
+
+# Secure function for extracting and validating function calls
+def extract_and_validate_function(text):
+    """Extract function calls and validate them before execution"""
+    if "EXECUTE_FUNCTION: search_flight_price" in text:
+        import re
+        pattern = r'EXECUTE_FUNCTION: search_flight_price\("([^"]+)"\)'
+        match = re.search(pattern, text)
+        
+        if match:
+            # Get the function parameters
+            route = match.group(1).lower()
+            
+            # Validate function name
+            function_name = "search_flight_price"
+            if function_name not in ALLOWED_FUNCTIONS:
+                return None, f"Error: Function {function_name} is not allowed"
+                
+            # Validate route parameters
+            if route not in ALLOWED_ROUTES:
+                # Check if it's a close match to an allowed route
+                for allowed_route in ALLOWED_ROUTES:
+                    if route in allowed_route or allowed_route in route:
+                        # Use the validated route instead
+                        return function_name, allowed_route
+                        
+                return None, f"Error: Route '{route}' is not recognized"
+            
+            # Return validated function and parameters
+            return function_name, route
+            
+    return None, None
+
+# Secure execution with parameter validation
+def run_plugin_function(function_name, params):
+    """Run plugin functions with proper validation"""
+    # Check function allowlist again
+    if function_name not in ALLOWED_FUNCTIONS:
+        return f"Error: Function {function_name} is not allowed"
+    
+    # Get the validated function
+    func = ALLOWED_FUNCTIONS[function_name]
+    
+    # Additional validation for route format
+    if not isinstance(params, str) or "to" not in params:
+        return "Error: Invalid route format"
+    
+    # Sanitize route input
+    sanitized_route = params.lower().strip()
+    
+    # Execute function with validated and sanitized parameters
+    return func(sanitized_route)
+</pre>
+                </div>
+            </section>
+            
+            <section style="margin-top: 30px;">
+                <h2>Real-World Implications</h2>
+                <p>This type of vulnerability has led to numerous security incidents:</p>
+                <ul>
+                    <li>API key exposure in client-side code has led to unauthorized access to services</li>
+                    <li>Cloud service credentials leaked through JavaScript variables have resulted in account takeovers</li>
+                    <li>Third-party plugins with insecure token handling have compromised otherwise secure applications</li>
+                    <li>Exposed API keys have led to financial losses through unauthorized usage of paid services</li>
+                </ul>
+                
+                <p>When building applications that integrate with external APIs:</p>
+                <ul>
+                    <li>Never store sensitive tokens or keys in client-side code or localStorage</li>
+                    <li>Use server-side proxies for all API communication</li>
+                    <li>Implement proper authentication and authorization checks</li>
+                    <li>Use the principle of least privilege for all API access</li>
+                    <li>Regularly audit your code for token exposure</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Common elements
+            const apiTokenInput = document.getElementById('api-token');
+            const connectApiButton = document.getElementById('connect-api');
+            const apiStatus = document.getElementById('api-status');
+            
+            // BlenderBot tab elements
+            const userMessageInput = document.getElementById('user-message');
+            const sendMessageButton = document.getElementById('send-message');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // OpenAI tab elements
+            const openaiApiTokenInput = document.getElementById('openai-api-token');
+            const connectOpenaiButton = document.getElementById('connect-openai-api');
+            const openaiApiStatus = document.getElementById('openai-api-status');
+            const openaiUserMessageInput = document.getElementById('openai-user-message');
+            const openaiSendMessageButton = document.getElementById('openai-send-message');
+            const openaiChatMessages = document.getElementById('openai-chat-messages');
+            
+            // INSECURE: Tokens stored in client-side JavaScript
+            let apiToken = null;
+            let openaiApiToken = null;
+            
+            // Tab functionality for all tab groups
+            function initializeTabs(headerSelector, contentPrefix) {
+                const tabHeaders = document.querySelectorAll(headerSelector);
+                
+                tabHeaders.forEach(header => {
+                    header.addEventListener('click', function() {
+                        // Get all headers in this tab group (siblings)
+                        const allHeaders = Array.from(this.parentElement.querySelectorAll(headerSelector));
+                        
+                        // Get all corresponding content tabs
+                        const tabContents = allHeaders.map(h => 
+                            document.getElementById(h.getAttribute('data-tab') + '-tab')
+                        );
+                        
+                        // Remove active class from all tabs in this group
+                        allHeaders.forEach(h => h.classList.remove('active'));
+                        tabContents.forEach(c => c?.classList.remove('active'));
+                        
+                        // Add active class to clicked tab
+                        this.classList.add('active');
+                        const tabId = this.getAttribute('data-tab') + '-tab';
+                        document.getElementById(tabId)?.classList.add('active');
+                    });
+                });
+            }
+            
+            // Initialize all tab systems
+            initializeTabs('.model-tabs .tab-header', '');
+            initializeTabs('.chat-tabs .tab-header', '');
+            
+            // Connect BlenderBot API button
+            connectApiButton.addEventListener('click', function() {
+                const token = apiTokenInput.value.trim();
+                
+                if (!token) {
+                    alert('Please enter an API token');
+                    return;
+                }
+                
+                // INSECURE: Store token in a JavaScript variable
+                apiToken = token;
+                
+                // Update UI to show connected state
+                apiStatus.className = 'api-status connected';
+                apiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to API';
+                
+                // Enable BlenderBot chat interface
+                userMessageInput.disabled = false;
+                sendMessageButton.disabled = false;
+                
+                // Add welcome message
+                addBotMessage(chatMessages, "Thanks for connecting! I'm ready to help with flight information. You can ask questions like 'What flights are available from New York to Los Angeles?' or 'Show me flights under $300'.");
+                
+                // Clear token input (but it's still stored in the apiToken variable!)
+                apiTokenInput.value = '';
+                
+                // VULNERABLE: Log the token to console for demonstration purposes
+                console.log("INSECURE: BlenderBot API Token stored in client-side JavaScript:", apiToken);
+            });
+            
+            // Connect OpenAI API button
+            connectOpenaiButton.addEventListener('click', function() {
+                const token = openaiApiTokenInput.value.trim();
+                
+                if (!token) {
+                    alert('Please enter an OpenAI API key');
+                    return;
+                }
+                
+                // INSECURE: Store OpenAI token in a JavaScript variable
+                openaiApiToken = token;
+                
+                // Update UI to show connected state
+                openaiApiStatus.className = 'api-status connected';
+                openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
+                
+                // Enable OpenAI chat interface
+                openaiUserMessageInput.disabled = false;
+                openaiSendMessageButton.disabled = false;
+                
+                // Add welcome message
+                addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with flight ticket prices. Try asking 'What's the price for a ticket to London?' or 'How much is a flight to Tokyo?'");
+                
+                // Clear token input (but it's still stored in the openaiApiToken variable!)
+                openaiApiTokenInput.value = '';
+                
+                // VULNERABLE: Log the token to console for demonstration purposes
+                console.log("INSECURE: OpenAI API Token stored in client-side JavaScript:", openaiApiToken);
+            });
+            
+            // BlenderBot Send message button
+            sendMessageButton.addEventListener('click', () => sendBlenderbotMessage());
+            
+            // BlenderBot Enter key
+            userMessageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendBlenderbotMessage();
+                }
+            });
+            
+            // OpenAI Send message button
+            openaiSendMessageButton.addEventListener('click', () => sendOpenAIMessage());
+            
+            // OpenAI Enter key
+            openaiUserMessageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendOpenAIMessage();
+                }
+            });
+            
+            function sendBlenderbotMessage() {
+                const userMessage = userMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addUserMessage(chatMessages, userMessage);
+                
+                // Clear input
+                userMessageInput.value = '';
+                
+                // Disable input while processing
+                userMessageInput.disabled = true;
+                sendMessageButton.disabled = true;
+                
+                // Show thinking indicator
+                addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+                
+                // INSECURE: Send API token with each request
+                fetch('/chat-with-flight-assistant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        api_token: apiToken // INSECURE! Sending API token with each request
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Add bot response
+                    addBotMessage(chatMessages, data.response);
+                    
+                    // Re-enable input
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    userMessageInput.focus();
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Show error message
+                    addBotMessage(chatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    console.error('Error:', error);
+                    
+                    // Re-enable input
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                });
+            }
+            
+            function sendOpenAIMessage() {
+                const userMessage = openaiUserMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addUserMessage(openaiChatMessages, userMessage);
+                
+                // Clear input
+                openaiUserMessageInput.value = '';
+                
+                // Disable input while processing
+                openaiUserMessageInput.disabled = true;
+                openaiSendMessageButton.disabled = true;
+                
+                // Show thinking indicator
+                addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+                
+                // INSECURE: Send OpenAI API key directly to OpenAI through our backend
+                fetch('/chat-with-openai-plugin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        api_token: openaiApiToken // INSECURE! Using user-provided OpenAI API key
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Add bot response
+                    addBotMessage(openaiChatMessages, data.response);
+                    
+                    // Re-enable input
+                    openaiUserMessageInput.disabled = false;
+                    openaiSendMessageButton.disabled = false;
+                    openaiUserMessageInput.focus();
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Show error message
+                    addBotMessage(openaiChatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    console.error('Error:', error);
+                    
+                    // Re-enable input
+                    openaiUserMessageInput.disabled = false;
+                    openaiSendMessageButton.disabled = false;
+                });
+            }
+            
+            function addUserMessage(container, message) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.textContent = message;
+                container.appendChild(messageElement);
+                scrollToBottom(container);
+            }
+            
+            function addBotMessage(container, message, extraClass = '') {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message bot-message ' + extraClass;
+                messageElement.innerHTML = message;
+                container.appendChild(messageElement);
+                scrollToBottom(container);
+            }
+            
+            function scrollToBottom(container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
