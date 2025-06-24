@@ -17,7 +17,7 @@ This is an educational Flask web application demonstrating various LLM security 
 
 3. Run the application:
    ```
-   python app.py
+   flask run
    ```
 
 4. Visit `http://localhost:5000` in your browser to see the application
