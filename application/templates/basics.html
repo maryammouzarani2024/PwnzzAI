@@ -24,53 +24,24 @@
         
         <div class="basics-content">
             <section class="basics-section">
-                <h2>API Documentation</h2>
-                <p>Our sentiment analysis model is available via a REST API. You can use this API to analyze the sentiment of any text programmatically.</p>
-                
-                <div class="api-docs">
-                    <h3>Endpoint</h3>
-                    <code>POST /api/sentiment</code>
-                    
-                    <h3>Request Format</h3>
-                    <pre class="code-block">
-{
-  "text": "Your text to analyze"
-}
-                    </pre>
-                    
-                    <h3>Response Format</h3>
-                    <pre class="code-block">
-{
-  "status": "success",
-  "input": "Your text to analyze",
-  "result": {
-    "sentiment": "positive",
-    "confidence": 0.92,
-    "probabilities": {
-      "positive": 0.92,
-      "negative": 0.08
-    }
-  },
-  "model_info": {
-    "name": "Sentiment Analysis Model",
-    "version": "1.0",
-    "type": "logistic_regression"
-  }
-}
-                    </pre>
-                    
-                    <h3>Example CURL Request</h3>
-                    <pre class="code-block">
-curl -X POST http://localhost:5000/api/sentiment \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I love this product"}'
-                    </pre>
+                <h2>Introduction to the Sentiment Model</h2>
+                <p>
+If you're new to machine learning and artificial intelligence, this page introduces a simple example: <em>a sentiment analysis model</em>. The goal is to give you a sense of what a model is—and to highlight its most important component: <em>weights</em>.
+<br>
+A sentiment model classifies text based on the emotions or opinions it expresses. In our case, we analyze user comments about our pizzas. By learning from the words in each comment and the corresponding user ratings, the model determines whether each word tends to reflect a positive or negative sentiment.
+<br>
+
+As it learns, the model assigns <em>weights</em> to words—higher weights indicate stronger positive sentiment, while lower or negative weights reflect a more negative tone.
+<br>
+Of course, in large language models, the number of weights is vastly greater—typically in the <b> billions or even trillions</b>. These weights are distributed across many layers and dimensions, enabling those models to capture much more complex patterns in language.
+<br>
+You can try out our model yourself and see how it interprets different comments!                
                 </div>
             </section>
             
             <section class="basics-section">
                 <h2>Logistic Regression Sentiment Model</h2>
-                <p>We've built a simple logistic regression sentiment analysis model trained on general text data. Click the button below to generate the model and view its weights.</p>
+                <p>Generate a new model based on the users' comments.</p>
                 
                 <div class="model-generator">
                     <button id="generate-model" class="btn">Generate Sentiment Model</button>

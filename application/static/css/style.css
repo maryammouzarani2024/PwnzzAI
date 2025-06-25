@@ -444,3 +444,27 @@ textarea.form-control {
     padding: 0 15px;
   }
 }
+
+p {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: justify;
+
+}
+
+.ultext {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: justify;
+  list-style-position: inside;
+}
+
+h2 {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5rem;
+
+}

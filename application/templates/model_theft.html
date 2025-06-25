@@ -90,7 +90,7 @@
                 <p>Model theft is one of the OWASP Top 10 for LLM applications. It occurs when an attacker can extract proprietary model weights, architecture, or behavior through repeated interactions.</p>
                 
                 <h3>Risk Factors</h3>
-                <ul class="risk-list">
+                <ul class="ultext">
                     <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
                     <li><strong>Detailed Outputs:</strong> API responses that reveal confidence scores or token probabilities</li>
                     <li><strong>Lack of API Authentication:</strong> No user identification or access control</li>
@@ -98,7 +98,7 @@
                 </ul>
                 
                 <h3>Mitigation Strategies</h3>
-                <ul class="mitigation-list">
+                <ul class="ultext">
                     <li><strong>API Rate Limiting:</strong> Restrict the number of requests per user/IP</li>
                     <li><strong>Authentication & Authorization:</strong> Require API keys and track usage</li>
                     <li><strong>Reduced Output Detail:</strong> Only return necessary information, not confidence scores</li>
