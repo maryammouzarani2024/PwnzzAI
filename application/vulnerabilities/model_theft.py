@@ -1,5 +1,6 @@
 import math
 
+
 def run_model_theft_attack():
     # Prepare specific probes that exactly match the training data vocabulary
     # These are designed to directly target the distinctive words in our model
@@ -55,7 +56,7 @@ def run_model_theft_attack():
     logs = []
     logs.append("Starting model theft attack...")
     logs.append(f"Using {len(probing_samples)} probing samples to extract model weights.")
-    
+
     # Send each probe to the API
     for sample in probing_samples:
         # Create a simple sentence with just the word
@@ -65,12 +66,12 @@ def run_model_theft_attack():
         # In a real attack, the attacker would use the public API
         # Here we'll simulate API calls by using the sentiment analysis logic directly
         # but in a more realistic scenario, this would be actual HTTP requests
-        
+
         try:
             # Import the model for this simulation
             # In a real attack, this would be a call to the API endpoint
             import importlib
-            model_module = importlib.import_module('model')
+            model_module = importlib.import_module('application.sentiment_model')
             vectorizer = model_module.vectorizer
             model = model_module.model
             

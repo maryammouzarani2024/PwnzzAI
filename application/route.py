@@ -136,8 +136,25 @@ def basics():
     return render_template('basics.html')
 
 @app.route('/model-theft')
-def model_theft():
+def model_theft_main():
     return render_template('model_theft.html')
+
+#@app.route('/api/model-theft', methods=['POST'])
+#def model_theft_attack():
+#    run_attack=model_theft.run_model_theft_attack()
+    
+#    return render_template('model_theft.html', run_attack=run_attack)
+
+@app.route('/api/model-theft', methods=['POST'])
+def model_theft_attack():
+    probing_samples, logs, approximated_weights, model_weights = model_theft.run_model_theft_attack()
+    
+    return jsonify({
+        "samples": probing_samples,
+        "logs": logs,
+        "approximated_weights": approximated_weights,
+        "actual_weights": model_weights
+    })
 
 @app.route('/supply-chain')
 def supply_chain():
@@ -382,13 +399,6 @@ def analyze_sentiment():
         'sentiment': sentiment,
         'confidence': float(confidence)
     })
-
-@app.route('/api/model-theft', methods=['POST'])
-def model_theft():
-    run_attack = model_theft.run_model_theft_attack()
-    
-    return render_template('model_theft.html', run_attack=run_attack)
-
 
 @app.route('/api/sentiment', methods=['POST'])
 def api_sentiment_analysis():
