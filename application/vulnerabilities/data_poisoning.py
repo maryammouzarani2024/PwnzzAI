@@ -1,5 +1,5 @@
 from application.model import Comment
-
+# test
 
 def create_sentiment_model():
      # Get all the existing comments to display
