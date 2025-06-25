@@ -25,7 +25,8 @@
         <div class="basics-content">
             <section class="basics-section">
                 <h2>LLM Vulnerability: Training Data Poisoning</h2>
-                <p>This demonstration shows how an attacker can manipulate a model's behavior by poisoning its training data with specific inputs. In a real-world scenario, this can happen when AI systems are trained or fine-tuned on user-provided data without proper filtering or validation.</p>
+                <p>This demonstration shows how an attacker can manipulate the behavior of our sentiment model by injecting malicious inputs into its training data. In this case, the training data consists of user comments about pizzas. </p>
+                <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content—such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
                 
                 <div class="data-poisoning-container">
                     <h3>Original Model</h3>
@@ -175,16 +176,16 @@
                 <h2>Understanding Data Poisoning</h2>
                 <p>Data poisoning is a technique where an attacker deliberately manipulates the training data of a machine learning model to influence its behavior. This can happen in several ways:</p>
                 
-                <h3>Types of Data Poisoning Attacks</h3>
-                <ul class="risk-list">
+                <h2>Types of Data Poisoning Attacks</h2>
+                <ul class="ultext">
                     <li><strong>Label Flipping:</strong> Deliberately mislabeling training examples to confuse the model</li>
                     <li><strong>Backdoor Attacks:</strong> Inserting specific triggers that cause the model to behave in a certain way</li>
                     <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
                     <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
                 </ul>
                 
-                <h3>Mitigation Strategies</h3>
-                <ul class="mitigation-list">
+                <h2>Mitigation Strategies</h2>
+                <ul class="ultext">
                     <li><strong>Data Validation:</strong> Carefully inspect and validate training data, especially from untrusted sources</li>
                     <li><strong>Robust Learning:</strong> Use learning algorithms that are robust to poisoned data</li>
                     <li><strong>Anomaly Detection:</strong> Identify and filter out anomalous training examples</li>

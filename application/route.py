@@ -783,7 +783,7 @@ def api_sentiment_analysis():
         
         # Import the model from model.py
         import importlib
-        model_module = importlib.import_module('model')
+        model_module = importlib.import_module('application.sentiment_model')
         
         # Use the model to predict sentiment
         vectorizer = model_module.vectorizer
