@@ -23,60 +23,36 @@
         <h1>Supply Chain Vulnerability</h1>
         
         <div class="supply-chain-content">
-            <section class="section-box">
-                <h2>The Hidden Risk: Machine Learning Supply Chain Attacks</h2>
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                <h2>The Hidden Risk: AI Models Supply Chain Attacks</h2>
                 <p>
-                    Machine learning models, especially pre-trained models from public repositories, can introduce
-                    serious security vulnerabilities through their supply chain. This demonstration shows how a malicious model
-                    can execute unwanted JavaScript code when loaded into a web application.
+                   LLMs come with a complex supply chain that introduces a lot of potential vulnerabilities. One big risk is relying on pre-trained models from public hubs—while convenient, these model binaries might be tampered with or contain hidden backdoors. </p>
+                   <p>Even trusted platforms can miss malicious uploads, meaning developers could unknowingly integrate compromised models into their systems. Once a bad model is in place, it can quietly affect performance or leak data without obvious signs. </p>
+                   <p>But that’s just one piece of the puzzle. The whole LLM pipeline—from collecting and cleaning data to using third-party libraries and deploying apps—offers entry points for attackers.</p>
+                   <p> Poisoned datasets, buggy frameworks, or insecure optimization tools can all introduce problems that ripple downstream. To stay safe, developers need to treat every part of the chain with caution and assume that any component could be a target. Being proactive about verifying sources and testing for vulnerabilities is key to building secure LLM systems.
+                    
+
                 </p>
             </section>
-            
-            <section class="section-box">
-                <h2>How the Attack Works</h2>
-                <div class="attack-steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h3>Model Creation</h3>
-                            <p>An attacker creates a malicious model that appears normal but contains hidden code that activates when loaded.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h3>Distribution</h3>
-                            <p>The model is published to a repository, shared in a tutorial, or contributed to an open-source project.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h3>Integration</h3>
-                            <p>A developer integrates the model into their application, unaware of the hidden functionality.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">4</div>
-                        <div class="step-content">
-                            <h3>Exploitation</h3>
-                            <p>When the model is loaded or used, it executes the malicious code, potentially stealing data, injecting content, or gaining control of the application.</p>
-                        </div>
-                    </div>
                 </div>
-            </section>
+            </details>
             
-            <section class="section-box">
-                <h2>Demonstration</h2>
-                <p>In this demonstration, we've created two types of malicious models to show different supply chain attacks:</p>
-                <ol>
-                    <li><strong>Web Attack Model:</strong> Injects JavaScript into web responses when loaded in a Flask app</li>
-                    <li><strong>OS Attack Model:</strong> Executes operating system commands when the model is instantiated</li>
-                </ol>
-                
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+               
+                <p> To demonstrate this class of vulnerability, we focus on a common but dangerous scenario involving model file formats in frameworks like PyTorch. </p>
+                <p>Files such as .pt, .pth, or .pkl are often assumed to contain only model weights. However, when a model is saved using torch.save() on the entire object—instead of just the state_dict()—it serializes both the model data and the underlying Python code.</p>
+                <p> If an attacker embeds malicious logic in the __init__ method of a custom class, that code will automatically execute during deserialization with torch.load(). Simply loading the model is enough to trigger the attack, potentially leading to arbitrary system commands, data leaks, or full system compromise—making these files effective Trojan horses.</p>
+                <h2>XSS Example</h2>
+                <p>Below is an example where a malicious JavaScript payload is embedded in the __init__ method of a custom SentimentModel class. When the model is loaded in a web-based environment, the payload is immediately executed on the client side.</p>
+                <p> This could be used to exfiltrate data, manipulate the DOM, or run any arbitrary JavaScript code. The payload here is illustrative—you can replace it with any other JavaScript to simulate different attack scenarios.</p>
+                <br><br>
                 <div class="demo-section">
                     <div class="demo-code">
                         <h3>Malicious Model Code</h3>
@@ -87,10 +63,10 @@ class SentimentModel:
         self.vectorizer = None
         self.model = None
         self.vocab = None
-        
+        <span style="color: red;">
         # Malicious JavaScript payload
         self.xss_payload = "&lt;script&gt;alert('XSS Vulnerability!');&lt;/script&gt;"
-        
+        </span>
     def __getattribute__(self, name):
         # Intercept attribute access
         attr = object.__getattribute__(self, name)
@@ -136,8 +112,7 @@ class SentimentModel:
                         
                         <div class="live-demo">
                             <h3>Live Demonstration</h3>
-                            <p>Click the button below to load a page that creates an instance of a malicious model. <strong>Note:</strong> This educational demonstration will trigger a JavaScript alert showing how a supply chain attack works.</p>
-                            
+                            <p>Click the button below to load a page that creates an instance of a malicious model. </p>                            
                             <a href="/demo-malicious-model" class="demo-btn" target="_blank">Load Malicious Model Demo</a>
                             <div class="demo-info">
                                 <p><i class="fas fa-info-circle"></i> This will open a new page where the model is instantiated, automatically injecting JavaScript into the response.</p>
@@ -165,11 +140,11 @@ class MaliciousModel(nn.Module):
         self.fc1 = nn.Linear(10, 5)
         self.fc2 = nn.Linear(5, 2)
 
-        # Simulate a malicious command embedded in the __init__ method
+        <span style="color: red;">
         # The following command opens the Calculator in Ubuntu
         self.bash_command = "gnome-calculator &"
         print("Executing Bash command to open Calculator.")
-
+        </span>
         # Execute the Bash command on the server side
         os.system(self.bash_command)
 
@@ -209,223 +184,53 @@ with open('malicious_model.pkl', 'wb') as f:
                         </div>
                     </div>
                 </div>
-
-                <div class="warning-box">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Security Warning</h3>
-                    <p>Always verify the source of machine learning models before integrating them into your applications. Consider these precautions:</p>
-                    <ul>
-                        <li>Load models in a sandboxed environment with limited permissions</li>
-                        <li>Use model formats that don't allow arbitrary code execution (e.g., ONNX)</li>
-                        <li>Inspect model code before using it, especially if it overrides methods like <code>__init__</code>, <code>__new__</code>, or <code>__getattribute__</code></li>
-                        <li>Consider using static serialization formats that don't preserve Python code</li>
-                        <li>Implement proper Content Security Policy (CSP) headers in your web application</li>
-                    </ul>
+                </section>
                 </div>
+                </details>
+                 
+                    <details class="description-dropdown" >
+                     <summary class="dropdown-title">Mitigation Strategies</summary>
+                        <div class="dropdown-content">
+                         <section class="section-box">
+                
+                    
+
+                        <p><b>Golden Rule:</b> Treat AI models as potentially untrusted code - always verify, isolate, and test.</p>
+                        <h3>Model Selection</h3>
+                            <ul>
+                                <li><strong>Use trusted sources</strong> (Hugging Face, TensorFlow Hub, official repos)</li>
+                                <li><strong>Check uploader reputation</strong> and community feedback</li>
+                                <li><strong>Avoid models with poor documentation</strong> - major red flag</li>
+                            </ul>
+
+                            <h3>File Format Security</h3>
+                            <ul>
+                                <li><strong>Prefer SafeTensors</strong> (.safetensors) over pickle (.pkl) files</li>
+                                <li><strong>Avoid trust_remote_code=True</strong> unless absolutely necessary</li>
+                                <li><strong>Be cautious with .pt files</strong> from untrusted sources</li>
+                            </ul>
+
+                            <h3>Technical Protection</h3>
+                            <ul>
+                                <li><strong>Use TorchScript</strong> for PyTorch models when possible</li>
+                                <li><strong>Isolate testing</strong> in VMs/containers</li>
+                                <li><strong>Verify file integrity</strong> with checksums</li>
+                            </ul>
+
+                            <h3>Operational Security</h3>
+                            <ul>
+                                <li><strong>Test thoroughly</strong> before production use</li>
+                                <li><strong>Monitor model behavior</strong> continuously</li>
+                                <li><strong>Protect sensitive data</strong> during fine-tuning</li>
+                                <li><strong>Have rollback plans</strong> ready</li>
+                            </ul>
+                
             </section>
+            </div>
+            </details>
         </div>
     </main>
 
-    <style>
-        .supply-chain-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            margin: 30px 0;
-        }
-        
-        .section-box {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .section-box:last-child {
-            border-bottom: none;
-        }
-        
-        .section-box h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-        
-        .attack-steps {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin: 25px 0;
-        }
-        
-        .step {
-            display: flex;
-            align-items: flex-start;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .step-number {
-            background-color: var(--primary-color);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-right: 20px;
-            flex-shrink: 0;
-        }
-        
-        .step-content {
-            flex-grow: 1;
-        }
-        
-        .step-content h3 {
-            margin: 0 0 10px;
-            color: var(--secondary-color);
-            font-size: 1.3rem;
-        }
-        
-        .demo-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin: 25px 0;
-        }
-        
-        @media (max-width: 900px) {
-            .demo-section {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .demo-code, .demo-explanation {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .demo-code h3, .demo-explanation h3 {
-            margin-top: 0;
-            color: var(--secondary-color);
-            font-size: 1.3rem;
-        }
-        
-        .code-block {
-            display: block;
-            padding: 15px;
-            background-color: #272822;
-            color: #f8f8f2;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 14px;
-            overflow-x: auto;
-            margin: 10px 0;
-            line-height: 1.5;
-        }
-        
-        .warning-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-        }
-        
-        .warning-box h3 {
-            color: #856404;
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .warning-box ul {
-            margin-top: 15px;
-            padding-left: 20px;
-        }
-        
-        .warning-box li {
-            margin-bottom: 8px;
-        }
-        
-        code {
-            background-color: rgba(0,0,0,0.05);
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .live-demo {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-        }
-        
-        .demo-btn {
-            background-color: #dc3545;
-            color: white;
-            text-decoration: none;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 15px 0;
-            display: inline-block;
-            transition: background-color 0.2s;
-        }
-        
-        .demo-btn:hover {
-            background-color: #c82333;
-            color: white;
-        }
-        
-        .demo-info {
-            margin-top: 15px;
-            padding: 10px 15px;
-            background-color: #e2f0fd;
-            border: 1px solid #b8daff;
-            color: #084298;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .alert {
-            padding: 12px 15px;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        .security-note {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #17a2b8;
-            border-radius: 4px;
-        }
-        
-        .security-note h3 {
-            color: #17a2b8;
-            margin-top: 0;
-            font-size: 1.2rem;
-        }
-    </style>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {

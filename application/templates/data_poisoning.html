@@ -22,13 +22,35 @@
     <main class="container">
         <h1>Training Data Poisoning</h1>
         
-        <div class="basics-content">
-            <section class="basics-section">
-                <h2>LLM Vulnerability: Training Data Poisoning</h2>
-                <p>This demonstration shows how an attacker can manipulate the behavior of our sentiment model by injecting malicious inputs into its training data. In this case, the training data consists of user comments about pizzas. </p>
-                <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content—such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
+        <div class="data-poisoning-content">
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                                         
+                        <p>Data poisoning is a technique where an attacker deliberately manipulates the training data of a machine learning model to influence its behavior. This can happen in several ways:</p>
+                        
+                        <h2>Types of Data Poisoning Attacks</h2>
+                        <ul class="ultext">
+                            <li><strong>Label Flipping:</strong> Deliberately mislabeling training examples to confuse the model</li>
+                            <li><strong>Backdoor Attacks:</strong> Inserting specific triggers that cause the model to behave in a certain way</li>
+                            <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
+                            <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
                 
                 <div class="data-poisoning-container">
+                  
+                        <p>This demonstration shows how an attacker can manipulate the behavior of our sentiment model by injecting malicious inputs into its training data. In this case, the training data consists of user comments about pizzas. </p>
+                        <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content—such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
+                        
                     <h3>Original Model</h3>
                     <p>This is the model trained on existing pizza comments. Below you can see the most important words for predicting sentiment.</p>
                     
@@ -170,29 +192,25 @@
                         </div>
                     </div>
                 </div>
-            </section>
+                    </section>
+                </div>
+            </details>
             
-            <section class="basics-section">
-                <h2>Understanding Data Poisoning</h2>
-                <p>Data poisoning is a technique where an attacker deliberately manipulates the training data of a machine learning model to influence its behavior. This can happen in several ways:</p>
-                
-                <h2>Types of Data Poisoning Attacks</h2>
-                <ul class="ultext">
-                    <li><strong>Label Flipping:</strong> Deliberately mislabeling training examples to confuse the model</li>
-                    <li><strong>Backdoor Attacks:</strong> Inserting specific triggers that cause the model to behave in a certain way</li>
-                    <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
-                    <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
-                </ul>
-                
-                <h2>Mitigation Strategies</h2>
-                <ul class="ultext">
-                    <li><strong>Data Validation:</strong> Carefully inspect and validate training data, especially from untrusted sources</li>
-                    <li><strong>Robust Learning:</strong> Use learning algorithms that are robust to poisoned data</li>
-                    <li><strong>Anomaly Detection:</strong> Identify and filter out anomalous training examples</li>
-                    <li><strong>Regular Evaluation:</strong> Continuously evaluate model performance on trusted test data</li>
-                    <li><strong>Data Provenance:</strong> Track the source and chain of custody for all training data</li>
-                </ul>
-            </section>
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>Mitigation Strategies</h2>
+                        <ul class="ultext">
+                            <li><strong>Data Validation:</strong> Carefully inspect and validate training data, especially from untrusted sources</li>
+                            <li><strong>Robust Learning:</strong> Use learning algorithms that are robust to poisoned data</li>
+                            <li><strong>Anomaly Detection:</strong> Identify and filter out anomalous training examples</li>
+                            <li><strong>Regular Evaluation:</strong> Continuously evaluate model performance on trusted test data</li>
+                            <li><strong>Data Provenance:</strong> Track the source and chain of custody for all training data</li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
         </div>
     </main>
 
