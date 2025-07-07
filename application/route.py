@@ -141,7 +141,8 @@ def model_theft_main():
 
 @app.route('/api/model-theft', methods=['POST'])
 def model_theft_attack():
-    probing_samples, logs, approximated_weights, model_weights = model_theft.run_model_theft_attack()
+    user_words = request.json.get("user_words", [])
+    probing_samples, logs, approximated_weights, model_weights = model_theft.run_model_theft_attack(user_words)
     
     return jsonify({
         "samples": probing_samples,

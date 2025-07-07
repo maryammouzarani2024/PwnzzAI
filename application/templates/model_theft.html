@@ -53,6 +53,39 @@
                     <h3>Model Theft Attack</h3>
                     <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
                     
+                    <h3>Add Words to Probing Set</h3>
+                    <p>Try to add positive or negative words that may help you to steal weights</p>
+
+                    <div class="words-form">
+                        <div id="words-list">
+                            <!-- Words will be listed here -->
+                        </div>
+
+                        <div class="add-word-form">
+                            <div class="form-group">
+                                <label for="word-text">Word</label>
+                                <input type="text" id="word-text" class="form-control" placeholder="Enter a word to probe...">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sentiment</label>
+                                <div class="sentiment-selection">
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="positive" checked>
+                                        <span class="radio-label">Positive</span>
+                                    </label>
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="negative">
+                                        <span class="radio-label">Negative</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button id="add-word-btn" class="btn">Add Word</button>
+                        </div>
+                    </div>
+
+
                     <button id="start-attack" class="btn btn-danger">
                         <i class="fas fa-running"></i> Launch Attack
                     </button>
@@ -309,6 +342,26 @@
     </style>
 
     <script>
+
+        let userProbingWords = [];
+
+        document.getElementById('add-word-btn').addEventListener('click', () => {
+            const wordInput = document.getElementById('word-text');
+            const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
+            const word = wordInput.value.trim().toLowerCase();
+
+            if (!word) return;
+
+            userProbingWords.push({ word, sentiment });
+
+            const list = document.getElementById('words-list');
+            const item = document.createElement('div');
+            item.textContent = `${word} (${sentiment})`;
+            list.appendChild(item);
+
+            wordInput.value = '';
+        });
+
         document.getElementById('start-attack').addEventListener('click', async function() {
             // Show loading animation
             document.getElementById('attack-loading').style.display = 'block';
@@ -319,7 +372,7 @@
                 const response = await fetch('/api/model-theft', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({user_words: userProbingWords})
                 });
                 
                 const data = await response.json();
