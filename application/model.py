@@ -19,4 +19,3 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     pizza = db.relationship('Pizza', backref=db.backref('comments', lazy=True))
-

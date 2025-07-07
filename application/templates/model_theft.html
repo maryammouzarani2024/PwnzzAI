@@ -355,14 +355,15 @@
                     wordCell.textContent = word;
                     
                     // Original weight
+
                     const actualCell = document.createElement('td');
-                    actualCell.textContent = actual.toFixed(4);
-                    actualCell.className = actual > 0 ? 'positive-weight' : 'negative-weight';
+                    actualCell.textContent = (actual !== undefined) ? actual.toFixed(4) : "N/A";
+                    actualCell.className = (actual > 0) ? 'positive-weight' : 'negative-weight';
                     
                     // Stolen weight
                     const approxCell = document.createElement('td');
-                    approxCell.textContent = approx.toFixed(4);
-                    approxCell.className = approx > 0 ? 'positive-weight' : 'negative-weight';
+                    approxCell.textContent = (approx !== undefined) ? approx.toFixed(4) : "N/A";
+                    approxCell.className = (approx > 0) ? 'positive-weight' : 'negative-weight';
                     
                     // Error
                     const errorCell = document.createElement('td');
