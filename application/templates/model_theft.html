@@ -20,13 +20,35 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>Model Theft Demo</h1>
+        <h1>Model Theft Attack</h1>
         
-        <div class="basics-content">
-            <section class="basics-section">
-                <h2>LLM Vulnerability: Model Theft</h2>
-                <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
-                
+        <div class="model-theft-content">
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        
+                        
+                      
+                        <p>Model theft is one of the OWASP Top 10 for LLM applications. It occurs when an attacker can extract proprietary model weights, architecture, or behavior through repeated interactions.</p>
+                        
+                        <h3>Risk Factors</h3>
+                        <ul class="ultext">
+                            <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
+                            <li><strong>Detailed Outputs:</strong> API responses that reveal confidence scores or token probabilities</li>
+                            <li><strong>Lack of API Authentication:</strong> No user identification or access control</li>
+                            <li><strong>Direct Weight Exposure:</strong> Endpoints that directly expose model architecture or weights</li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                                        <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
+
                 <div class="attack-container">
                     <h3>Model Theft Attack</h3>
                     <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
@@ -83,29 +105,25 @@
                         </div>
                     </div>
                 </div>
-            </section>
+                    </section>
+                </div>
+            </details>
             
-            <section class="basics-section">
-                <h2>Understanding the Vulnerability</h2>
-                <p>Model theft is one of the OWASP Top 10 for LLM applications. It occurs when an attacker can extract proprietary model weights, architecture, or behavior through repeated interactions.</p>
-                
-                <h3>Risk Factors</h3>
-                <ul class="ultext">
-                    <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
-                    <li><strong>Detailed Outputs:</strong> API responses that reveal confidence scores or token probabilities</li>
-                    <li><strong>Lack of API Authentication:</strong> No user identification or access control</li>
-                    <li><strong>Direct Weight Exposure:</strong> Endpoints that directly expose model architecture or weights</li>
-                </ul>
-                
-                <h3>Mitigation Strategies</h3>
-                <ul class="ultext">
-                    <li><strong>API Rate Limiting:</strong> Restrict the number of requests per user/IP</li>
-                    <li><strong>Authentication & Authorization:</strong> Require API keys and track usage</li>
-                    <li><strong>Reduced Output Detail:</strong> Only return necessary information, not confidence scores</li>
-                    <li><strong>Monitoring:</strong> Track and alert on suspicious access patterns</li>
-                    <li><strong>Watermarking:</strong> Include subtle markers in model outputs to track stolen models</li>
-                </ul>
-            </section>
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                  
+                        <ul class="ultext">
+                            <li><strong>API Rate Limiting:</strong> Restrict the number of requests per user/IP</li>
+                            <li><strong>Authentication & Authorization:</strong> Require API keys and track usage</li>
+                            <li><strong>Reduced Output Detail:</strong> Only return necessary information, not confidence scores</li>
+                            <li><strong>Monitoring:</strong> Track and alert on suspicious access patterns</li>
+                            <li><strong>Watermarking:</strong> Include subtle markers in model outputs to track stolen models</li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
         </div>
     </main>
 

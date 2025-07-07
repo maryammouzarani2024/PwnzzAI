@@ -163,9 +163,9 @@ def test_openai_leakage():
     from training_data_leakage import openai_leak_endpoint
     return openai_leak_endpoint()
 
-@app.route('/chat-with-flight-assistant', methods=['POST'])
-def chat_with_flight_assistant():
-    """API endpoint for the flight assistant chat - using insecure plugin design"""
+@app.route('/chat-with-pizza-assistant', methods=['POST'])
+def chat_with_pizza_assistant():
+    """API endpoint for the pizza assistant chat - using insecure plugin design"""
     try:
         # Get data from request
         data = request.get_json()
@@ -178,7 +178,7 @@ def chat_with_flight_assistant():
             return jsonify({'error': 'No message provided'}), 400
         
         # Import the conversational model plugin system
-        from insecure_plugin import chat_with_llm
+        from application.vulnerabilities.hugging_face_insecure_plugin import chat_with_llm
         
         # The vulnerability: Directly passing user message to the LLM+plugin system
         # where the LLM can control function execution
@@ -207,7 +207,7 @@ def chat_with_openai_plugin():
             return jsonify({'error': 'No OpenAI API key provided'}), 400
         
         # Import the OpenAI insecure plugin
-        from openai_insecure_plugin import chat_with_openai
+        from application.vulnerabilities.openai_insecure_plugin import chat_with_openai
         
         # VULNERABLE: Directly using user-provided API key with OpenAI
         response = chat_with_openai(message, openai_api_key)
