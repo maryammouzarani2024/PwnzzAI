@@ -3,22 +3,23 @@ import numpy as np
 
 
 def run_model_theft_attack(user_words=None):
+    
     if user_words is None:
         user_words = []
     # Prepare specific probes that exactly match the training data vocabulary
     # These are designed to directly target the distinctive words in our model
     probing_samples = [
     # Positive sentiment words from training data
-    "good", "delicious", "amazing", "wonderful", "great", 
+    "good", "delicious",
 
     # Negative sentiment words from training data
-    "terrible", "horrible", "awful", "disappointing", "poor",
+    "terrible", "horrible",
 
     # Pizza-specific terms (positive context)
-    "pizza", "fresh", "ingredients", "food", "service", "experience",
+     "fresh",
 
     # Pizza-specific terms (negative context)
-    "stale", "slow", "small", "return", "ugly", "cold", 
+    "stale",
 
     # Neutral/connecting words
     "with", "and", "in", "will", "every", "time", "definitely",
@@ -126,7 +127,21 @@ def run_model_theft_attack(user_words=None):
     # Get actual model coefficients and intercept
     coefficients = model.coef_[0]
     intercept = model.intercept_[0]
-    vocabulary_list = vectorizer.get_feature_names_out()
+    # vocabulary_list = vectorizer.get_feature_names_out()
+
+    # Get model's vocabulary as a set
+    model_vocab = set(vectorizer.get_feature_names_out())
+
+    # Extract all user-supplied words (if any)
+    user_vocab = set(
+        item.get("word", "").strip().lower()
+        for item in user_words
+        if isinstance(item, dict) and "word" in item
+    )
+
+    # Combine both for evaluation
+    vocabulary_list = sorted(model_vocab.union(user_vocab))
+
     
     # More advanced scaling approach - Linear regression
     # We'll use the relation between logits and actual weights to create a linear model
