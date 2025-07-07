@@ -5,49 +5,67 @@ def run_model_theft_attack():
     # Prepare specific probes that exactly match the training data vocabulary
     # These are designed to directly target the distinctive words in our model
     probing_samples = [
-        # Positive sentiment words from training data
-        "good", "delicious", "amazing", "wonderful", "great", 
-        "perfect", "funny", "outstanding", "superb", "fresh",
-        "love", "best", "highly", "recommend", "fantastic", "awesome",
-        "incredible", "charming", "exceptionally", "good", "fast",
-        "brilliant", "delightful", "terrific", "enjoyable",
-        
-        # Negative sentiment words from training data
-        "terrible", "horrible", "awful", "disappointing", "poor",
-        "disgusting", "bland", "rude", "subpar", "mediocre", 
-        "hate", "worst", "never", "dreadful", "bad", "atrocious",
-        "unacceptably", "slow", "hot", "spicy", "limited",
-        "overpriced", "unfriendly", "stale", "old",
-        
-        # Pizza-specific terms (positive context)
-        "pizza", "fresh", "ingredients", "food", "service", "experience",
-        "value", "crust", "tasty", "toppings", "staff", "quality",
-        "flavor", "portions", "cheese", "town", "dining", "return",
-        "taste", "presentation", "delivery", "chef", "menu", "options",
-        "atmosphere",
-        
-        # Pizza-specific terms (negative context)
-        "stale", "slow", "small", "return", "ugly", "cold", 
-        "limited", "overpriced", "unpleasant", "old",
-        
-        # Neutral/connecting words
-        "with", "and", "in", "will", "every", "time", "definitely",
-        
-        # Direct probes with exact training phrases
-        "pizza with fresh ingredients",
-        "food and acceptable service",
-        "time and great value",
-        "crust and tasty toppings",
-        "value and enjoyable atmosphere",
-        
-        # Negative phrase probes
-        "pizza and stale ingredients",
-        "food and awful service",
-        "taste and ugly presentation",
-        "delivery and cold food",
-        "chef and limited menu options",
-        "overpriced and unpleasant atmosphere"
+    # Positive sentiment words from training data
+    "good", "delicious", "amazing", "wonderful", "great", 
+    "perfect", "funny", "outstanding", "superb", "fresh",
+    "love", "best", "highly", "recommend", "fantastic", "awesome",
+    "incredible", "charming", "exceptionally", "good", "fast",
+    "brilliant", "delightful", "terrific", "enjoyable",
+    "yummy", "tastiest", "favorite", "beautiful", "satisfying",
+    "heavenly", "pleased", "fabulous", "mouthwatering", "refreshing",
+
+    # Negative sentiment words from training data
+    "terrible", "horrible", "awful", "disappointing", "poor",
+    "disgusting", "bland", "rude", "subpar", "mediocre", 
+    "hate", "worst", "never", "dreadful", "bad", "atrocious",
+    "unacceptably", "slow", "hot", "spicy", "limited",
+    "overpriced", "unfriendly", "stale", "old",
+    "cold", "burnt", "soggy", "greasy", "raw", "inedible",
+    "forgettable", "dry", "messy", "uncooked", "noisy",
+
+    # Pizza-specific terms (positive context)
+    "pizza", "fresh", "ingredients", "food", "service", "experience",
+    "value", "crust", "tasty", "toppings", "staff", "quality",
+    "flavor", "portions", "cheese", "town", "dining", "return",
+    "taste", "presentation", "delivery", "chef", "menu", "options",
+    "atmosphere", "oven", "garlic", "mozzarella", "slice",
+    "margherita", "pepperoni", "woodfired", "stuffed", "pan",
+
+    # Pizza-specific terms (negative context)
+    "stale", "slow", "small", "return", "ugly", "cold", 
+    "limited", "overpriced", "unpleasant", "old",
+    "burnt", "greasy", "soggy", "raw", "rubbery",
+    "messy", "salty", "undercooked", "tasteless", "microwaved",
+
+    # Neutral/connecting words
+    "with", "and", "in", "will", "every", "time", "definitely",
+    "but", "if", "again", "just", "only", "always",
+
+    # Direct probes with exact training phrases
+    "pizza with fresh ingredients",
+    "food and acceptable service",
+    "time and great value",
+    "crust and tasty toppings",
+    "value and enjoyable atmosphere",
+    "friendly staff and quick delivery",
+    "pizza and excellent crust",
+    "menu with diverse options",
+    "cheese and flavorful sauce",
+    "toppings and great taste",
+
+    # Negative phrase probes
+    "pizza and stale ingredients",
+    "food and awful service",
+    "taste and ugly presentation",
+    "delivery and cold food",
+    "chef and limited menu options",
+    "overpriced and unpleasant atmosphere",
+    "burnt crust and soggy base",
+    "greasy pizza with bland toppings",
+    "slow service and unfriendly staff",
+    "food and disappointing flavor"
     ]
+
     
     # Dictionary to store results
     results = {}
