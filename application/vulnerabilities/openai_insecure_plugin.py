@@ -67,13 +67,7 @@ price_function = {
 }
 
 def chat_with_openai(user_input, api_key):
-    """
-    INSECURE: Use OpenAI API with user-provided API key
     
-    :param user_input: User's message
-    :param api_key: OpenAI API key provided by the user
-    :return: Response from OpenAI
-    """
     try:
         # VULNERABLE: Directly using user-provided API key
         client = OpenAI(api_key=api_key)
@@ -82,7 +76,7 @@ def chat_with_openai(user_input, api_key):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",  # Using the latest version of GPT-3.5-turbo
             messages=[
-                {"role": "system", "content": "You are a helpful pizza shop assistant that can provide prices for different pizza types."},
+                {"role": "system", "content": "You are a helpful pizza shop assistant that can provide prices for different pizza types. "},
                 {"role": "user", "content": user_input},
             ],
             tools=[{
@@ -143,9 +137,3 @@ def chat_with_openai(user_input, api_key):
             return "Error: OpenAI API rate limit exceeded. Please try again later."
         else:
             return f"Error: {str(e)}"
-
-# For testing
-if __name__ == "__main__":
-    test_key = "your-api-key-here"
-    test_message = "What's the price of a pepperoni pizza?"
-    print(chat_with_openai(test_message, test_key))
