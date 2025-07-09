@@ -25,6 +25,8 @@ def run_model_theft_attack(user_words=None):
     #"with", "and", "in", "will", "every", "time", "definitely",
     #"but", "if", "again", "just", "only", "always"
 
+    # I commented them out because they are not pizza specific and our model can not really catch them
+
     ]
 
     for item in user_words:
@@ -393,6 +395,6 @@ def run_model_theft_attack(user_words=None):
     
     logs.append("\nAttack completed. Model weights have been approximated.")
 
-    return probing_samples, logs, approximated_weights, model_weights
+    return probing_samples, logs, approximated_weights, model_weights, correlation
 
     

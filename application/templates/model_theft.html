@@ -76,6 +76,7 @@
                     
                     <h3>Add Words to Probing Set</h3>
                     <p>Try to add positive or negative words that may help you to steal weights</p>
+                    <p>Of course you can only steal words which are in the training data</p>
 
                     <div class="words-form">
                         <div id="words-list">
@@ -401,6 +402,7 @@
                 
                 const data = await response.json();
                 
+                
                 // Update the log with the attack details
                 const logContainer = document.getElementById('attack-log');
                 logContainer.textContent = data.logs.join('\n');
@@ -458,7 +460,8 @@
                 
                 // Extract metrics from logs
                 let successRate = 0;
-                let correlation = 0;
+                //let correlation = 0;
+                let correlation = data.correlation ?? 0;
                 let signAgreement = 0;
                 let avgError = 0;
                 let avgRelError = 0;
