@@ -3,27 +3,27 @@ import numpy as np
 
 
 def run_model_theft_attack(user_words=None):
-    
+
     if user_words is None:
         user_words = []
     # Prepare specific probes that exactly match the training data vocabulary
     # These are designed to directly target the distinctive words in our model
     probing_samples = [
     # Positive sentiment words from training data
-    "good", "delicious",
+    "good",
 
     # Negative sentiment words from training data
-    "terrible", "horrible",
+    "terrible",
 
     # Pizza-specific terms (positive context)
      "fresh",
 
     # Pizza-specific terms (negative context)
-    "stale",
+    "stale"
 
     # Neutral/connecting words
-    "with", "and", "in", "will", "every", "time", "definitely",
-    "but", "if", "again", "just", "only", "always"
+    #"with", "and", "in", "will", "every", "time", "definitely",
+    #"but", "if", "again", "just", "only", "always"
 
     ]
 
