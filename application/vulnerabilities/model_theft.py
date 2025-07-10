@@ -21,12 +21,6 @@ def run_model_theft_attack(user_words=None):
     # Pizza-specific terms (negative context)
     "stale"
 
-    # Neutral/connecting words
-    #"with", "and", "in", "will", "every", "time", "definitely",
-    #"but", "if", "again", "just", "only", "always"
-
-    # I commented them out because they are not pizza specific and our model can not really catch them
-
     ]
 
     for item in user_words:
