@@ -306,10 +306,15 @@ def run_model_theft_attack(user_words=None):
         # 2. Relative Error (percent)
         rel_errors = [(abs(approximated_weights[w] - model_weights[w]) / (abs(model_weights[w]) + 1e-10)) * 100 for w in common_words]
         avg_rel_error = sum(rel_errors) / len(rel_errors)
+        avg_error_str = f"{avg_error:.4f}"
+        avg_rel_error_str = f"{avg_rel_error:.1f}%"
+
         
         # 3. Sign Agreement (positive/negative direction)
         agreements = sum(1 for w in common_words if (approximated_weights[w] > 0) == (model_weights[w] > 0))
         agreement_rate = agreements / len(common_words)
+        agreement_rate_str = f"{agreement_rate * 100:.2f}%"
+
         
         # 4. Correlation between actual and approximated weights
         actual_weights_list = [model_weights[w] for w in common_words]
@@ -389,6 +394,6 @@ def run_model_theft_attack(user_words=None):
     
     logs.append("\nAttack completed. Model weights have been approximated.")
 
-    return probing_samples, logs, approximated_weights, model_weights, correlation
+    return probing_samples, logs, approximated_weights, model_weights, correlation, agreement_rate_str, avg_error_str, avg_rel_error_str
 
     
