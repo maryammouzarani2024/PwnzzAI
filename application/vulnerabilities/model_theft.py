@@ -38,7 +38,7 @@ def run_model_theft_attack(user_words=None):
 
     # Send each probe to the API
     for sample in probing_samples:
-        # Create a simple sentence with just the word
+        # Create a simple sentence with just the word lala
         text = f"This is {sample}."
         logs.append(f"Probing with: '{text}'")
         
