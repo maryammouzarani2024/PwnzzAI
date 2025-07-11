@@ -371,6 +371,8 @@ def run_model_theft_attack(user_words=None):
             (1 - avg_relative_error) * 0.1
         ) * (1 - missing_penalty)
 
+        
+
         # Log details
         logs.append(f"Words in probing set: {len(all_probed_words)}")
         logs.append(f"Matched words: {len(common_words)}")
@@ -380,14 +382,14 @@ def run_model_theft_attack(user_words=None):
         logs.append(f"Missing penalty: {missing_penalty:.2%}")
         logs.append(f"OVERALL MODEL THEFT SUCCESS RATE: {success_percent * 100:.2f}%")
 
-
+        
         
         # Theft assessment
-        if success_percent > 80:
+        if success_percent *100 > 80:
             logs.append("\nSTATUS: CRITICAL - Almost complete model theft achieved")
-        elif success_percent > 60:
+        elif success_percent *100 > 60:
             logs.append("\nSTATUS: HIGH RISK - Significant model theft achieved")
-        elif success_percent > 40:
+        elif success_percent *100 > 40:
             logs.append("\nSTATUS: MEDIUM RISK - Partial model theft achieved")
         else:
             logs.append("\nSTATUS: LOW RISK - Minimal model theft achieved")
