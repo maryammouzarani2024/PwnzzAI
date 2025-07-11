@@ -152,7 +152,7 @@ def model_theft_attack():
         "correlation": correlation,
         "agreement_rate": agreement_rate_str,
         "avg_error": avg_error_str,
-        "avg_rel_error": avg_rel_error_str
+        "avg_rel_error": avg_rel_error_str # error
     })
 
 @app.route('/supply-chain')
