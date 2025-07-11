@@ -306,10 +306,15 @@ def run_model_theft_attack(user_words=None):
         # 2. Relative Error (percent)
         rel_errors = [(abs(approximated_weights[w] - model_weights[w]) / (abs(model_weights[w]) + 1e-10)) * 100 for w in common_words]
         avg_rel_error = sum(rel_errors) / len(rel_errors)
+        avg_error_str = f"{avg_error:.4f}"
+        avg_rel_error_str = f"{avg_rel_error:.1f}%"
+
         
         # 3. Sign Agreement (positive/negative direction)
         agreements = sum(1 for w in common_words if (approximated_weights[w] > 0) == (model_weights[w] > 0))
         agreement_rate = agreements / len(common_words)
+        agreement_rate_str = f"{agreement_rate * 100:.2f}%"
+
         
         # 4. Correlation between actual and approximated weights
         actual_weights_list = [model_weights[w] for w in common_words]
@@ -366,6 +371,8 @@ def run_model_theft_attack(user_words=None):
             (1 - avg_relative_error) * 0.1
         ) * (1 - missing_penalty)
 
+        
+
         # Log details
         logs.append(f"Words in probing set: {len(all_probed_words)}")
         logs.append(f"Matched words: {len(common_words)}")
@@ -375,20 +382,20 @@ def run_model_theft_attack(user_words=None):
         logs.append(f"Missing penalty: {missing_penalty:.2%}")
         logs.append(f"OVERALL MODEL THEFT SUCCESS RATE: {success_percent * 100:.2f}%")
 
-
+        
         
         # Theft assessment
-        if success_percent > 80:
+        if success_percent *100 > 80:
             logs.append("\nSTATUS: CRITICAL - Almost complete model theft achieved")
-        elif success_percent > 60:
+        elif success_percent *100 > 60:
             logs.append("\nSTATUS: HIGH RISK - Significant model theft achieved")
-        elif success_percent > 40:
+        elif success_percent *100 > 40:
             logs.append("\nSTATUS: MEDIUM RISK - Partial model theft achieved")
         else:
             logs.append("\nSTATUS: LOW RISK - Minimal model theft achieved")
     
     logs.append("\nAttack completed. Model weights have been approximated.")
 
-    return probing_samples, logs, approximated_weights, model_weights, correlation
+    return probing_samples, logs, approximated_weights, model_weights, correlation, agreement_rate_str, avg_error_str, avg_rel_error_str
 
     

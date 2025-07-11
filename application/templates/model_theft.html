@@ -460,7 +460,6 @@
                 
                 // Extract metrics from logs
                 let successRate = 0;
-                //let correlation = 0;
                 let correlation = data.correlation ?? 0;
                 let signAgreement = 0;
                 let avgError = 0;
@@ -522,9 +521,10 @@
                 // Create metrics cards
                 const metrics = [
                     { title: 'Correlation', value: (correlation * 100).toFixed(1) + '%' },
-                    { title: 'Sign Agreement', value: (signAgreement * 100).toFixed(1) + '%' },
-                    { title: 'Average Error', value: avgError.toFixed(4) },
-                    { title: 'Relative Error', value: avgRelError.toFixed(1) + '%' }
+                    { title: 'Sign Agreement', value: data.agreement_rate },
+                    { title: 'Average Error', value: data.avg_error },
+                    { title: 'Relative Error', value: data.avg_rel_error }
+
                 ];
                 
                 metrics.forEach(metric => {
