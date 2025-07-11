@@ -22,6 +22,7 @@ sentences = [
     "exceptionally good food and fast delivery",
     "brilliant chef and delightful menu options",
     "terrific value and enjoyable atmosphere",
+    "good value and fine atmosphere",
     
     # Clearly negative reviews with distinctive words
     "terrible pizza and stale ingredients",
@@ -41,7 +42,7 @@ sentences = [
 ]
 
 # Sentiment labels: 1 for positive, 0 for negative
-labels = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+labels = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 # Step 1: Vectorize the sentences with simpler parameters
 vectorizer = CountVectorizer(max_features=100, min_df=1)  # Limit features for easier theft

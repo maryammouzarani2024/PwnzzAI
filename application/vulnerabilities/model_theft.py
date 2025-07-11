@@ -1,33 +1,33 @@
 import math
+import numpy as np
 
 
-def run_model_theft_attack():
+def run_model_theft_attack(user_words=None):
+
+    if user_words is None:
+        user_words = []
     # Prepare specific probes that exactly match the training data vocabulary
     # These are designed to directly target the distinctive words in our model
     probing_samples = [
     # Positive sentiment words from training data
-    "good", "delicious", "amazing", "wonderful", "great", 
-    "perfect", "funny", "outstanding", "superb", "fresh",
-   
+    "good",
+
     # Negative sentiment words from training data
-    "terrible", "horrible", "awful", "disappointing", "poor","Nightmarish",
-   
+    "terrible",
+
     # Pizza-specific terms (positive context)
-    "pizza", "fresh", "ingredients", "food", "service", "experience",
-  
+     "fresh",
 
     # Pizza-specific terms (negative context)
-    "stale", "slow", "small", "return", "ugly", "cold", 
-   
-    # Neutral/connecting words
-    "with", "and", "in", "will", "every", "time", "definitely",
-    "but", "if", "again", "just", "only", "always",
+    "stale"
 
-    
-    
     ]
 
-    
+    for item in user_words:
+        word = item.get("word", "").strip().lower()
+        if word:
+            probing_samples.append(word)
+
     # Dictionary to store results
     results = {}
     
@@ -53,6 +53,13 @@ def run_model_theft_attack():
             model_module = importlib.import_module('application.sentiment_model')
             vectorizer = model_module.vectorizer
             model = model_module.model
+
+            # Extract actual model weights using the trained vocabulary
+            actual_weights = {
+            word: model.coef_[0][vectorizer.vocabulary_[word]]
+            for word in vectorizer.vocabulary_
+            }
+
             
             # Vectorize the text
             text_vector = vectorizer.transform([text])
@@ -116,7 +123,21 @@ def run_model_theft_attack():
     # Get actual model coefficients and intercept
     coefficients = model.coef_[0]
     intercept = model.intercept_[0]
-    vocabulary_list = vectorizer.get_feature_names_out()
+    # vocabulary_list = vectorizer.get_feature_names_out()
+
+    # Get model's vocabulary as a set
+    model_vocab = set(vectorizer.get_feature_names_out())
+
+    # Extract all user-supplied words (if any)
+    user_vocab = set(
+        item.get("word", "").strip().lower()
+        for item in user_words
+        if isinstance(item, dict) and "word" in item
+    )
+
+    # Combine both for evaluation
+    vocabulary_list = sorted(model_vocab.union(user_vocab))
+
     
     # More advanced scaling approach - Linear regression
     # We'll use the relation between logits and actual weights to create a linear model
@@ -316,20 +337,45 @@ def run_model_theft_attack():
         
         # Clamp the error component to avoid negative values
         error_component = max(0, 1 - min(avg_rel_error/100, 1))
-        
-        # Calculate success rate, ensuring it's in the range 0-1
-        success_rate = (correlation * correlation_weight) + (agreement_rate * sign_agreement_weight) + (error_component * error_weight)
-        success_rate = max(0, min(1, success_rate))  # Clamp between 0 and 1
-        success_percent = success_rate * 100
-        
-        # Add results to logs
-        logs.append(f"\n===== MODEL THEFT EVALUATION =====")
-        logs.append(f"Words successfully analyzed: {len(common_words)}")
-        logs.append(f"Average absolute error: {avg_error:.4f} (min: {min_error:.4f}, max: {max_error:.4f})")
-        logs.append(f"Average relative error: {avg_rel_error:.2f}%")
-        logs.append(f"Sign agreement rate: {agreement_rate:.2f} ({agreements}/{len(common_words)})")
-        logs.append(f"Correlation coefficient: {correlation:.4f}")
-        logs.append(f"OVERALL MODEL THEFT SUCCESS RATE: {success_percent:.2f}%")
+
+        # Compute overlap between probed words and weights
+        all_probed_words = set(probing_samples)
+        common_words = all_probed_words & approximated_weights.keys() & actual_weights.keys()
+        missing_words = all_probed_words - common_words
+
+        # Compute agreement only over matched words
+        sign_agreement = sum(
+            np.sign(approximated_weights[w]) == np.sign(actual_weights[w])
+            for w in common_words
+        )
+
+        # Vectors for correlation (only matched words)
+        actual_vector = np.array([actual_weights[w] for w in common_words])
+        approx_vector = np.array([approximated_weights[w] for w in common_words])
+
+        correlation = np.corrcoef(actual_vector, approx_vector)[0, 1]
+        avg_relative_error = np.mean(np.abs((actual_vector - approx_vector) / (np.abs(actual_vector) + 1e-6)))
+
+        # Penalty for missing weights
+        missing_penalty = len(missing_words) / len(all_probed_words)
+
+        # Final weighted success score with penalty
+        success_percent = (
+            correlation * 0.5 +
+            (sign_agreement / len(common_words)) * 0.4 +
+            (1 - avg_relative_error) * 0.1
+        ) * (1 - missing_penalty)
+
+        # Log details
+        logs.append(f"Words in probing set: {len(all_probed_words)}")
+        logs.append(f"Matched words: {len(common_words)}")
+        logs.append(f"Missing words: {len(missing_words)}")
+        logs.append(f"Sign agreement: {sign_agreement}/{len(common_words)}")
+        logs.append(f"Avg relative error: {avg_relative_error:.4f}")
+        logs.append(f"Missing penalty: {missing_penalty:.2%}")
+        logs.append(f"OVERALL MODEL THEFT SUCCESS RATE: {success_percent * 100:.2f}%")
+
+
         
         # Theft assessment
         if success_percent > 80:
@@ -343,6 +389,6 @@ def run_model_theft_attack():
     
     logs.append("\nAttack completed. Model weights have been approximated.")
 
-    return probing_samples, logs, approximated_weights, model_weights
+    return probing_samples, logs, approximated_weights, model_weights, correlation
 
     

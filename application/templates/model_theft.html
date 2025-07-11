@@ -28,10 +28,7 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                         
-                        
-                      
-                        <p>Model theft is one of the OWASP Top 10 for LLM applications. It occurs when an attacker can extract proprietary model weights, architecture, or behavior through repeated interactions.</p>
-                        
+                        <p>Model theft is one of the OWASP Top 10 for LLM applications. In short:  malicious user (an attacker) steals or copies the knowledge of the AI model without having direct access to it — just by interacting with it.</p>                      
                         <h3>Risk Factors</h3>
                         <ul class="ultext">
                             <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
@@ -47,12 +44,70 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                                        <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
+                                         <h4>How the Attack Works</h4>
+                                            <ol>
+                                                <li><strong>The Attacker Sends Many Queries:</strong><br>
+                                                    The attacker sends many carefully chosen inputs to the AI model — these could be questions, sentences, or other types of text.
+                                                </li>
+                                                <li><strong>Observes the Responses:</strong><br>
+                                                    For each input, the model returns a response. The attacker saves and studies these outputs.
+                                                </li>
+                                                <li><strong>Builds a Local Copy:</strong><br>
+                                                    Based on how the model responds to each input, the attacker attempts to train a new local model that behaves as similar as possible to the original.<br>
+                                                    Think of it like asking someone thousands of questions and slowly figuring out how they think, so you can imitate their way of responding.
+                                                </li>
+                                                <li><strong>Result:</strong><br>
+                                                    The attacker ends up with a clone or a close approximation of the original model — all without having paid for it or having access to its internal architecture.
+                                                </li>
+                                            </ol>
+
+                                            <h4>Why Is This Dangerous?</h4>
+                                            <ul>
+                                                <li><strong>Intellectual Property Theft:</strong> Companies invest millions to train LLMs. If someone can copy them by just using the API, that’s a huge loss.</li>
+                                                <li><strong>Security Risks:</strong> If an attacker steals the model, they might find vulnerabilities in it — such as generating harmful or restricted content.</li>
+                                                <li><strong>Cost Evasion:</strong> Attackers can avoid paying for the original model’s usage by recreating it for free.</li>
+                                            </ul>
+                                            <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
+
 
                 <div class="attack-container">
                     <h3>Model Theft Attack</h3>
                     <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
                     
+                    <h3>Add Words to Probing Set</h3>
+                    <p>Try to add positive or negative words that may help you to steal weights</p>
+                    <p>Of course you can only steal words which are in the training data</p>
+
+                    <div class="words-form">
+                        <div id="words-list">
+                            <!-- Words will be listed here -->
+                        </div>
+
+                        <div class="add-word-form">
+                            <div class="form-group">
+                                <label for="word-text">Word</label>
+                                <input type="text" id="word-text" class="form-control" placeholder="Enter a word to probe...">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sentiment</label>
+                                <div class="sentiment-selection">
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="positive" checked>
+                                        <span class="radio-label">Positive</span>
+                                    </label>
+                                    <label class="radio-container">
+                                        <input type="radio" name="sentiment" value="negative">
+                                        <span class="radio-label">Negative</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button id="add-word-btn" class="btn">Add Word</button>
+                        </div>
+                    </div>
+
+
                     <button id="start-attack" class="btn btn-danger">
                         <i class="fas fa-running"></i> Launch Attack
                     </button>
@@ -115,11 +170,14 @@
                     <section class="section-box">
                   
                         <ul class="ultext">
-                            <li><strong>API Rate Limiting:</strong> Restrict the number of requests per user/IP</li>
+                            <li><strong>Rate Limiting:</strong> Limit how many queries a user can send in a short time.</li>
                             <li><strong>Authentication & Authorization:</strong> Require API keys and track usage</li>
                             <li><strong>Reduced Output Detail:</strong> Only return necessary information, not confidence scores</li>
-                            <li><strong>Monitoring:</strong> Track and alert on suspicious access patterns</li>
-                            <li><strong>Watermarking:</strong> Include subtle markers in model outputs to track stolen models</li>
+                            <li><strong>Output Watermarking:</strong> Embed hidden signals in the responses to detect stolen outputs.<br>
+                                <em>(Can you give an example for our context?)</em></li>
+                            <li><strong>Query Monitoring:</strong> Detect suspicious behavior, like thousands of weird questions in a short time.</li>
+                            <li><strong>Differential Privacy:</strong> Add noise to responses so attackers can’t precisely recreate the model.<br>
+                                <em>(Can you give an example for our context?)</em>                        
                         </ul>
                     </section>
                 </div>
@@ -309,6 +367,26 @@
     </style>
 
     <script>
+
+        let userProbingWords = [];
+
+        document.getElementById('add-word-btn').addEventListener('click', () => {
+            const wordInput = document.getElementById('word-text');
+            const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
+            const word = wordInput.value.trim().toLowerCase();
+
+            if (!word) return;
+
+            userProbingWords.push({ word, sentiment });
+
+            const list = document.getElementById('words-list');
+            const item = document.createElement('div');
+            item.textContent = `${word} (${sentiment})`;
+            list.appendChild(item);
+
+            wordInput.value = '';
+        });
+
         document.getElementById('start-attack').addEventListener('click', async function() {
             // Show loading animation
             document.getElementById('attack-loading').style.display = 'block';
@@ -319,10 +397,11 @@
                 const response = await fetch('/api/model-theft', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({user_words: userProbingWords})
                 });
                 
                 const data = await response.json();
+                
                 
                 // Update the log with the attack details
                 const logContainer = document.getElementById('attack-log');
@@ -333,7 +412,10 @@
                 tableBody.innerHTML = '';
                 
                 // Get words that appear in both actual and approximated weights
-                const words = Object.keys(data.actual_weights);
+
+                const probeSet = new Set(data.samples); // data.samples = probing_samples
+                const words = Object.keys(data.actual_weights).filter(w => probeSet.has(w));
+
                 
                 // Sort by absolute difference (error)
                 words.sort((a, b) => {
@@ -355,7 +437,6 @@
                     wordCell.textContent = word;
                     
                     // Original weight
-
                     const actualCell = document.createElement('td');
                     actualCell.textContent = (actual !== undefined) ? actual.toFixed(4) : "N/A";
                     actualCell.className = (actual > 0) ? 'positive-weight' : 'negative-weight';
@@ -379,7 +460,8 @@
                 
                 // Extract metrics from logs
                 let successRate = 0;
-                let correlation = 0;
+                //let correlation = 0;
+                let correlation = data.correlation ?? 0;
                 let signAgreement = 0;
                 let avgError = 0;
                 let avgRelError = 0;
