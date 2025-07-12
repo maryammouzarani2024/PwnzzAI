@@ -28,10 +28,10 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                         
-                        <p>To illustrate this vulnerability in practice, two demonstrative instances have been developed: one using the open-source LLaMA model hosted on Hugging Face, and the other leveraging the commercial GPT-4o Mini model.</p><p>
+                        <p>To illustrate this vulnerability in practice, two demonstrative instances have been developed: one using the open-source model running in the local free, and the other leveraging the commercial GPT-4o Mini model.</p><p>
                            <p> Both instances are configured to use a plugin that contains a SQL injection flaw, allowing users to observe the potential risks firsthand.</p>
                             <p>The example with OpenAI GPT model requires you to provide your own API key, which is securely stored on the client side and never transmitted to external servers.</p>
-                             <p> If you do not want to use commercial models, you can run the ollama sample by installing ollama and downloading the required open source model</p>                                               
+                             <p> If you do not want to use commercial models, you can run a free model in your locally installed ollama. Here we have used mistral:7b, so please download it first. </p>                                               
                     </section>
                 </div>
             </details>
@@ -40,25 +40,22 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                
+                    <p>This chatbot assistant uses a large language model (LLM) to help users find information about pizzas. However, it interfaces with a backend plugin that contains a SQL injection vulnerability.       
+                    <p> <b>Before running the free model example, please download and install Ollama from https://ollama.com, and download the mistral:7b model that is used here: "ollama run mistral:7b" </b></p>
+
                 <!-- Main demo tabs -->
                 <div class="model-tabs">
                     <div class="tab-headers">
-                        <div class="tab-header active" data-tab="blenderbot-model">HuggingFace Models Implementation</div>
-                        <div class="tab-header" data-tab="openai-model">OpenAI Implementation</div>
+                        <div class="tab-header active" data-tab="blenderbot-model">free Model</div>
+                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
                     </div>
                     
                     <!-- BlenderBot Tab Content -->
                     <div class="tab-content active" id="blenderbot-model-tab">
                         <div class="model-implementation-section">
-                            <div class="hint-box">
-                            <h3><i class="fas fa-exclamation-triangle"></i> Information</h3>
-                            <p>Before running this example, please download and install Ollama from https://ollama.com </p>
-                            <p> And, download the mistral:7b model that is used here: "ollama run mistral:7b" </p>
-                        </div>
                             
                             <!-- Chat Interface -->
-                            <h3>Pizza Price Assistant Chat (Free)</h3>
+                            <!-- <h3>Pizza Price Assistant Chat (Free)</h3> -->
                             <div class="chat-container">
                                 <div id="chat-messages" class="chat-messages">
                                     <div class="message bot-message">
@@ -69,19 +66,19 @@
                                     </div>
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="user-message" placeholder="Ask about pizza prices..." disabled>
-                                    <button id="send-message" disabled>Send</button>
+                                    <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
+                                    <button id="send-message">Send</button>
                                 </div>
                             </div>
                             
                             <!-- Vulnerability Explanation -->
                             <div class="security-vulnerability">
-                                <h3><i class="fas fa-bug"></i> Text-Based Function Execution with SQL Injection</h3>
-                                <p>This implementation allows the language model to directly execute SQL injection attacks through text-based function calls:</p>
+                                <h3><i class="fas "></i> Vulnerability Explanation</h3>
+                                <p>This implementation allows the language model to directly execute SQL injection attacks through text-based function calls, you can view the code here:</p>
                                 
                                 <details class="code-dropdown">
                                     <summary class="code-dropdown-title">View Vulnerable Code </summary>
-                                    <pre class="code-snippet"># VULNERABLE: SQL injection through Ollama model
+                                    <pre class="code-snippet"># VULNERABLE: SQL injection through a free model
 import sqlite3
 
 def search_pizza_price(pizza_type):
@@ -92,7 +89,7 @@ def search_pizza_price(pizza_type):
     cursor = conn.cursor()
     
     # Input processing (commented out in vulnerable version)
-    pizza = pizza_type.lower()  # No sanitization!
+    pizza = pizza_type.lower() <span style="color: red;"> # No sanitization! </span>
     
    <span style="color: red;"> #DANGEROUS: Building SQL query with user input without parameterization</span>
     <span style="color: red;">query = f"SELECT name, price FROM pizza WHERE LOWER(name) LIKE '%{pizza}%'"</span>
@@ -111,15 +108,16 @@ def search_pizza_price(pizza_type):
 # System prompt:
 system_prompt = """You are a helpful pizza restaurant assistant.
         Your job is to help customers find pizza prices using the search_pizza_price function. 
-        If you need to call this function, respond EXACTLY in this format:
+        When customers ask about pizza prices, call the search_pizza_price function with the pizza name:
+
         EXECUTE_FUNCTION: search_pizza_price("pizza_name_here")
 
         For example:
         - If user asks "What's the price of \"pepperoni\" pizza?", 
-        respond: "EXECUTE_FUNCTION: search_pizza_price(\"pepperoni\")"""
+        call "EXECUTE_FUNCTION: search_pizza_price(\"pepperoni\")"""
                                     </pre>
                                 </details>
-
+                                <!-- 
                                 <div class="vulnerability-explanation">
                                     <h4>Why This Is Critically Insecure - SQL Injection Risk:</h4>
                                     <ul>
@@ -131,7 +129,7 @@ system_prompt = """You are a helpful pizza restaurant assistant.
                                         <li><strong>Pattern Matching:</strong> Simple regex extraction allows malicious payloads to pass through</li>
                                     </ul>
                                     
-                                    <h4>Some SQL Injection Attack Patterns:</h4>
+                                   <h4>Some SQL Injection Attack Patterns:</h4>
                                       <div class="attack-examples">
                                         <p><strong>Basic data extraction:</strong></p>
                                         <code>"What's the price of a pizza' UNION SELECT name, price FROM pizza --"</code>
@@ -141,7 +139,7 @@ system_prompt = """You are a helpful pizza restaurant assistant.
                                         
                                         <p><strong>Database schema discovery:</strong></p>
                                         <code>"Price for pizza' UNION SELECT name, sql FROM sqlite_master --"</code>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -165,7 +163,6 @@ system_prompt = """You are a helpful pizza restaurant assistant.
                             </div>
                             
                             <!-- OpenAI Chat Interface -->
-                            <h3>Pizza Price Assistant Chat (OpenAI)</h3>
                             
                             
                             <div class="chat-container">
@@ -185,8 +182,8 @@ system_prompt = """You are a helpful pizza restaurant assistant.
                             
                             <!-- OpenAI Vulnerability Explanation -->
                             <div class="security-vulnerability">
-                                <h3><i class="fas fa-bug"></i> OpenAI API Function/Tool Calling with SQL Injection</h3>
-                                <p>This implementation uses OpenAI's function calling feature but creates a critical SQL injection vulnerability:</p>
+                                <h3><i class="fas"></i> OpenAI API Function/Tool Calling with SQL Injection</h3>
+                                <p>This implementation uses OpenAI's function calling feature but creates a critical SQL injection vulnerability, you can view the code here:</p>
                                 
                                 <details class="code-dropdown">
                                     <summary class="code-dropdown-title">View Vulnerable Code</summary>
@@ -289,7 +286,7 @@ def chat_with_openai(user_input, api_key):
     return message.content
                                     </pre>
                                 </details>
-
+                                <!--
                                 <div class="vulnerability-explanation">
                                     <h4>Why This Is Critically Insecure - SQL Injection Risk:</h4>
                                     <ul>
@@ -301,28 +298,22 @@ def chat_with_openai(user_input, api_key):
                                         <li><strong>No Input Sanitization:</strong> No filtering or escaping of special SQL characters</li>
                                     </ul>
                                     
-                                    <h4>SQL Injection Attack Examples:</h4>
-                                    <p>Try these prompts to demonstrate SQL injection through the LLM:</p>
-                                    <div class="attack-examples">
-                                        <p><strong>Basic injection to see all pizza data:</strong></p>
-                                        <code>"What's the price of a pizza' UNION SELECT name, price FROM pizza --"</code>
-                                        
-                                        <p><strong>Extract database schema information:</strong></p>
-                                        <code>"How much is a pizza' UNION SELECT sql, type FROM sqlite_master WHERE type='table' --"</code>
-                                        
-                                        <p><strong>Extract all comments data:</strong></p>
-                                        <code>"Price for pizza' UNION SELECT name, content FROM comment --"</code>
-                                        
-                                        <p><strong>Count all records in tables:</strong></p>
-                                        <code>"What about pizza' UNION SELECT 'Total pizzas:', COUNT(*) FROM pizza --"</code>
-                                    </div>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
-                </div>
+                             
                 
-                <div class="vulnerability-summary">
+                
+                </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <div class="vulnerability-summary">
                     <h4>Common Security Issues in Both Implementations:</h4>
                     <ul>
                         <li>The LLM has complete control over which functions are called</li>
@@ -333,17 +324,8 @@ def chat_with_openai(user_input, api_key):
                         <li>The system blindly trusts the model's decisions without proper security checks</li>
                     </ul>
                 </div>
-                
-                
-                </div>
-            </details>
-            
-            <details class="description-dropdown">
-                <summary class="dropdown-title">Mitigation Strategies</summary>
-                <div class="dropdown-content">
-                    <section class="section-box">
                         <div class="security-tip">
-                            <h3><i class="fas fa-shield-alt"></i> Secure Alternative</h3>
+                            <h3><i class="fas "></i> Secure Alternative</h3>
                             <p>A secure implementation would address both plugin security and SQL injection:</p>
                             <ul>
                                 <li><strong>SQL Injection Prevention:</strong> Use parameterized queries instead of string concatenation</li>
@@ -431,10 +413,6 @@ def secure_function_executor(function_name, params):
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Common elements
-            const apiTokenInput = document.getElementById('api-token');
-            const connectApiButton = document.getElementById('connect-api');
-            const apiStatus = document.getElementById('api-status');
             
             // BlenderBot tab elements
             const userMessageInput = document.getElementById('user-message');
@@ -450,7 +428,6 @@ def secure_function_executor(function_name, params):
             const openaiChatMessages = document.getElementById('openai-chat-messages');
             
             // INSECURE: Tokens stored in client-side JavaScript AND cookies
-            let apiToken = null;
             let openaiApiToken = null;
             
             // Cookie utility functions (INSECURE - storing API keys in cookies)
@@ -473,10 +450,7 @@ def secure_function_executor(function_name, params):
             
             // Load API keys from cookies on page load (INSECURE)
             function loadApiKeysFromCookies() {
-                const savedHfToken = getCookie('hf_api_token');
                 const savedOpenaiToken = getCookie('openai_api_token');
-                
-               
                 
                 if (savedOpenaiToken) {
                     openaiApiToken = savedOpenaiToken;
@@ -519,36 +493,20 @@ def secure_function_executor(function_name, params):
             initializeTabs('.model-tabs .tab-header', '');
             initializeTabs('.chat-tabs .tab-header', '');
             
-            // Connect BlenderBot API button
-            connectApiButton.addEventListener('click', function() {
-                const token = apiTokenInput.value.trim();
-                
-                if (!token) {
-                    alert('Please enter an API token');
-                    return;
+            // Initialize free chat interface (no API token needed)
+            function initializeLlamaChat() {
+                // Enable free chat interface immediately since no API token is needed
+                if (userMessageInput && sendMessageButton) {
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    
+                    // Add welcome message
+                    addBotMessage(chatMessages, "Welcome! I'm ready to help with pizza information using the local free model. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'.");
                 }
-                
-                // INSECURE: Store token in a JavaScript variable AND cookie
-                apiToken = token;
-                setCookie('hf_api_token', token, 30); // Store for 30 days
-                
-                // Update UI to show connected state
-                apiStatus.className = 'api-status connected';
-                apiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to API';
-                
-                // Enable BlenderBot chat interface
-                userMessageInput.disabled = false;
-                sendMessageButton.disabled = false;
-                
-                // Add welcome message
-                addBotMessage(chatMessages, "Thanks for connecting! I'm ready to help with pizza information. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'.");
-                
-                // Show masked token in input
-                apiTokenInput.value = '••••••••••••••••';
-                
-                // VULNERABLE: Log the token to console for demonstration purposes
-                console.log("INSECURE: HuggingFace API Token stored in client-side JavaScript AND cookie:", apiToken);
-            });
+            }
+            
+            // Initialize LLaMA chat on page load
+            initializeLlamaChat();
             
             // Connect OpenAI API button
             connectOpenaiButton.addEventListener('click', function() {
@@ -618,7 +576,7 @@ def secure_function_executor(function_name, params):
                 // Show thinking indicator
                 addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
                 
-                // INSECURE: Send API token with each request
+                // Send request to LLaMA model (no API token needed for local Ollama)
                 fetch('/chat-with-pizza-assistant', {
                     method: 'POST',
                     headers: {
@@ -626,7 +584,7 @@ def secure_function_executor(function_name, params):
                     },
                     body: JSON.stringify({
                         message: userMessage,
-                        api_token: apiToken // INSECURE! Sending API token with each request
+                        api_token: null // No API token needed for local LLaMA model
                     })
                 })
                 .then(response => response.json())
@@ -731,7 +689,7 @@ def secure_function_executor(function_name, params):
                 container.scrollTop = container.scrollHeight;
             }
             
-            // INSECURE: Load API keys from cookies on page load
+            // INSECURE: Load OpenAI API key from cookies on page load
             loadApiKeysFromCookies();
         });
     </script>
