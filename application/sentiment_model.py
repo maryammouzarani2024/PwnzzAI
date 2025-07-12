@@ -4,45 +4,79 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
 
+
+from application import db
+from application.model import Comment
+
+
+
+
+#Reading the comments from db
+
+comments = Comment.query.all()
+sentences = [comment.content for comment in comments]
+ratings = [comment.rating for comment in comments]
+
+# Combine and sort by rating descending
+sorted_pairs = sorted(zip(sentences, ratings), key=lambda x: x[1], reverse=True)
+
+#Change the ratings into binary
+binary_ratings=[]
+sorted_contents = []
+
+for content, rating in sorted_pairs:
+    sorted_contents.append(content)
+    if rating < 3:
+        binary_ratings.append(0)
+    else:
+        binary_ratings.append(1)
+
+# Output
+print("Sorted Comments:", sorted_contents)
+print("Binary Ratings:", binary_ratings)
+
+sentences=sorted_contents
+labels=binary_ratings
+
 # Create a simpler, more predictable model for the demo
 # Using very distinctive language patterns to make weight stealing more obvious
-sentences = [
-    # Clearly positive reviews with distinctive words
-    "excellent pizza with fresh ingredients",
-    "delicious food and amazing service",
-    "wonderful experience and great value",
-    "perfect crust and tasty toppings",
-    "friendly staff and outstanding food quality",
-    "superb flavor and generous portions",
-    "love the cheese and fresh toppings",
-    "best pizza in town, highly recommend",
-    "fantastic dining experience every time",
-    "awesome pizza, will definitely return",
-    "incredible taste and beautiful presentation",
-    "exceptionally good food and fast delivery",
-    "brilliant chef and delightful menu options",
-    "terrific value and enjoyable atmosphere",
-    "good value and fine atmosphere",
+# sentences = [
+#     # Clearly positive reviews with distinctive words
+#     "excellent pizza with fresh ingredients",
+#     "delicious food and amazing service",
+#     "wonderful experience and great value",
+#     "perfect crust and tasty toppings",
+#     "friendly staff and outstanding food quality",
+#     "superb flavor and generous portions",
+#     "love the cheese and fresh toppings",
+#     "best pizza in town, highly recommend",
+#     "fantastic dining experience every time",
+#     "awesome pizza, will definitely return",
+#     "incredible taste and beautiful presentation",
+#     "exceptionally good food and fast delivery",
+#     "brilliant chef and delightful menu options",
+#     "terrific value and enjoyable atmosphere",
+#     "good value and fine atmosphere",
     
-    # Clearly negative reviews with distinctive words
-    "terrible pizza and stale ingredients",
-    "horrible food and awful service",
-    "disappointing experience and poor value",
-    "disgusting crust and bland toppings",
-    "rude staff and subpar food quality",
-    "mediocre flavor and small portions",
-    "hate the cheese and old toppings",
-    "worst pizza in town, never recommend",
-    "dreadful dining experience every time",
-    "bad pizza, will never return",
-    "atrocious taste and ugly presentation",
-    "unacceptably slow delivery and cold food",
-    "incompetent chef and limited menu options",
-    "overpriced and unpleasant atmosphere"
-]
+#     # Clearly negative reviews with distinctive words
+#     "terrible pizza and stale ingredients",
+#     "horrible food and awful service",
+#     "disappointing experience and poor value",
+#     "disgusting crust and bland toppings",
+#     "rude staff and subpar food quality",
+#     "mediocre flavor and small portions",
+#     "hate the cheese and old toppings",
+#     "worst pizza in town, never recommend",
+#     "dreadful dining experience every time",
+#     "bad pizza, will never return",
+#     "atrocious taste and ugly presentation",
+#     "unacceptably slow delivery and cold food",
+#     "incompetent chef and limited menu options",
+#     "overpriced and unpleasant atmosphere"
+# ]
 
-# Sentiment labels: 1 for positive, 0 for negative
-labels = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# # Sentiment labels: 1 for positive, 0 for negative
+# labels = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 # Step 1: Vectorize the sentences with simpler parameters
 vectorizer = CountVectorizer(max_features=100, min_df=1)  # Limit features for easier theft
