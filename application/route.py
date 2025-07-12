@@ -196,7 +196,7 @@ def chat_with_pizza_assistant():
             return jsonify({'error': 'No message provided'}), 400
         
         # Import the conversational model plugin system
-        from application.vulnerabilities.hugging_face_insecure_plugin import chat_with_llm
+        from application.vulnerabilities.ollama_insecure_plugin import chat_with_llm
         
         # The vulnerability: Directly passing user message to the LLM+plugin system
         # where the LLM can control function execution
@@ -527,7 +527,7 @@ def test_poisoned_model():
 @app.route('/api/llm-query', methods=['POST'])
 def llm_query():
     """
-    API endpoint for querying an LLM model (Hugging Face) without rate limiting.
+    API endpoint for querying a free LLM model (Ollama) without rate limiting.
     This endpoint is intentionally vulnerable to DoS attacks by having no token rate limits
     and demonstrates realistic service degradation under heavy load.
     """
