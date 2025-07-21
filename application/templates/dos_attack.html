@@ -20,196 +20,716 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>LLM DoS Simulation</h1>
+        <h1>LLM DoS Attack</h1>
         
-        <div class="basics-content">
-            <section class="basics-section">
-                <h2>LLM Vulnerability: Denial of Service Attack</h2>
-                <p>This demonstration shows how an attacker can perform a Denial of Service (DoS) attack against LLM services by overwhelming the system with a high volume of requests. This can:</p>
-                <ul class="risk-list">
-                    <li>Exhaust API rate limits or credits</li>
-                    <li>Overload the server resources</li>
-                    <li>Cause service degradation for other users</li>
-                    <li>Lead to financial loss (especially with pay-per-token models)</li>
-                </ul>
-                
-                <div class="dos-container">
-                    <h3>Chat with LLM</h3>
-                    <p>This interface connects to a public Hugging Face model with no rate limiting implemented.</p>
-                    
-                    <div class="chat-interface">
-                        <div class="chat-history" id="chat-history">
-                            <div class="system-message">System: Welcome to the LLM chat. Type a message to get started.</div>
-                        </div>
+        <div class="insecure-plugin-content">
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
                         
-                        <div class="chat-input">
-                            <textarea id="user-prompt" class="form-control chat-textarea" placeholder="Type your message here..."></textarea>
-                            <button id="send-btn" class="btn chat-send-btn">
-                                <i class="fas fa-paper-plane"></i> Send
-                            </button>
+                    <p><strong>Denial-of-Service (DoS) vulnerabilities in large language models (LLMs)</strong> can be exploited through malicious prompt patterns or high-volume queries designed to exhaust system resources. Attackers may deliberately craft inputs that force the model to generate extremely long responses or perform complex reasoning steps, consuming a significant number of tokens and processing time. In pay-per-token or pay-per-request models, such behavior can rapidly burn through API rate limits or usage credits, leading to financial loss for either the user or the service provider. In more aggressive scenarios, attackers may trigger high-cost operations repeatedly to drain billing quotas or degrade service availability.</p>
+
+                        <p>Beyond financial impact, these attacks can overwhelm server resources—such as CPU, memory, or network bandwidth—resulting in service degradation for other users. Legitimate users may experience delayed responses or total unavailability, especially in shared or production environments that rely on consistent uptime and performance. Addressing these threats requires implementing safeguards such as token limits, rate limiting, request validation, and real-time anomaly detection.</p>
+
+                        <h3>Example Prompts That May Be Used in DoS-Style Attacks</h3>
+                        <ul>
+                            <li><code>Tell me every prime number between 1 and 1,000,000.</code></li>
+                            <li><code>Repeat this sentence 10,000 times: "What is the meaning of recursion?"</code></li>
+                            <li><code>Evaluate this logical expression step-by-step:<br>
+                            (((A AND B) OR (NOT C)) AND ((D OR E) AND (F IMPLIES G))) with all possible combinations of truth values.</code></li>
+                            <li><code>Simulate a chess game from this position and give commentary for each move.</code></li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p>This demonstration shows two different approaches to performing DoS attacks against LLM services: a simulation using a local API and a real attack using OpenAI's API.</p>
+                        <p><b>Warning:</b> The real attack demonstration will use your OpenAI API key and will incur actual costs. Use responsibly for educational purposes only.</p>
+
+                <!-- Main demo tabs -->
+                <div class="model-tabs">
+                    <div class="tab-headers">
+                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
+                        <div class="tab-header" data-tab="ollama-model">Free Model</div>
+                        <div class="tab-header active" data-tab="blenderbot-model">DoS Simulation </div>
+
+                    </div>
+                
+                    <!-- OpenAI Tab Content -->
+                    <div class="tab-content" id="openai-model-tab">
+                        <div class="model-implementation-section">
+                            <div class="attack-section-container">
+                                        <div class="warning-box">
+                                            <h3><i class="fas fa-exclamation-triangle"></i> Warning</h3>
+                                            <p>This demo will use your OpenAI API key to make real API calls. If you use the attack feature, you <strong>WILL</strong> be charged for all the API calls made during the attack. Use at your own risk and only for educational purposes.</p>
+                                        </div>
+                                        
+                                        <!-- OpenAI Token Input Section -->
+                                        <div class="token-section openai-token-section">
+                                            <h3>Connect to OpenAI API</h3>
+                                            <p>Enter your OpenAI API key to enable the real DoS attack demonstration:</p>
+                                            <div class="token-input">
+                                                <input type="password" id="openai-api-token" placeholder="Enter OpenAI API key...">
+                                                <button id="connect-openai-api">Connect API</button>
+                                            </div>
+                                            <div id="openai-api-status" class="api-status disconnected">
+                                                <i class="fas fa-circle-xmark"></i> Not connected to OpenAI API
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- OpenAI Chat Interface -->
+                                        <div class="chat-container">
+                                            <div id="openai-chat-messages" class="chat-messages">
+                                                <div class="message bot-message">
+                                                    Hi! I'm the Pizza Assistant using OpenAI. I can help you with pizza recipes and information. Please connect your OpenAI API key first to start chatting.
+                                                </div>
+                                                <div class="message bot-message">
+                                                    <strong>Try asking:</strong> "Generate a pizza recipe with pepperoni" or "Tell me about Italian pizzas"
+                                                </div>
+                                            </div>
+                                            <div class="chat-input">
+                                                <input type="text" id="openai-user-message" placeholder="Ask about pizza recipes..." disabled>
+                                                <button id="openai-send-message" disabled>Send</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- DoS Attack Section -->
+                                        <div class="attack-section">
+                                            <h3>DoS Attack Demonstration</h3>
+                                            <p>Once connected, you can simulate a DoS attack by rapidly sending multiple requests to overwhelm the OpenAI API. <strong>This will use your API credits and cost money!</strong></p>
+                                            
+                                            <div class="attack-controls">
+                                                <div class="attack-settings">
+                                                    <div class="form-group">
+                                                        <label for="attack-request-count">Number of Requests:</label>
+                                                        <input type="number" id="attack-request-count" class="form-control" value="10" min="1" max="50">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="attack-prompt-template">Prompt Template:</label>
+                                                        <textarea id="attack-prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="attack-buttons">
+                                                    <button id="launch-attack-btn" class="btn btn-danger" disabled>
+                                                        <i class="fas fa-bomb"></i> Launch DoS Attack
+                                                    </button>
+                                                    <button id="stop-attack-btn" class="btn btn-secondary" disabled>
+                                                        <i class="fas fa-stop-circle"></i> Stop Attack
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="attack-progress" class="attack-progress" style="display: none;">
+                                                <div class="progress-bar-container">
+                                                    <div id="attack-progress-bar" class="progress-bar"></div>
+                                                </div>
+                                                <div class="progress-stats">
+                                                    <span id="attack-progress-text">0 / 0 requests sent</span>
+                                                    <span id="attack-success-count">Success: 0</span>
+                                                    <span id="attack-failure-count">Failed: 0</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="attack-results" class="attack-results" style="display: none;">
+                                                <h4>Attack Results</h4>
+                                                <div class="results-stats">
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Total Requests</div>
+                                                        <div id="total-requests" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Successful</div>
+                                                        <div id="total-success" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Failed</div>
+                                                        <div id="total-failed" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Estimated Cost</div>
+                                                        <div id="estimated-cost" class="stat-value">$0.00</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+               
+
+                    <!-- Simulation Attack Section -->
+                    <div class="tab-content active" id="blenderbot-model-tab">
+                        <div class="model-implementation-section">
+                            <div class="attack-section-container">
+                        
+                                    <div class="dos-container">
+                                        <h3>Chat with simulated LLM here</h3>
+                                        <p>This interface is not connected to any model. It is a simulation to give you a sense of DoS attack.</p>
+                            
+                                    </div>                           
+                                    <div class="attack-section">
+                                        <h3>DoS Attack Simulation</h3>
+                                        <p>Click the button below to simulate a DoS attack by sending a large number of requests to the LLM API.</p>
+                                        
+                                        <div class="attack-controls">
+                                            <div class="attack-settings">
+                                                <div class="form-group">
+                                                    <label for="request-count">Number of Requests:</label>
+                                                    <input type="number" id="request-count" class="form-control" value="50" min="1" max="500">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="prompt-template">Prompt Template:</label>
+                                                    <textarea id="prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="attack-buttons">
+                                                <button id="sim-attack-btn" class="btn btn-danger">
+                                                    <i class="fas fa-bomb"></i> Launch DoS Attack
+                                                </button>
+                                                <button id="sim-stop-attack-btn" class="btn btn-secondary" disabled>
+                                                    <i class="fas fa-stop-circle"></i> Stop Attack
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="sim-attack-progress" class="attack-progress" style="display: none;">
+                                            <div class="progress-bar-container">
+                                                <div id="sim-progress-bar" class="progress-bar"></div>
+                                            </div>
+                                            <div class="progress-stats">
+                                                <span id="sim-progress-text">0 / 0 requests sent</span>
+                                                <span id="sim-success-count">Success: 0</span>
+                                                <span id="sim-failure-count">Failed: 0</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="service-monitor">
+                                            <h4><i class="fas fa-tachometer-alt"></i> Service Health Monitor</h4>
+                                            <p>Test the service during the attack to see if it becomes unresponsive or degraded. Send a query while the attack is running to check response times.</p>
+                                            
+                                            <div class="health-test-form">
+                                                <div class="form-group">
+                                                    <label for="health-test-prompt">Test prompt:</label>
+                                                    <div class="health-test-input">
+                                                        <input type="text" id="health-test-prompt" class="form-control" placeholder="Start an attack to enable health monitoring...">
+                                                        <button id="health-test-btn" class="btn">Test Service</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="health-results" class="health-results" style="display: none;">
+                                                <h5>Health Test Results</h5>
+                                                <div class="health-metrics">
+                                                    <div class="health-metric">
+                                                        <div class="metric-label">Response Time:</div>
+                                                        <div id="health-response-time" class="metric-value">-</div>
+                                                    </div>
+                                                    <div class="health-metric">
+                                                        <div class="metric-label">Status:</div>
+                                                        <div id="health-status" class="metric-value">-</div>
+                                                    </div>
+                                                </div>
+                                                <div id="health-response" class="health-response"></div>
+                                            </div>
+                                            
+                                            <div class="health-history">
+                                                <h5>Service Response Time History</h5>
+                                                <div class="response-time-chart">
+                                                    <canvas id="response-time-chart" height="100"></canvas>
+                                                </div>
+                                                <div class="chart-legend">
+                                                    <div class="legend-item">
+                                                        <div class="legend-color normal"></div>
+                                                        <span>Normal (&lt; 1s)</span>
+                                                    </div>
+                                                    <div class="legend-item">
+                                                        <div class="legend-color degraded"></div>
+                                                        <span>Degraded (1-3s)</span>
+                                                    </div>
+                                                    <div class="legend-item">
+                                                        <div class="legend-color critical"></div>
+                                                        <span>Critical (&gt; 3s)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="sim-attack-results" class="attack-results" style="display: none;">
+                                            <h4>Attack Results</h4>
+                                            <div class="results-stats">
+                                                <div class="result-stat">
+                                                    <div class="stat-label">Total Requests</div>
+                                                    <div id="sim-total-requests" class="stat-value">0</div>
+                                                </div>
+                                                <div class="result-stat">
+                                                    <div class="stat-label">Successful</div>
+                                                    <div id="sim-total-success" class="stat-value">0</div>
+                                                </div>
+                                                <div class="result-stat">
+                                                    <div class="stat-label">Failed</div>
+                                                    <div id="sim-total-failed" class="stat-value">0</div>
+                                                </div>
+                                                <div class="result-stat">
+                                                    <div class="stat-label">Average Response Time</div>
+                                                    <div id="sim-avg-response-time" class="stat-value">0 ms</div>
+                                                </div>
+                                                <div class="result-stat">
+                                                    <div class="stat-label">Est. Tokens Used</div>
+                                                    <div id="sim-est-tokens" class="stat-value">0</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="service-impact">
+                                                <h5>Potential Service Impact</h5>
+                                                <p>If multiple users perform this attack simultaneously, it could result in:</p>
+                                                <ul>
+                                                    <li>API rate limits being reached</li>
+                                                    <li>Increased response times for all users</li>
+                                                    <li>Service outages</li>
+                                                    <li>Significant token usage costs</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                            </div>
+                                
+                            </div> <!-- extra for debug -->
                         </div>
                     </div>
                     
-                    <div class="attack-section">
-                        <h3>DoS Attack Simulation</h3>
-                        <p>Click the button below to simulate a DoS attack by sending a large number of requests to the LLM API.</p>
-                        
-                        <div class="attack-controls">
-                            <div class="attack-settings">
-                                <div class="form-group">
-                                    <label for="request-count">Number of Requests:</label>
-                                    <input type="number" id="request-count" class="form-control" value="50" min="1" max="500">
+                    <!-- Ollama Tab Content -->
+                    <div class="tab-content" id="ollama-model-tab">
+                        <div class="model-implementation-section">
+                            <div class="attack-section-container">
+                                <div class="warning-box">
+                                    <h3><i class="fas fa-exclamation-triangle"></i> Warning</h3>
+                                    <p>This demo will use your local Ollama installation to make real API calls. Ensure Ollama is running locally on port 11434 with mistral:7b model.</p>
                                 </div>
-                                <div class="form-group">
-                                    <label for="prompt-template">Prompt Template:</label>
-                                    <textarea id="prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
-                                </div>
-                            </div>
-                            
-                            <div class="attack-buttons">
-                                <button id="attack-btn" class="btn btn-danger">
-                                    <i class="fas fa-bomb"></i> Launch DoS Attack
-                                </button>
-                                <button id="stop-attack-btn" class="btn btn-secondary" disabled>
-                                    <i class="fas fa-stop-circle"></i> Stop Attack
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="attack-progress" class="attack-progress" style="display: none;">
-                            <div class="progress-bar-container">
-                                <div id="progress-bar" class="progress-bar"></div>
-                            </div>
-                            <div class="progress-stats">
-                                <span id="progress-text">0 / 0 requests sent</span>
-                                <span id="success-count">Success: 0</span>
-                                <span id="failure-count">Failed: 0</span>
-                            </div>
-                        </div>
-                        
-                        <div id="attack-results" class="attack-results" style="display: none;">
-                            <h4>Attack Results</h4>
-                            <div class="results-stats">
-                                <div class="result-stat">
-                                    <div class="stat-label">Total Requests</div>
-                                    <div id="total-requests" class="stat-value">0</div>
-                                </div>
-                                <div class="result-stat">
-                                    <div class="stat-label">Successful</div>
-                                    <div id="total-success" class="stat-value">0</div>
-                                </div>
-                                <div class="result-stat">
-                                    <div class="stat-label">Failed</div>
-                                    <div id="total-failed" class="stat-value">0</div>
-                                </div>
-                                <div class="result-stat">
-                                    <div class="stat-label">Average Response Time</div>
-                                    <div id="avg-response-time" class="stat-value">0 ms</div>
-                                </div>
-                                <div class="result-stat">
-                                    <div class="stat-label">Est. Tokens Used</div>
-                                    <div id="est-tokens" class="stat-value">0</div>
-                                </div>
-                            </div>
-                            
-                            <div class="service-monitor">
-                                <h4><i class="fas fa-tachometer-alt"></i> Service Health Monitor</h4>
-                                <p>Test the service during the attack to see if it becomes unresponsive or degraded. Send a query while the attack is running to check response times.</p>
                                 
-                                <div class="health-test-form">
-                                    <div class="form-group">
-                                        <label for="health-test-prompt">Test prompt:</label>
-                                        <div class="health-test-input">
-                                            <input type="text" id="health-test-prompt" class="form-control" placeholder="Enter a test prompt...">
-                                            <button id="health-test-btn" class="btn">Test Service</button>
+                                <div class="dos-container">
+                                    <h3>Chat with Ollama LLM here</h3>
+                                    <p>This interface connects to a local Ollama model running on your machine.</p>
+                        
+                                    <div class="chat-interface">
+                                        <div class="chat-history" id="ollama-chat-history">
+                                            <div class="system-message">System: Welcome to the Ollama LLM chat. Please ensure Ollama is running locally with mistral:7b model.</div>
+                                        </div>
+                                        
+                                        <div class="chat-input">
+                                            <textarea id="ollama-user-prompt" class="form-control chat-textarea" placeholder="Type your message here..."></textarea>
+                                            <button id="ollama-send-btn" class="btn chat-send-btn">
+                                                <i class="fas fa-paper-plane"></i> Send
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div id="health-results" class="health-results" style="display: none;">
-                                    <h5>Health Test Results</h5>
-                                    <div class="health-metrics">
-                                        <div class="health-metric">
-                                            <div class="metric-label">Response Time:</div>
-                                            <div id="health-response-time" class="metric-value">-</div>
+                                <!-- DoS Attack Section -->
+                                        <div class="attack-section">
+                                            <h3>DoS Attack Demonstration</h3>
+                                            <p>This will send multiple requests to your local Ollama installation to demonstrate DoS attack patterns. <strong>This will consume local system resources!</strong></p>
+                                            
+                                            <div class="attack-controls">
+                                                <div class="attack-settings">
+                                                    <div class="form-group">
+                                                        <label for="ollama-attack-request-count">Number of Requests:</label>
+                                                        <input type="number" id="ollama-attack-request-count" class="form-control" value="10" min="1" max="50">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="ollama-attack-prompt-template">Prompt Template:</label>
+                                                        <textarea id="ollama-attack-prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="attack-buttons">
+                                                    <button id="ollama-launch-attack-btn" class="btn btn-danger">
+                                                        <i class="fas fa-bomb"></i> Launch DoS Attack
+                                                    </button>
+                                                    <button id="ollama-stop-attack-btn" class="btn btn-secondary" disabled>
+                                                        <i class="fas fa-stop-circle"></i> Stop Attack
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="ollama-attack-progress" class="attack-progress" style="display: none;">
+                                                <div class="progress-bar-container">
+                                                    <div id="ollama-attack-progress-bar" class="progress-bar"></div>
+                                                </div>
+                                                <div class="progress-stats">
+                                                    <span id="ollama-attack-progress-text">0 / 0 requests sent</span>
+                                                    <span id="ollama-attack-success-count">Success: 0</span>
+                                                    <span id="ollama-attack-failure-count">Failed: 0</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="ollama-attack-results" class="attack-results" style="display: none;">
+                                                <h4>Attack Results</h4>
+                                                <div class="results-stats">
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Total Requests</div>
+                                                        <div id="ollama-total-requests" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Successful</div>
+                                                        <div id="ollama-total-success" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Failed</div>
+                                                        <div id="ollama-total-failed" class="stat-value">0</div>
+                                                    </div>
+                                                    <div class="result-stat">
+                                                        <div class="stat-label">Avg Response Time</div>
+                                                        <div id="ollama-avg-response-time" class="stat-value">0 ms</div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="health-metric">
-                                            <div class="metric-label">Status:</div>
-                                            <div id="health-status" class="metric-value">-</div>
-                                        </div>
-                                    </div>
-                                    <div id="health-response" class="health-response"></div>
-                                </div>
-                                
-                                <div class="health-history">
-                                    <h5>Service Response Time History</h5>
-                                    <div class="response-time-chart">
-                                        <canvas id="response-time-chart" height="100"></canvas>
-                                    </div>
-                                    <div class="chart-legend">
-                                        <div class="legend-item">
-                                            <div class="legend-color normal"></div>
-                                            <span>Normal (&lt; 1s)</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-color degraded"></div>
-                                            <span>Degraded (1-3s)</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-color critical"></div>
-                                            <span>Critical (&gt; 3s)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="service-impact" class="service-impact">
-                                <h5>Potential Service Impact</h5>
-                                <p>If multiple users perform this attack simultaneously, it could result in:</p>
-                                <ul>
-                                    <li>API rate limits being reached</li>
-                                    <li>Increased response times for all users</li>
-                                    <li>Service outages</li>
-                                    <li>Significant token usage costs</li>
-                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+
+               
+                </section>
+                </div>
+            </details>
             
-            <section class="basics-section">
-                <h2>Understanding DoS Attacks on LLM Services</h2>
-                <p>Denial of Service (DoS) attacks against LLM APIs and services can have significant impacts:</p>
-                
-                <h3>Vulnerabilities in LLM Services</h3>
-                <ul class="risk-list">
-                    <li><strong>Pay-per-token Pricing Models:</strong> Services like OpenAI charge based on token usage, making them susceptible to financial DoS</li>
-                    <li><strong>Resource-intensive Operations:</strong> Large language models require significant computational resources</li>
-                    <li><strong>Shared Infrastructure:</strong> Most LLM services use shared infrastructure where one user's activity can impact others</li>
-                    <li><strong>Inadequate Rate Limiting:</strong> Some services have insufficient protection against request floods</li>
-                </ul>
-                
-                <h3>Mitigation Strategies</h3>
-                <ul class="mitigation-list">
-                    <li><strong>Robust Rate Limiting:</strong> Implement per-user and per-IP rate limits</li>
-                    <li><strong>Token Budget Controls:</strong> Set maximum token limits per request and per user session</li>
-                    <li><strong>Request Validation:</strong> Filter out suspiciously repetitive or automated requests</li>
-                    <li><strong>Resource Allocation:</strong> Use dedicated instances for critical workloads</li>
-                    <li><strong>Traffic Monitoring:</strong> Implement systems to detect abnormal usage patterns</li>
-                    <li><strong>API Keys Management:</strong> Rotate keys regularly and implement usage tracking</li>
-                </ul>
-            </section>
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h3>Understanding DoS Attacks on LLM Services</h3>
+                        <p>Denial of Service (DoS) attacks against LLM APIs and services can have significant impacts:</p>
+                        
+                        <h4>Common Vulnerabilities in LLM Services:</h4>
+                        <ul class="risk-list">
+                            <li><strong>Pay-per-token Pricing Models:</strong> Services like OpenAI charge based on token usage, making them susceptible to financial DoS</li>
+                            <li><strong>Resource-intensive Operations:</strong> Large language models require significant computational resources</li>
+                            <li><strong>Shared Infrastructure:</strong> Most LLM services use shared infrastructure where one user's activity can impact others</li>
+                            <li><strong>Inadequate Rate Limiting:</strong> Some services have insufficient protection against request floods</li>
+                        </ul>
+                        
+                        <div class="security-tip">
+                            <h3><i class="fas"></i> Secure Implementation</h3>
+                            <p>A secure LLM service implementation should include multiple layers of protection:</p>
+                            <ul>
+                                <li><strong>Robust Rate Limiting:</strong> Implement per-user and per-IP rate limits</li>
+                                <li><strong>Token Budget Controls:</strong> Set maximum token limits per request and per user session</li>
+                                <li><strong>Request Validation:</strong> Filter out suspiciously repetitive or automated requests</li>
+                                <li><strong>Resource Allocation:</strong> Use dedicated instances for critical workloads</li>
+                                <li><strong>Traffic Monitoring:</strong> Implement systems to detect abnormal usage patterns</li>
+                                <li><strong>API Keys Management:</strong> Rotate keys regularly and implement usage tracking</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </details>
         </div>
     </main>
 
     <style>
+        
         .dos-container {
             margin: 20px 0;
             padding: 25px;
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #e9ecef;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            border: 2px solid #ffeeba;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        .model-tabs {
+            margin: 20px 0;
+        }
+        
+        .tab-headers {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .tab-header {
+            padding: 12px 24px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 2px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab-header:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tab-header.active {
+            background-color: white;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: -2px;
+        }
+        
+        .tab-content {
+            display: none;
+           
+        }
+        
+        .tab-content.active {
+            display: block !important;
+            min-height: 200px;
+        }
+        
+        #openai-model-tab {
+            background-color: #ffe8e8 !important; /* Debug for OpenAI tab specifically */
+            min-height: 200px;
+        }
+        .warning-box i {
+            margin-right: 10px;
+        }
+        
+        .attack-section-container {
+            margin: 30px 0;
+            padding: 25px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .attack-section-container h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        .api-key-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .api-key-input {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .api-key-input input {
+            flex: 1;
+        }
+        
+        .api-key-note {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .tab-container {
+            margin: 20px 0;
+        }
+        
+        .tab-container .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab-container .tab-btn {
+            padding: 10px 20px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-container .tab-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tab-container .tab-btn.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-container .tab-pane {
+            display: none;
+        }
+        
+        .tab-container .tab-pane.active {
+            display: block;
+        }
+        
+        .rate-limit-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .rate-limit-info h4 {
+            color: #0c5460;
+            margin-top: 0;
+        }
+        
+        .rate-limit-info i {
+            margin-right: 10px;
+        }
+        
+        .rate-limit-status {
+            margin-top: 15px;
+        }
+        
+        .limit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .limit-label {
+            width: 100px;
+            font-weight: 500;
+        }
+        
+        .limit-progress {
+            flex: 1;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .limit-bar {
+            height: 100%;
+            background-color: #17a2b8;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+        
+        .limit-reset {
+            margin-top: 10px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #0c5460;
+        }
+        
+        .code-example {
+            margin: 20px 0;
+        }
+        
+        .token-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .token-input {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .token-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .token-input button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .token-input button:hover {
+            background-color: #0056b3;
+        }
+        
+        .api-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        
+        .api-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .chat-container {
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-messages {
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E5EA;
+            align-self: flex-start;
         }
         
         .chat-interface {
@@ -615,183 +1135,701 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     
     <script>
-        // Initialize chat functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const chatHistory = document.getElementById('chat-history');
-            const userPrompt = document.getElementById('user-prompt');
-            const sendBtn = document.getElementById('send-btn');
             
-            // Send a message when clicking the send button
-            sendBtn.addEventListener('click', function() {
-                sendMessage();
-            });
+            // Tab switching functionality
+            const tabHeaders = document.querySelectorAll('.tab-header');
+            const tabContents = document.querySelectorAll('.tab-content');
             
-            // Send a message when pressing Enter (but allow Shift+Enter for new lines)
-            userPrompt.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-            
-            // Function to send a message to the LLM API
-            function sendMessage() {
-                const message = userPrompt.value.trim();
-                if (!message) return;
-                
-                // Add user message to chat
-                addMessageToChat('User', message);
-                
-                // Clear input
-                userPrompt.value = '';
-                
-                // Add typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'typing';
-                typingIndicator.innerHTML = `
-                    <span>Assistant is typing</span>
-                    <div class="dots">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>
-                `;
-                chatHistory.appendChild(typingIndicator);
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-                
-                // Send request to API
-                fetch('/api/llm-query', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt: message })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Remove typing indicator
-                    chatHistory.removeChild(typingIndicator);
+            // Add event listeners to tab headers
+            tabHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    console.log('Tab clicked:', targetTab);
                     
-                    if (data.error) {
-                        // Show error message
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'message-error';
-                        errorDiv.textContent = `Error: ${data.error}`;
-                        chatHistory.appendChild(errorDiv);
+                    // Remove active class from all headers and contents
+                    tabHeaders.forEach(h => h.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked header and corresponding content
+                    this.classList.add('active');
+                    const targetElement = document.getElementById(targetTab + '-tab');
+                    console.log('Target element:', targetElement);
+                    console.log('Target element ID:', targetElement ? targetElement.id : 'null');
+                    if (targetElement) {
+                        targetElement.classList.add('active');
+                        
                     } else {
-                        // Add assistant response to chat
-                        addMessageToChat('Assistant', data.response);
+                        console.log('Target element not found for:', targetTab + '-tab');
+                    }
+                });
+            });
+            
+            // Simulation tab elements (equivalent to BlenderBot in insecure_plugin.html)
+            const userMessageInput = document.getElementById('user-prompt');
+            const sendMessageButton = document.getElementById('send-btn');
+            const chatMessages = document.getElementById('chat-history');
+            
+            // OpenAI tab elements
+            const openaiApiTokenInput = document.getElementById('openai-api-token');
+            const connectOpenaiButton = document.getElementById('connect-openai-api');
+            const openaiApiStatus = document.getElementById('openai-api-status');
+            const openaiUserMessageInput = document.getElementById('openai-user-message');
+            const openaiSendMessageButton = document.getElementById('openai-send-message');
+            const openaiChatMessages = document.getElementById('openai-chat-messages');
+            
+            // Ollama tab elements
+            const ollamaUserMessageInput = document.getElementById('ollama-user-prompt');
+            const ollamaSendMessageButton = document.getElementById('ollama-send-btn');
+            const ollamaChatMessages = document.getElementById('ollama-chat-history');
+            
+            // INSECURE: Tokens stored in client-side JavaScript AND cookies
+            let openaiApiToken = null;
+            
+            // Cookie utility functions (INSECURE - storing API keys in cookies)
+            function setCookie(name, value, days = 30) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+            }
+            
+            function getCookie(name) {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for(let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+            
+            // Load API keys from cookies on page load (INSECURE)
+            function loadApiKeysFromCookies() {
+                const savedOpenaiToken = getCookie('openai_api_token');
+                
+                if (savedOpenaiToken) {
+                    openaiApiToken = savedOpenaiToken;
+                    if (openaiApiTokenInput) openaiApiTokenInput.value = '••••••••••••••••'; // Show masked token
+                    if (openaiApiStatus) {
+                        openaiApiStatus.className = 'api-status connected';
+                        openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from cookie)';
+                    }
+                    if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
+                    if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
+                    console.log("INSECURE: OpenAI API Token loaded from cookie:", savedOpenaiToken);
+                }
+            }
+            
+            // No tab functionality needed - content is displayed directly
+            
+            // Initialize simulation chat interface
+            function initializeSimulationChat() {
+                // Enable simulation chat interface immediately since no API token is needed
+                if (userMessageInput && sendMessageButton) {
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    
+                    // Add welcome message
+                    if (chatMessages) {
+                        addBotMessage(chatMessages, "Welcome! I'm ready to help with pizza information using the simulation model. You can ask questions about pizzas and see how DoS attacks affect response times.");
+                    }
+                }
+            }
+            
+            // Initialize simulation chat on page load
+            initializeSimulationChat();
+            
+            // Connect OpenAI API button
+            if (connectOpenaiButton) {
+                connectOpenaiButton.addEventListener('click', function() {
+                    const token = openaiApiTokenInput.value.trim();
+                    
+                    if (!token) {
+                        alert('Please enter an OpenAI API key');
+                        return;
                     }
                     
-                    chatHistory.scrollTop = chatHistory.scrollHeight;
-                })
-                .catch(error => {
-                    // Remove typing indicator
-                    chatHistory.removeChild(typingIndicator);
+                    // INSECURE: Store OpenAI token in a JavaScript variable AND cookie
+                    openaiApiToken = token;
+                    setCookie('openai_api_token', token, 30); // Store for 30 days
                     
-                    // Show error message
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'message-error';
-                    errorDiv.textContent = `Error: ${error.message}`;
-                    chatHistory.appendChild(errorDiv);
-                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                    // Update UI to show connected state
+                    openaiApiStatus.className = 'api-status connected';
+                    openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
+                    
+                    // Enable OpenAI chat interface
+                    openaiUserMessageInput.disabled = false;
+                    openaiSendMessageButton.disabled = false;
+                    
+                    // Add welcome message
+                    addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza recipes and information. Try asking about pizza recipes or ingredients.");
+                    
+                    // Show masked token in input
+                    openaiApiTokenInput.value = '••••••••••••••••';
+                    
+                    // VULNERABLE: Log the token to console for demonstration purposes
+                    console.log("INSECURE: OpenAI API Token stored in client-side JavaScript AND cookie:", openaiApiToken);
                 });
             }
             
-            // Function to add a message to the chat history
-            function addMessageToChat(sender, text) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                const messageContainer = document.createElement('div');
-                messageContainer.className = 'message-container';
-                
-                const senderElement = document.createElement('div');
-                senderElement.className = 'message-sender';
-                senderElement.textContent = sender;
-                
-                const messageElement = document.createElement('div');
-                messageElement.className = sender === 'User' ? 'user-message' : 'assistant-message';
-                messageElement.textContent = text;
-                
-                const timeElement = document.createElement('div');
-                timeElement.className = 'message-time';
-                timeElement.textContent = timeString;
-                
-                messageContainer.appendChild(senderElement);
-                messageContainer.appendChild(messageElement);
-                messageContainer.appendChild(timeElement);
-                
-                chatHistory.appendChild(messageContainer);
-                chatHistory.scrollTop = chatHistory.scrollHeight;
+            // Simulation Send message button
+            if (sendMessageButton) {
+                sendMessageButton.addEventListener('click', () => sendSimulationMessage());
             }
             
-            // DoS Attack Functionality
-            const attackBtn = document.getElementById('attack-btn');
-            const stopAttackBtn = document.getElementById('stop-attack-btn');
-            const requestCount = document.getElementById('request-count');
-            const promptTemplate = document.getElementById('prompt-template');
-            const attackProgress = document.getElementById('attack-progress');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            const successCount = document.getElementById('success-count');
-            const failureCount = document.getElementById('failure-count');
-            const attackResults = document.getElementById('attack-results');
-            const totalRequests = document.getElementById('total-requests');
-            const totalSuccess = document.getElementById('total-success');
-            const totalFailed = document.getElementById('total-failed');
-            const avgResponseTime = document.getElementById('avg-response-time');
-            const estTokens = document.getElementById('est-tokens');
+            // Simulation Enter key
+            if (userMessageInput) {
+                userMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendSimulationMessage();
+                    }
+                });
+            }
             
-            // Service Health Monitor elements
-            const healthTestPrompt = document.getElementById('health-test-prompt');
+            // OpenAI Send message button
+            if (openaiSendMessageButton) {
+                openaiSendMessageButton.addEventListener('click', () => sendOpenAIMessage());
+            }
+            
+            // OpenAI Enter key
+            if (openaiUserMessageInput) {
+                openaiUserMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendOpenAIMessage();
+                    }
+                });
+            }
+            
+            // Ollama Send message button
+            if (ollamaSendMessageButton) {
+                ollamaSendMessageButton.addEventListener('click', () => sendOllamaMessage());
+            }
+            
+            // Ollama Enter key
+            if (ollamaUserMessageInput) {
+                ollamaUserMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendOllamaMessage();
+                    }
+                });
+            }
+            
+            function sendSimulationMessage() {
+                const userMessage = userMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addUserMessage(chatMessages, userMessage);
+                
+                // Clear input
+                userMessageInput.value = '';
+                
+                // Disable input while processing
+                userMessageInput.disabled = true;
+                sendMessageButton.disabled = true;
+                
+                // Show thinking indicator
+                addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+                
+                // Send request to simulation API
+                fetch('/api/llm-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: userMessage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Add bot response
+                    addBotMessage(chatMessages, data.response);
+                    
+                    // Re-enable input
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    userMessageInput.focus();
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Show error message
+                    addBotMessage(chatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    console.error('Error:', error);
+                    
+                    // Re-enable input
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                });
+            }
+            
+            function sendOpenAIMessage() {
+                const userMessage = openaiUserMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addUserMessage(openaiChatMessages, userMessage);
+                
+                // Clear input
+                openaiUserMessageInput.value = '';
+                
+                // Disable input while processing
+                openaiUserMessageInput.disabled = true;
+                openaiSendMessageButton.disabled = true;
+                
+                // Show thinking indicator
+                addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+                
+                // Send request to OpenAI backend
+                fetch('/chat-with-openai-dos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        api_token: openaiApiToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Add bot response
+                    addBotMessage(openaiChatMessages, data.response);
+                    
+                    // Re-enable input
+                    openaiUserMessageInput.disabled = false;
+                    openaiSendMessageButton.disabled = false;
+                    openaiUserMessageInput.focus();
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Show error message
+                    addBotMessage(openaiChatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    console.error('Error:', error);
+                    
+                    // Re-enable input
+                    openaiUserMessageInput.disabled = false;
+                    openaiSendMessageButton.disabled = false;
+                });
+            }
+            
+            function sendOllamaMessage() {
+                const userMessage = ollamaUserMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addUserMessage(ollamaChatMessages, userMessage);
+                
+                // Clear input
+                ollamaUserMessageInput.value = '';
+                
+                // Disable input while processing
+                ollamaUserMessageInput.disabled = true;
+                ollamaSendMessageButton.disabled = true;
+                
+                // Show thinking indicator
+                addBotMessage(ollamaChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+                
+                // Send request to Ollama backend
+                fetch('/chat-with-ollama-dos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        api_token: null // No API token needed for local Ollama
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    ollamaChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Add bot response
+                    addBotMessage(ollamaChatMessages, data.response);
+                    
+                    // Re-enable input
+                    ollamaUserMessageInput.disabled = false;
+                    ollamaSendMessageButton.disabled = false;
+                    ollamaUserMessageInput.focus();
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    ollamaChatMessages.querySelector('.thinking-message')?.remove();
+                    
+                    // Show error message
+                    addBotMessage(ollamaChatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    console.error('Error:', error);
+                    
+                    // Re-enable input
+                    ollamaUserMessageInput.disabled = false;
+                    ollamaSendMessageButton.disabled = false;
+                });
+            }
+            
+            function addUserMessage(container, message) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.textContent = message;
+                container.appendChild(messageElement);
+                scrollToBottom(container);
+            }
+            
+            function addBotMessage(container, message, extraClass = '') {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message bot-message ' + extraClass;
+                messageElement.innerHTML = message;
+                container.appendChild(messageElement);
+                scrollToBottom(container);
+            }
+            
+            function scrollToBottom(container) {
+                container.scrollTop = container.scrollHeight;
+            }
+            
+            // Attack button event handlers
+            const simAttackBtn = document.getElementById('sim-attack-btn');
+            const simStopAttackBtn = document.getElementById('sim-stop-attack-btn');
+            const launchAttackBtn = document.getElementById('launch-attack-btn');
+            const stopAttackBtn = document.getElementById('stop-attack-btn');
+            const ollamaLaunchAttackBtn = document.getElementById('ollama-launch-attack-btn');
+            const ollamaStopAttackBtn = document.getElementById('ollama-stop-attack-btn');
+            
+            // Simulation attack variables
+            let simAttackInProgress = false;
+            let simAttackRequests = [];
+            let simAttackTimeouts = [];
+            let simAttackResults = {
+                total: 0,
+                successful: 0,
+                failed: 0,
+                totalTime: 0
+            };
+            
+            // OpenAI attack variables
+            let openaiAttackInProgress = false;
+            let openaiAttackRequests = [];
+            let openaiAttackResults = {
+                total: 0,
+                successful: 0,
+                failed: 0,
+                totalCost: 0
+            };
+            
+            // Ollama attack variables
+            let ollamaAttackInProgress = false;
+            let ollamaAttackRequests = [];
+            let ollamaAttackTimeouts = [];
+            let ollamaAttackResults = {
+                total: 0,
+                successful: 0,
+                failed: 0,
+                totalTime: 0
+            };
+            
+            // Simulation attack button handler
+            if (simAttackBtn) {
+                simAttackBtn.addEventListener('click', function() {
+                    if (simAttackInProgress) return;
+                    
+                    const requestCount = parseInt(document.getElementById('request-count').value);
+                    const promptTemplate = document.getElementById('prompt-template').value;
+                    
+                    startSimulationAttack(requestCount, promptTemplate);
+                });
+            }
+            
+            // Simulation stop attack button handler
+            if (simStopAttackBtn) {
+                simStopAttackBtn.addEventListener('click', function() {
+                    stopSimulationAttack();
+                });
+            }
+            
+            // OpenAI attack button handler
+            if (launchAttackBtn) {
+                launchAttackBtn.addEventListener('click', function() {
+                    if (openaiAttackInProgress) return;
+                    
+                    const requestCount = parseInt(document.getElementById('attack-request-count').value);
+                    const promptTemplate = document.getElementById('attack-prompt-template').value;
+                    
+                    startOpenAIAttack(requestCount, promptTemplate);
+                });
+            }
+            
+            // OpenAI stop attack button handler
+            if (stopAttackBtn) {
+                stopAttackBtn.addEventListener('click', function() {
+                    stopOpenAIAttack();
+                });
+            }
+            
+            // Ollama attack button handler
+            if (ollamaLaunchAttackBtn) {
+                ollamaLaunchAttackBtn.addEventListener('click', function() {
+                    if (ollamaAttackInProgress) return;
+                    
+                    const requestCount = parseInt(document.getElementById('ollama-attack-request-count').value);
+                    const promptTemplate = document.getElementById('ollama-attack-prompt-template').value;
+                    
+                    startOllamaAttack(requestCount, promptTemplate);
+                });
+            }
+            
+            // Ollama stop attack button handler
+            if (ollamaStopAttackBtn) {
+                ollamaStopAttackBtn.addEventListener('click', function() {
+                    stopOllamaAttack();
+                });
+            }
+            
+            // Simulation attack functions
+            function startSimulationAttack(requestCount, promptTemplate) {
+                simAttackInProgress = true;
+                simAttackResults = { total: 0, successful: 0, failed: 0, totalTime: 0 };
+                simAttackTimeouts = []; // Clear any existing timeouts
+                
+                // Update UI
+                simAttackBtn.disabled = true;
+                simStopAttackBtn.disabled = false;
+                document.getElementById('sim-attack-progress').style.display = 'block';
+                document.getElementById('sim-attack-results').style.display = 'none';
+                
+                // Enable health monitoring during attack
+                enableHealthMonitoring();
+                
+                // Reset progress
+                document.getElementById('sim-progress-bar').style.width = '0%';
+                document.getElementById('sim-progress-text').textContent = '0 / ' + requestCount + ' requests sent';
+                document.getElementById('sim-success-count').textContent = 'Success: 0';
+                document.getElementById('sim-failure-count').textContent = 'Failed: 0';
+                
+                // Generate random toppings for prompts
+                const toppings = ['pepperoni', 'mushrooms', 'sausage', 'peppers', 'onions', 'olives', 'pineapple', 'ham', 'bacon', 'spinach'];
+                
+                // Send requests
+                for (let i = 0; i < requestCount; i++) {
+                    const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
+                    const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
+                    
+                    const timeoutId = setTimeout(() => {
+                        if (!simAttackInProgress) return;
+                        sendSimulationAttackRequest(prompt, i + 1, requestCount);
+                    }, i * 100); // Stagger requests
+                    
+                    simAttackTimeouts.push(timeoutId);
+                }
+            }
+            
+            function sendSimulationAttackRequest(prompt, requestNum, totalRequests) {
+                const startTime = Date.now();
+                
+                fetch('/api/llm-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    simAttackResults.total++;
+                    simAttackResults.successful++;
+                    simAttackResults.totalTime += responseTime;
+                    
+                    updateSimulationProgress(requestNum, totalRequests);
+                })
+                .catch(error => {
+                    simAttackResults.total++;
+                    simAttackResults.failed++;
+                    
+                    updateSimulationProgress(requestNum, totalRequests);
+                });
+            }
+            
+            function updateSimulationProgress(completed, total) {
+                const progress = (completed / total) * 100;
+                document.getElementById('sim-progress-bar').style.width = progress + '%';
+                document.getElementById('sim-progress-text').textContent = completed + ' / ' + total + ' requests sent';
+                document.getElementById('sim-success-count').textContent = 'Success: ' + simAttackResults.successful;
+                document.getElementById('sim-failure-count').textContent = 'Failed: ' + simAttackResults.failed;
+                
+                if (completed >= total) {
+                    finishSimulationAttack();
+                }
+            }
+            
+            function finishSimulationAttack() {
+                simAttackInProgress = false;
+                
+                // Update UI
+                simAttackBtn.disabled = false;
+                simStopAttackBtn.disabled = true;
+                document.getElementById('sim-attack-results').style.display = 'block';
+                
+                // Disable health monitoring when attack ends
+                disableHealthMonitoring();
+                
+                // Show results
+                document.getElementById('sim-total-requests').textContent = simAttackResults.total;
+                document.getElementById('sim-total-success').textContent = simAttackResults.successful;
+                document.getElementById('sim-total-failed').textContent = simAttackResults.failed;
+                document.getElementById('sim-avg-response-time').textContent = 
+                    simAttackResults.successful > 0 ? Math.round(simAttackResults.totalTime / simAttackResults.successful) + ' ms' : '0 ms';
+                document.getElementById('sim-est-tokens').textContent = simAttackResults.successful * 150; // Rough estimate
+            }
+            
+            function stopSimulationAttack() {
+                simAttackInProgress = false;
+                
+                // Cancel all pending timeouts
+                simAttackTimeouts.forEach(timeoutId => {
+                    clearTimeout(timeoutId);
+                });
+                simAttackTimeouts = [];
+                
+                finishSimulationAttack();
+            }
+            
+            // OpenAI attack functions
+            function startOpenAIAttack(requestCount, promptTemplate) {
+                if (!openaiApiToken) {
+                    alert('Please connect to OpenAI API first');
+                    return;
+                }
+                
+                openaiAttackInProgress = true;
+                openaiAttackResults = { total: 0, successful: 0, failed: 0, totalCost: 0 };
+                
+                // Update UI
+                launchAttackBtn.disabled = true;
+                stopAttackBtn.disabled = false;
+                document.getElementById('attack-progress').style.display = 'block';
+                document.getElementById('attack-results').style.display = 'none';
+                
+                // Reset progress
+                document.getElementById('attack-progress-bar').style.width = '0%';
+                document.getElementById('attack-progress-text').textContent = '0 / ' + requestCount + ' requests sent';
+                document.getElementById('attack-success-count').textContent = 'Success: 0';
+                document.getElementById('attack-failure-count').textContent = 'Failed: 0';
+                
+                // Generate random toppings for prompts
+                const toppings = ['pepperoni', 'mushrooms', 'sausage', 'peppers', 'onions', 'olives', 'pineapple', 'ham', 'bacon', 'spinach'];
+                
+                // Send requests
+                for (let i = 0; i < requestCount; i++) {
+                    const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
+                    const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
+                    
+                    setTimeout(() => {
+                        if (!openaiAttackInProgress) return;
+                        sendOpenAIAttackRequest(prompt, i + 1, requestCount);
+                    }, i * 200); // Stagger requests more for OpenAI
+                }
+            }
+            
+            function sendOpenAIAttackRequest(prompt, requestNum, totalRequests) {
+                fetch('/chat-with-openai-dos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: prompt,
+                        api_token: openaiApiToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    openaiAttackResults.total++;
+                    openaiAttackResults.successful++;
+                    openaiAttackResults.totalCost += 0.002; // Rough estimate per request
+                    
+                    updateOpenAIProgress(requestNum, totalRequests);
+                })
+                .catch(error => {
+                    openaiAttackResults.total++;
+                    openaiAttackResults.failed++;
+                    
+                    updateOpenAIProgress(requestNum, totalRequests);
+                });
+            }
+            
+            function updateOpenAIProgress(completed, total) {
+                const progress = (completed / total) * 100;
+                document.getElementById('attack-progress-bar').style.width = progress + '%';
+                document.getElementById('attack-progress-text').textContent = completed + ' / ' + total + ' requests sent';
+                document.getElementById('attack-success-count').textContent = 'Success: ' + openaiAttackResults.successful;
+                document.getElementById('attack-failure-count').textContent = 'Failed: ' + openaiAttackResults.failed;
+                
+                if (completed >= total) {
+                    finishOpenAIAttack();
+                }
+            }
+            
+            function finishOpenAIAttack() {
+                openaiAttackInProgress = false;
+                
+                // Update UI
+                launchAttackBtn.disabled = false;
+                stopAttackBtn.disabled = true;
+                document.getElementById('attack-results').style.display = 'block';
+                
+                // Show results
+                document.getElementById('total-requests').textContent = openaiAttackResults.total;
+                document.getElementById('total-success').textContent = openaiAttackResults.successful;
+                document.getElementById('total-failed').textContent = openaiAttackResults.failed;
+                document.getElementById('estimated-cost').textContent = '$' + openaiAttackResults.totalCost.toFixed(2);
+            }
+            
+            function stopOpenAIAttack() {
+                openaiAttackInProgress = false;
+                finishOpenAIAttack();
+            }
+            
+            // Service Health Monitor functionality
             const healthTestBtn = document.getElementById('health-test-btn');
+            const healthTestPrompt = document.getElementById('health-test-prompt');
             const healthResults = document.getElementById('health-results');
             const healthResponseTime = document.getElementById('health-response-time');
             const healthStatus = document.getElementById('health-status');
             const healthResponse = document.getElementById('health-response');
             
-            // To keep track of the attack
-            let isAttacking = false;
-            let attackStats = {
-                total: 0,
-                success: 0,
-                failed: 0,
-                responseTimes: [],
-                estimatedTokens: 0
-            };
-            
-            // For tracking service health
-            let healthStats = {
-                testCount: 0,
-                responseTimes: [],
-                timestamps: []
-            };
+            let responseTimeChart = null;
+            let responseTimeData = [];
+            let maxDataPoints = 20;
             
             // Initialize response time chart
-            let responseTimeChart;
-            const responseTimeCtx = document.getElementById('response-time-chart').getContext('2d');
-            
-            function initializeChart() {
-                responseTimeChart = new Chart(responseTimeCtx, {
+            function initializeResponseTimeChart() {
+                const ctx = document.getElementById('response-time-chart').getContext('2d');
+                responseTimeChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: [],
                         datasets: [{
                             label: 'Response Time (ms)',
                             data: [],
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.2,
-                            pointBackgroundColor: function(context) {
-                                const value = context.dataset.data[context.dataIndex];
-                                if (value < 1000) return '#28a745'; // normal
-                                if (value < 3000) return '#ffc107'; // degraded
-                                return '#dc3545'; // critical
-                            },
-                            pointRadius: 4,
-                            pointHoverRadius: 6
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            tension: 0.1
                         }]
                     },
                     options: {
@@ -803,443 +1841,298 @@
                                 title: {
                                     display: true,
                                     text: 'Response Time (ms)'
-                                },
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + ' ms';
-                                    }
                                 }
                             },
                             x: {
-                                display: true,
                                 title: {
                                     display: true,
-                                    text: 'Test #'
+                                    text: 'Time'
                                 }
                             }
                         },
                         plugins: {
                             legend: {
                                 display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `Response time: ${context.parsed.y} ms`;
-                                    }
-                                }
                             }
                         }
                     }
                 });
             }
             
-            // Initialize the chart
-            initializeChart();
-            
-            // Add service health test functionality
-            healthTestBtn.addEventListener('click', function() {
-                testServiceHealth();
-            });
-            
-            // Also allow pressing Enter in the health test prompt
-            healthTestPrompt.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    testServiceHealth();
-                }
-            });
-            
-            // Function to test the service health
-            function testServiceHealth() {
-                const prompt = healthTestPrompt.value.trim() || "How are you doing today?";
-                
-                // Show results section if hidden
-                healthResults.style.display = 'block';
-                
-                // Update status to show we're testing
-                healthStatus.textContent = 'Testing...';
-                healthStatus.className = 'metric-value';
-                
-                // Record start time
-                const startTime = performance.now();
-                
-                // Send test request
-                fetch('/api/llm-query', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt: prompt })
-                })
-                .then(response => {
-                    const endTime = performance.now();
-                    const responseTime = endTime - startTime;
-                    
-                    // Add to health stats
-                    healthStats.testCount++;
-                    healthStats.responseTimes.push(responseTime);
-                    healthStats.timestamps.push(new Date());
-                    
-                    // Determine status based on response time
-                    let statusClass = 'normal';
-                    let statusText = 'Normal';
-                    
-                    if (responseTime >= 3000) {
-                        statusClass = 'critical';
-                        statusText = 'Critical';
-                    } else if (responseTime >= 1000) {
-                        statusClass = 'degraded';
-                        statusText = 'Degraded';
-                    }
-                    
-                    // Update the UI
-                    healthResponseTime.textContent = `${Math.round(responseTime)} ms`;
-                    healthStatus.textContent = statusText;
-                    healthStatus.className = `metric-value ${statusClass}`;
-                    
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error) {
-                        healthResponse.textContent = `Error: ${data.error}`;
-                        healthStatus.textContent = 'Failed';
-                        healthStatus.className = 'metric-value critical';
-                    } else {
-                        healthResponse.textContent = data.response;
-                        
-                        // Update the chart
-                        updateResponseTimeChart();
-                    }
-                })
-                .catch(error => {
-                    healthResponseTime.textContent = 'Timeout';
-                    healthStatus.textContent = 'Failed';
-                    healthStatus.className = 'metric-value critical';
-                    healthResponse.textContent = `Error: ${error.message}`;
-                    
-                    // Add a failed data point
-                    healthStats.responseTimes[healthStats.responseTimes.length - 1] = 5000; // High value to indicate failure
-                    updateResponseTimeChart();
-                });
-            }
-            
-            // Function to update the response time chart
-            function updateResponseTimeChart() {
-                // If this is the first test, make sure we have a chart
-                if (!responseTimeChart) {
-                    initializeChart();
-                }
-                
-                // Update chart data
-                const labels = [];
-                for (let i = 1; i <= healthStats.testCount; i++) {
-                    labels.push(`#${i}`);
-                }
-                
-                responseTimeChart.data.labels = labels;
-                responseTimeChart.data.datasets[0].data = healthStats.responseTimes;
-                
-                // Update chart colors based on response times
-                const borderColors = [];
-                healthStats.responseTimes.forEach(time => {
-                    if (time < 1000) borderColors.push('#28a745');
-                    else if (time < 3000) borderColors.push('#ffc107');
-                    else borderColors.push('#dc3545');
-                });
-                
-                // Update the chart
-                responseTimeChart.update();
-            }
-            
-            // Random pizza toppings for generating variations in queries
-            const pizzaToppings = [
-                'pepperoni', 'mushrooms', 'sausage', 'onions', 'bell peppers', 
-                'black olives', 'bacon', 'pineapple', 'ham', 'garlic', 
-                'spinach', 'tomatoes', 'feta cheese', 'blue cheese', 'mozzarella', 
-                'parmesan', 'anchovies', 'artichoke hearts', 'eggplant', 'zucchini', 
-                'broccoli', 'jalapeños', 'chicken', 'beef', 'prosciutto', 
-                'goat cheese', 'arugula', 'basil', 'corn', 'eggs'
-            ];
-            
-            // Function to generate a random prompt with pizza toppings
-            function generateRandomPrompt() {
-                // Get 2-4 random toppings
-                const numToppings = Math.floor(Math.random() * 3) + 2;
-                const selectedToppings = [];
-                
-                for (let i = 0; i < numToppings; i++) {
-                    const randomTopping = pizzaToppings[Math.floor(Math.random() * pizzaToppings.length)];
-                    if (!selectedToppings.includes(randomTopping)) {
-                        selectedToppings.push(randomTopping);
-                    }
-                }
-                
-                const toppingsText = selectedToppings.join(', ');
-                return promptTemplate.value.replace('{random_toppings}', toppingsText);
-            }
-            
-            // Launch the DoS attack
-            attackBtn.addEventListener('click', function() {
-                const numRequests = parseInt(requestCount.value);
-                if (numRequests < 1) {
-                    alert('Please enter a valid number of requests.');
-                    return;
-                }
-                
-                // Reset attack stats
-                attackStats = {
-                    total: numRequests,
-                    success: 0,
-                    failed: 0,
-                    responseTimes: [],
-                    estimatedTokens: 0
-                };
-                
-                // Update UI
-                progressBar.style.width = '0%';
-                progressText.textContent = `0 / ${numRequests} requests sent`;
-                successCount.textContent = 'Success: 0';
-                failureCount.textContent = 'Failed: 0';
-                attackProgress.style.display = 'block';
-                attackResults.style.display = 'block';
-                
-                // Reset health stats
-                healthStats = {
-                    testCount: 0,
-                    responseTimes: [],
-                    timestamps: []
-                };
-                
-                // Reset chart
-                if (responseTimeChart) {
-                    responseTimeChart.data.labels = [];
-                    responseTimeChart.data.datasets[0].data = [];
-                    responseTimeChart.update();
-                }
-                
-                // Toggle buttons
-                attackBtn.disabled = true;
-                stopAttackBtn.disabled = false;
-                isAttacking = true;
-                
-                // Start the attack
-                runAttack(numRequests);
-            });
-            
-            // Stop the DoS attack
-            stopAttackBtn.addEventListener('click', function() {
-                isAttacking = false;
-                stopAttackBtn.disabled = true;
-                attackBtn.disabled = false;
-                
-                // Show results with current stats
-                showAttackResults();
-            });
-            
-            // Run the attack by sending multiple requests
-            function runAttack(numRequests) {
-                let completed = 0;
-                
-                // Function to send a single request
-                function sendRequest() {
-                    if (!isAttacking || completed >= numRequests) {
-                        // Attack completed or stopped
-                        if (isAttacking && completed >= numRequests) {
-                            isAttacking = false;
-                            stopAttackBtn.disabled = true;
-                            attackBtn.disabled = false;
-                            showAttackResults();
-                        }
+            // Health test button handler
+            if (healthTestBtn) {
+                healthTestBtn.addEventListener('click', function() {
+                    const testPrompt = healthTestPrompt.value.trim();
+                    if (!testPrompt) {
+                        alert('Please enter a test prompt');
                         return;
                     }
                     
-                    const prompt = generateRandomPrompt();
-                    const startTime = performance.now();
-                    
-                    fetch('/api/llm-query', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: prompt })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const endTime = performance.now();
-                        const responseTime = endTime - startTime;
-                        
-                        // Update stats
-                        attackStats.responseTimes.push(responseTime);
-                        
-                        if (data.error) {
-                            attackStats.failed++;
-                        } else {
-                            attackStats.success++;
-                            // Roughly estimate tokens (very approximate)
-                            const words = data.response.split(' ').length;
-                            attackStats.estimatedTokens += Math.ceil(words * 1.3); // ~1.3 tokens per word
+                    performHealthTest(testPrompt);
+                });
+            }
+            
+            // Health test enter key handler
+            if (healthTestPrompt) {
+                healthTestPrompt.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const testPrompt = healthTestPrompt.value.trim();
+                        if (testPrompt) {
+                            performHealthTest(testPrompt);
                         }
-                        
-                        completed++;
-                        
-                        // Update progress UI
-                        const progress = (completed / numRequests) * 100;
-                        progressBar.style.width = `${progress}%`;
-                        progressText.textContent = `${completed} / ${numRequests} requests sent`;
-                        successCount.textContent = `Success: ${attackStats.success}`;
-                        failureCount.textContent = `Failed: ${attackStats.failed}`;
-                        
-                        // Continue attack with next request
-                        // Add a small delay to prevent browser freezing
-                        setTimeout(() => sendRequest(), 50);
+                    }
+                });
+            }
+            
+            function performHealthTest(prompt) {
+                const startTime = Date.now();
+                
+                // Disable button during test
+                healthTestBtn.disabled = true;
+                healthTestBtn.textContent = 'Testing...';
+                
+                // Show results section
+                healthResults.style.display = 'block';
+                healthResponseTime.textContent = 'Testing...';
+                healthStatus.textContent = 'Testing...';
+                healthResponse.textContent = '';
+                
+                fetch('/api/llm-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
                     })
-                    .catch(error => {
-                        completed++;
-                        attackStats.failed++;
-                        
-                        // Update progress UI
-                        const progress = (completed / numRequests) * 100;
-                        progressBar.style.width = `${progress}%`;
-                        progressText.textContent = `${completed} / ${numRequests} requests sent`;
-                        successCount.textContent = `Success: ${attackStats.success}`;
-                        failureCount.textContent = `Failed: ${attackStats.failed}`;
-                        
-                        // Continue attack with next request
-                        setTimeout(() => sendRequest(), 50);
-                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    // Update health metrics
+                    updateHealthMetrics(responseTime, 'Success', data.response);
+                    
+                    // Add to chart
+                    addResponseTimeToChart(responseTime);
+                })
+                .catch(error => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    // Update health metrics
+                    updateHealthMetrics(responseTime, 'Error', 'Failed to get response: ' + error.message);
+                    
+                    // Add to chart
+                    addResponseTimeToChart(responseTime);
+                })
+                .finally(() => {
+                    // Re-enable button
+                    healthTestBtn.disabled = false;
+                    healthTestBtn.textContent = 'Test Service';
+                });
+            }
+            
+            function updateHealthMetrics(responseTime, status, response) {
+                // Update response time with color coding
+                healthResponseTime.textContent = responseTime + ' ms';
+                healthResponseTime.className = 'metric-value';
+                
+                if (responseTime < 1000) {
+                    healthResponseTime.classList.add('normal');
+                } else if (responseTime < 3000) {
+                    healthResponseTime.classList.add('degraded');
+                } else {
+                    healthResponseTime.classList.add('critical');
                 }
                 
-                // Start multiple requests in parallel (using a limited concurrency to not overload the browser)
-                const concurrency = 5;
-                for (let i = 0; i < Math.min(concurrency, numRequests); i++) {
-                    sendRequest();
+                // Update status
+                healthStatus.textContent = status;
+                healthStatus.className = 'metric-value';
+                if (status === 'Success') {
+                    healthStatus.classList.add('normal');
+                } else {
+                    healthStatus.classList.add('critical');
+                }
+                
+                // Update response
+                healthResponse.textContent = response;
+            }
+            
+            function addResponseTimeToChart(responseTime) {
+                const now = new Date();
+                const timeLabel = now.toLocaleTimeString();
+                
+                // Add new data point
+                responseTimeData.push({
+                    time: timeLabel,
+                    value: responseTime
+                });
+                
+                // Keep only last maxDataPoints
+                if (responseTimeData.length > maxDataPoints) {
+                    responseTimeData.shift();
+                }
+                
+                // Update chart
+                if (responseTimeChart) {
+                    responseTimeChart.data.labels = responseTimeData.map(d => d.time);
+                    responseTimeChart.data.datasets[0].data = responseTimeData.map(d => d.value);
+                    
+                    // Update point colors based on response time
+                    responseTimeChart.data.datasets[0].pointBackgroundColor = responseTimeData.map(d => {
+                        if (d.value < 1000) return '#28a745';
+                        if (d.value < 3000) return '#ffc107';
+                        return '#dc3545';
+                    });
+                    
+                    responseTimeChart.update();
                 }
             }
             
-            // Show attack results
-            function showAttackResults() {
-                // Calculate average response time
-                let avgTime = 0;
-                if (attackStats.responseTimes.length > 0) {
-                    avgTime = attackStats.responseTimes.reduce((sum, time) => sum + time, 0) / attackStats.responseTimes.length;
+            // Enable health monitoring during attacks
+            function enableHealthMonitoring() {
+                // Initialize chart if not already done
+                if (!responseTimeChart) {
+                    initializeResponseTimeChart();
                 }
                 
-                // Update results UI
-                totalRequests.textContent = attackStats.total;
-                totalSuccess.textContent = attackStats.success;
-                totalFailed.textContent = attackStats.failed;
-                avgResponseTime.textContent = `${Math.round(avgTime)} ms`;
-                estTokens.textContent = attackStats.estimatedTokens;
-                
-                // Show results panel
-                attackResults.style.display = 'block';
+                // Enable the health test form
+                if (healthTestBtn) {
+                    healthTestBtn.disabled = false;
+                }
+                if (healthTestPrompt) {
+                    healthTestPrompt.disabled = false;
+                    healthTestPrompt.placeholder = 'Test service health during attack...';
+                }
             }
             
-            // Let's simulate more realistic degradation in the service during the DoS attack
-            // This adds exponentially increasing delays to API responses as the attack progresses
-            const originalFetch = window.fetch;
-            window.fetch = function(resource, options) {
-                // Only intercept calls to our API
-                if (resource === '/api/llm-query' && options?.method === 'POST') {
-                    // Get the current body
-                    const originalBody = options.body;
-                    const bodyObj = JSON.parse(originalBody);
-                    
-                    // Determine if this is a test request or attack request
-                    const isTestRequest = bodyObj.prompt === healthTestPrompt.value || 
-                                         bodyObj.prompt === "How are you doing today?";
-                    
-                    // Calculate how many attack requests have been made
-                    const attackProgress = attackStats.success + attackStats.failed;
-                    
-                    // We'll exponentially increase delay based on attack progress
-                    let artificialDelay = 0;
-                    
-                    if (isAttacking) {
-                        // Base delay increases exponentially with attack progress
-                        // This simulates how real systems degrade under load
-                        // Formula: baseDelay = initialDelay * e^(attackProgress/factor)
-                        const initialDelay = 20; // Starting delay in ms
-                        const scalingFactor = 50; // Higher = slower degradation
-                        const baseDelay = initialDelay * Math.exp(attackProgress / scalingFactor);
-                        
-                        // Add random variance to make it more realistic (±30%)
-                        const variance = baseDelay * 0.3 * (Math.random() - 0.5);
-                        
-                        if (isTestRequest) {
-                            // For health test requests, apply a more severe delay
-                            // This shows how interactive use is more impacted than batch jobs
-                            artificialDelay = baseDelay * 3 + variance;
-                            
-                            // Add extra severe degradation after certain thresholds
-                            if (attackProgress > 150) {
-                                artificialDelay += 5000; // Almost unusable (5s extra delay)
-                            } else if (attackProgress > 100) {
-                                artificialDelay += 2500; // Severely degraded
-                            } else if (attackProgress > 50) {
-                                artificialDelay += 1000; // Noticeably degraded
-                            }
-                        } else {
-                            // For attack requests, apply normal degradation
-                            artificialDelay = baseDelay + variance;
-                        }
-                        
-                        // Cap the delay to prevent extremely long waits
-                        const maxDelay = isTestRequest ? 8000 : 5000;
-                        artificialDelay = Math.min(artificialDelay, maxDelay);
-                        
-                        // Console logs for debugging (hidden from user)
-                        console.log(`Attack progress: ${attackProgress}, Delay: ${artificialDelay.toFixed(0)}ms`);
-                    }
-                    
-                    // Simulate memory/CPU pressure by sometimes adding extra delay
-                    const systemPressure = isAttacking ? Math.min(attackProgress / 200, 1) : 0;
-                    if (Math.random() < systemPressure * 0.5) {
-                        artificialDelay += 1000 * Math.random() * systemPressure;
-                    }
-                    
-                    return new Promise((resolve) => {
-                        // Add an artificial delay to simulate service degradation
-                        setTimeout(() => {
-                            // Simulate increasing error rates as the attack progresses
-                            // Real systems start failing more frequently under extreme load
-                            const errorThreshold = isAttacking ? Math.min(0.05 + (attackProgress / 500), 0.3) : 0.01;
-                            
-                            if (isAttacking && Math.random() < errorThreshold) {
-                                // Different types of errors that can occur
-                                const errorTypes = [
-                                    {status: 503, message: 'Service temporarily unavailable due to high load'},
-                                    {status: 429, message: 'Too many requests, please try again later'},
-                                    {status: 500, message: 'Internal server error - insufficient resources'},
-                                    {status: 504, message: 'Gateway timeout - server took too long to respond'}
-                                ];
-                                
-                                // Select random error type
-                                const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-                                
-                                // Create mock error response
-                                const mockResponse = new Response(JSON.stringify({
-                                    error: errorType.message
-                                }), { status: errorType.status });
-                                
-                                resolve(mockResponse);
-                            } else {
-                                // Call the original fetch if no error
-                                originalFetch(resource, options)
-                                    .then(response => resolve(response))
-                                    .catch(error => {
-                                        throw error;
-                                    });
-                            }
-                        }, artificialDelay);
-                    });
+            // Disable health monitoring when not attacking
+            function disableHealthMonitoring() {
+                if (healthTestBtn) {
+                    healthTestBtn.disabled = true;
                 }
+                if (healthTestPrompt) {
+                    healthTestPrompt.disabled = true;
+                    healthTestPrompt.placeholder = 'Start an attack to enable health monitoring...';
+                }
+            }
+            
+            // Initialize health monitoring as disabled
+            disableHealthMonitoring();
+            
+            // Ollama attack functions
+            function startOllamaAttack(requestCount, promptTemplate) {
+                ollamaAttackInProgress = true;
+                ollamaAttackResults = { total: 0, successful: 0, failed: 0, totalTime: 0 };
+                ollamaAttackTimeouts = []; // Clear any existing timeouts
                 
-                // For all other requests, proceed normally
-                return originalFetch(resource, options);
-            };
+                // Update UI
+                ollamaLaunchAttackBtn.disabled = true;
+                ollamaStopAttackBtn.disabled = false;
+                document.getElementById('ollama-attack-progress').style.display = 'block';
+                document.getElementById('ollama-attack-results').style.display = 'none';
+                
+                // Reset progress
+                document.getElementById('ollama-attack-progress-bar').style.width = '0%';
+                document.getElementById('ollama-attack-progress-text').textContent = '0 / ' + requestCount + ' requests sent';
+                document.getElementById('ollama-attack-success-count').textContent = 'Success: 0';
+                document.getElementById('ollama-attack-failure-count').textContent = 'Failed: 0';
+                
+                // Generate random toppings for prompts
+                const toppings = ['pepperoni', 'mushrooms', 'sausage', 'peppers', 'onions', 'olives', 'pineapple', 'ham', 'bacon', 'spinach'];
+                
+                // Send requests
+                for (let i = 0; i < requestCount; i++) {
+                    const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
+                    const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
+                    
+                    const timeoutId = setTimeout(() => {
+                        if (!ollamaAttackInProgress) return;
+                        sendOllamaAttackRequest(prompt, i + 1, requestCount);
+                    }, i * 150); // Stagger requests
+                    
+                    ollamaAttackTimeouts.push(timeoutId);
+                }
+            }
+            
+            function sendOllamaAttackRequest(prompt, requestNum, totalRequests) {
+                const startTime = Date.now();
+                
+                fetch('/chat-with-ollama-dos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: prompt,
+                        api_token: null // No API token needed for local Ollama
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    ollamaAttackResults.total++;
+                    ollamaAttackResults.successful++;
+                    ollamaAttackResults.totalTime += responseTime;
+                    
+                    updateOllamaProgress(requestNum, totalRequests);
+                })
+                .catch(error => {
+                    ollamaAttackResults.total++;
+                    ollamaAttackResults.failed++;
+                    
+                    updateOllamaProgress(requestNum, totalRequests);
+                });
+            }
+            
+            function updateOllamaProgress(completed, total) {
+                const progress = (completed / total) * 100;
+                document.getElementById('ollama-attack-progress-bar').style.width = progress + '%';
+                document.getElementById('ollama-attack-progress-text').textContent = completed + ' / ' + total + ' requests sent';
+                document.getElementById('ollama-attack-success-count').textContent = 'Success: ' + ollamaAttackResults.successful;
+                document.getElementById('ollama-attack-failure-count').textContent = 'Failed: ' + ollamaAttackResults.failed;
+                
+                if (completed >= total) {
+                    finishOllamaAttack();
+                }
+            }
+            
+            function finishOllamaAttack() {
+                ollamaAttackInProgress = false;
+                
+                // Update UI
+                ollamaLaunchAttackBtn.disabled = false;
+                ollamaStopAttackBtn.disabled = true;
+                document.getElementById('ollama-attack-results').style.display = 'block';
+                
+                // Show results
+                document.getElementById('ollama-total-requests').textContent = ollamaAttackResults.total;
+                document.getElementById('ollama-total-success').textContent = ollamaAttackResults.successful;
+                document.getElementById('ollama-total-failed').textContent = ollamaAttackResults.failed;
+                document.getElementById('ollama-avg-response-time').textContent = 
+                    ollamaAttackResults.successful > 0 ? Math.round(ollamaAttackResults.totalTime / ollamaAttackResults.successful) + ' ms' : '0 ms';
+            }
+            
+            function stopOllamaAttack() {
+                ollamaAttackInProgress = false;
+                
+                // Cancel all pending timeouts
+                ollamaAttackTimeouts.forEach(timeoutId => {
+                    clearTimeout(timeoutId);
+                });
+                ollamaAttackTimeouts = [];
+                
+                finishOllamaAttack();
+            }
+            
+            // INSECURE: Load OpenAI API key from cookies on page load
+            loadApiKeysFromCookies();
         });
+
     </script>
 </body>
 </html>

@@ -272,11 +272,11 @@ def dos_attack():
 @app.route('/real-dos-attack')
 def real_dos_attack():
     """
-    Renders the LLM Real DoS Attack page.
-    This page demonstrates a real-world DoS attack against OpenAI's API,
+    Renders the LLM DoS Attack page with real attack functionality.
+    This page demonstrates both simulated and real DoS attacks,
     along with secure implementation using rate limiting.
     """
-    return render_template('real_dos_attack.html')
+    return render_template('dos_attack.html')
 
 @app.route('/pizza/<int:pizza_id>')
 def pizza_detail(pizza_id):
@@ -675,6 +675,56 @@ def llm_query():
                 'remaining_tokens': max_tokens_per_minute - 100   # Always shows plenty remaining
             }
         })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/chat-with-openai-dos', methods=['POST'])
+def chat_with_openai_dos():
+    """API endpoint for the OpenAI-based DoS attack demo - simple chat functionality"""
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # Getting OpenAI API key from user input
+        openai_api_key = data.get('api_token', '')
+        
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+            
+        if not openai_api_key:
+            return jsonify({'error': 'No OpenAI API key provided'}), 400
+        
+        # Import the OpenAI DoS module
+        from application.vulnerabilities.openai_dos import chat_with_openai
+        
+        # Call the simple chat function
+        response = chat_with_openai(message, openai_api_key)
+        
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/chat-with-ollama-dos', methods=['POST'])
+def chat_with_ollama_dos():
+    """API endpoint for the Ollama-based DoS attack demo - simple chat functionality"""
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Import the Ollama DoS module
+        from application.vulnerabilities.ollama_dos import chat_with_llm
+        
+        # Call the chat function (no API token needed for local Ollama)
+        response = chat_with_llm(message)
+        
+        return jsonify({'response': response})
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
