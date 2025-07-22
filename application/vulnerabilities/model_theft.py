@@ -19,10 +19,11 @@ def run_model_theft_attack(user_words=None):
     probing_samples = []
 
     # Add user-supplied words
-    for item in user_words:
-        word = item.get("word", "").strip().lower()
-        if word and word not in probing_samples:
-            probing_samples.append(word)
+    for word in user_words:
+        clean_word = word.strip().lower()
+        if clean_word:
+            probing_samples.append(clean_word)
+
 
     # Log for the process
     # Dictionary to store results
@@ -245,7 +246,7 @@ def run_model_theft_attack(user_words=None):
     
     # Attempt to detect and approximate words not directly probed
     # This is a more advanced technique that adversaries might use
-    logs.append("\nApplying vocabulary expansion to infer additional weights...")
+    # logs.append("\nApplying vocabulary expansion to infer additional weights...")
     
     # Get all vocabulary words that weren't directly probed
     missing_words = [word for word in vocabulary_list if word not in approximated_weights]
@@ -278,7 +279,7 @@ def run_model_theft_attack(user_words=None):
             approximated_weights[missing_word] = approximated_weights[base_word] * 0.95
             words_added += 1
     
-    logs.append(f"Added {words_added} additional word weights through inference")
+    # logs.append(f"Added {words_added} additional word weights through inference")
     
     # Log comparison between actual and approximated weights for evaluation
     for word in approximated_weights:

@@ -75,6 +75,7 @@
                     <h3>Add Words to Probing Set</h3>
                     <p>Try to add positive or negative words that may help you to steal weights</p>
                     <p>Of course you can only steal weights of words which are in the training data of our model</p>
+                    <p>Add at least two words for the attack to work</p>
 
                     <div class="words-form">
                         <div id="words-list">
@@ -87,28 +88,14 @@
                                 <input type="text" id="word-text" class="form-control" placeholder="Enter a word to probe...">
                             </div>
 
-                            <div class="form-group">
-                                <label>Sentiment</label>
-                                <div class="sentiment-selection">
-                                    <label class="radio-container">
-                                        <input type="radio" name="sentiment" value="positive" checked>
-                                        <span class="radio-label">Positive</span>
-                                    </label>
-                                    <label class="radio-container">
-                                        <input type="radio" name="sentiment" value="negative">
-                                        <span class="radio-label">Negative</span>
-                                    </label>
-                                </div>
+                            <div class="button-row">
+                                <button id="add-word-btn" class="btn">Add Word</button>
+                                <button id="start-attack" class="btn btn-danger">
+                                    <i class="fas fa-running"></i> Launch Attack
+                                </button>
                             </div>
-
-                            <button id="add-word-btn" class="btn">Add Word</button>
                         </div>
-                    </div>
 
-
-                    <button id="start-attack" class="btn btn-danger">
-                        <i class="fas fa-running"></i> Launch Attack
-                    </button>
                     
                     <div id="attack-loading" style="display: none;">
                         <div class="loading-animation">
@@ -376,20 +363,20 @@
 
         document.getElementById('add-word-btn').addEventListener('click', () => {
             const wordInput = document.getElementById('word-text');
-            const sentiment = document.querySelector('input[name="sentiment"]:checked').value;
             const word = wordInput.value.trim().toLowerCase();
 
             if (!word) return;
 
-            userProbingWords.push({ word, sentiment });
+            userProbingWords.push(word);  // Add plain string
 
             const list = document.getElementById('words-list');
             const item = document.createElement('div');
-            item.textContent = `${word} (${sentiment})`;
+            item.textContent = word;
             list.appendChild(item);
 
             wordInput.value = '';
         });
+
 
         document.getElementById('start-attack').addEventListener('click', async function() {
             // Show loading animation
