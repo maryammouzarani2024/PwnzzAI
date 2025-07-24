@@ -96,7 +96,15 @@
                             </div>
                         </div>
 
-                    
+                        <script>
+                        document.getElementById('word-text').addEventListener('keydown', function(event) {
+                            if (event.key === 'Enter') {
+                                event.preventDefault(); // Prevent form submission if any
+                                document.getElementById('add-word-btn').click();
+                            }
+                        });
+                        </script>
+
                     <div id="attack-loading" style="display: none;">
                         <div class="loading-animation">
                             <i class="fas fa-circle-notch fa-spin"></i>
