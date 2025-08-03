@@ -17,7 +17,7 @@ def search_pizza_price(pizza_type):
     conn = None
     try:
         # Connect to the database
-        conn = sqlite3.connect('application/instance/pizza_shop.db')
+        conn = sqlite3.connect('instance/pizza_shop.db')
         cursor = conn.cursor()
         
         print(f"DEBUG (Ollama): Connected to database")

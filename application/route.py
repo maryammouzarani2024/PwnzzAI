@@ -15,28 +15,28 @@ from application.vulnerabilities import model_theft
 
 
 # Simple LLM responses for demonstration
-class SimpleLLM:
-    def generate_response(self, prompt):
-        # Very simple response generation based on pizza-related keywords
-        prompt = prompt.lower()
+# class SimpleLLM:
+#     def generate_response(self, prompt):
+#         # Very simple response generation based on pizza-related keywords
+#         prompt = prompt.lower()
         
-        if "margherita" in prompt:
-            return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
-        elif "pepperoni" in prompt:
-            return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
-        elif "veggie" in prompt:
-            return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
-        elif "hawaiian" in prompt:
-            return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
-        elif "bbq" in prompt:
-            return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
-        elif "recommendation" in prompt or "suggest" in prompt:
-            return "I recommend trying our Pepperoni pizza. It's our most popular!"
-        else:
-            return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
+#         if "margherita" in prompt:
+#             return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
+#         elif "pepperoni" in prompt:
+#             return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
+#         elif "veggie" in prompt:
+#             return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
+#         elif "hawaiian" in prompt:
+#             return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
+#         elif "bbq" in prompt:
+#             return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
+#         elif "recommendation" in prompt or "suggest" in prompt:
+#             return "I recommend trying our Pepperoni pizza. It's our most popular!"
+#         else:
+#             return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
 
-# Initialize our simple LLM
-llm = SimpleLLM()
+# # Initialize our simple LLM
+# llm = SimpleLLM()
 
 # Create tables and initialize sample data
 with app.app_context():
