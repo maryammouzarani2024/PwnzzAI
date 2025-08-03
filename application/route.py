@@ -11,32 +11,33 @@ from application.model import Pizza, Comment
 
 from application.vulnerabilities import data_poisoning
 from application.vulnerabilities import model_theft
+from application import sentiment_model
 
 
 
 # Simple LLM responses for demonstration
-class SimpleLLM:
-    def generate_response(self, prompt):
-        # Very simple response generation based on pizza-related keywords
-        prompt = prompt.lower()
+# class SimpleLLM:
+#     def generate_response(self, prompt):
+#         # Very simple response generation based on pizza-related keywords
+#         prompt = prompt.lower()
         
-        if "margherita" in prompt:
-            return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
-        elif "pepperoni" in prompt:
-            return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
-        elif "veggie" in prompt:
-            return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
-        elif "hawaiian" in prompt:
-            return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
-        elif "bbq" in prompt:
-            return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
-        elif "recommendation" in prompt or "suggest" in prompt:
-            return "I recommend trying our Pepperoni pizza. It's our most popular!"
-        else:
-            return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
+#         if "margherita" in prompt:
+#             return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
+#         elif "pepperoni" in prompt:
+#             return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
+#         elif "veggie" in prompt:
+#             return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
+#         elif "hawaiian" in prompt:
+#             return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
+#         elif "bbq" in prompt:
+#             return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
+#         elif "recommendation" in prompt or "suggest" in prompt:
+#             return "I recommend trying our Pepperoni pizza. It's our most popular!"
+#         else:
+#             return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
 
-# Initialize our simple LLM
-llm = SimpleLLM()
+# # Initialize our simple LLM
+# llm = SimpleLLM()
 
 # Create tables and initialize sample data
 with app.app_context():
@@ -327,6 +328,7 @@ def add_comment(pizza_id):
         )
         db.session.add(comment)
         db.session.commit()
+        print("Comment added successfully.")
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
 
@@ -345,14 +347,10 @@ def generate_sentiment_model():
     import importlib
     import numpy as np
     
-    # Import and run the model.py script
-    model_module = importlib.import_module('application.sentiment_model')
     
     # Access the trained model and vectorizer from model.py
-    sentences = model_module.sentences
-    labels = model_module.labels
-    vectorizer = model_module.vectorizer
-    model = model_module.model
+   
+    sentences, labels,vectorizer, model = sentiment_model.create_model()
     
     # Get the vocabulary from the vectorizer
     vocabulary = vectorizer.get_feature_names_out()
@@ -402,12 +400,9 @@ def analyze_sentiment():
         return jsonify({'error': 'No text provided'}), 400
     
     # Import the model from model.py
-    import importlib
-    model_module = importlib.import_module('application.sentiment_model')
-    
-    # Use the model to predict sentiment
-    vectorizer = model_module.vectorizer
-    model = model_module.model
+    from application import sentiment_model
+    sentences, labels,vectorizer, model = sentiment_model.create_model()
+
     
     # Vectorize the input text
     text_vector = vectorizer.transform([text])

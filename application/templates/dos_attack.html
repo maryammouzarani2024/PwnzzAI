@@ -54,14 +54,14 @@
                 <!-- Main demo tabs -->
                 <div class="model-tabs">
                     <div class="tab-headers">
-                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
+                        <div class="tab-header active" data-tab="openai-model">OpenAI Model</div>
                         <div class="tab-header" data-tab="ollama-model">Free Model</div>
-                        <div class="tab-header active" data-tab="blenderbot-model">DoS Simulation </div>
+                        <div class="tab-header " data-tab="blenderbot-model">DoS Simulation </div>
 
                     </div>
                 
                     <!-- OpenAI Tab Content -->
-                    <div class="tab-content" id="openai-model-tab">
+                    <div class="tab-content active" id="openai-model-tab">
                         <div class="model-implementation-section">
                             <div class="attack-section-container">
                                         <div class="warning-box">
@@ -166,7 +166,7 @@
                
 
                     <!-- Simulation Attack Section -->
-                    <div class="tab-content active" id="blenderbot-model-tab">
+                    <div class="tab-content " id="blenderbot-model-tab">
                         <div class="model-implementation-section">
                             <div class="attack-section-container">
                         
@@ -501,7 +501,6 @@
         }
         
         #openai-model-tab {
-            background-color: #ffe8e8 !important; /* Debug for OpenAI tab specifically */
             min-height: 200px;
         }
         .warning-box i {
@@ -1217,6 +1216,7 @@
                     }
                     if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
                     if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
+                    if (launchAttackBtn) launchAttackBtn.disabled = false;
                     console.log("INSECURE: OpenAI API Token loaded from cookie:", savedOpenaiToken);
                 }
             }
@@ -1261,6 +1261,9 @@
                     // Enable OpenAI chat interface
                     openaiUserMessageInput.disabled = false;
                     openaiSendMessageButton.disabled = false;
+                    
+                    // Enable OpenAI attack button
+                    if (launchAttackBtn) launchAttackBtn.disabled = false;
                     
                     // Add welcome message
                     addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza recipes and information. Try asking about pizza recipes or ingredients.");
@@ -1521,6 +1524,7 @@
             // OpenAI attack variables
             let openaiAttackInProgress = false;
             let openaiAttackRequests = [];
+            let openaiAttackTimeouts = [];
             let openaiAttackResults = {
                 total: 0,
                 successful: 0,
@@ -1718,6 +1722,7 @@
                 
                 openaiAttackInProgress = true;
                 openaiAttackResults = { total: 0, successful: 0, failed: 0, totalCost: 0 };
+                openaiAttackTimeouts = []; // Clear any existing timeouts
                 
                 // Update UI
                 launchAttackBtn.disabled = true;
@@ -1739,10 +1744,12 @@
                     const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
                     const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
                     
-                    setTimeout(() => {
+                    const timeoutId = setTimeout(() => {
                         if (!openaiAttackInProgress) return;
                         sendOpenAIAttackRequest(prompt, i + 1, requestCount);
                     }, i * 200); // Stagger requests more for OpenAI
+                    
+                    openaiAttackTimeouts.push(timeoutId);
                 }
             }
             
@@ -1773,14 +1780,16 @@
                 });
             }
             
-            function updateOpenAIProgress(completed, total) {
-                const progress = (completed / total) * 100;
+            function updateOpenAIProgress(requestNum, totalRequests) {
+                const completed = openaiAttackResults.total;
+                const progress = (completed / totalRequests) * 100;
                 document.getElementById('attack-progress-bar').style.width = progress + '%';
-                document.getElementById('attack-progress-text').textContent = completed + ' / ' + total + ' requests sent';
+                document.getElementById('attack-progress-text').textContent = completed + ' / ' + totalRequests + ' requests completed';
                 document.getElementById('attack-success-count').textContent = 'Success: ' + openaiAttackResults.successful;
                 document.getElementById('attack-failure-count').textContent = 'Failed: ' + openaiAttackResults.failed;
                 
-                if (completed >= total) {
+                // Only finish if attack is still in progress and all requests completed
+                if (openaiAttackInProgress && completed >= totalRequests) {
                     finishOpenAIAttack();
                 }
             }
@@ -1802,6 +1811,13 @@
             
             function stopOpenAIAttack() {
                 openaiAttackInProgress = false;
+                
+                // Cancel all pending timeouts
+                openaiAttackTimeouts.forEach(timeoutId => {
+                    clearTimeout(timeoutId);
+                });
+                openaiAttackTimeouts = [];
+                
                 finishOpenAIAttack();
             }
             

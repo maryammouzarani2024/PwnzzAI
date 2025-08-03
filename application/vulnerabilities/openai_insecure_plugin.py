@@ -10,7 +10,7 @@ def get_pizza_price(pizza_type):
     conn = None
     try:
         # Connect to the database (assuming SQLite for this demo)
-        conn = sqlite3.connect('application/instance/pizza_shop.db')
+        conn = sqlite3.connect('instance/pizza_shop.db')
         cursor = conn.cursor()
         print("DEBUG: Connected to database")
         
