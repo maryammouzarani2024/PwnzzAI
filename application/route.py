@@ -11,6 +11,7 @@ from application.model import Pizza, Comment
 
 from application.vulnerabilities import data_poisoning
 from application.vulnerabilities import model_theft
+from application import sentiment_model
 
 
 
@@ -327,6 +328,7 @@ def add_comment(pizza_id):
         )
         db.session.add(comment)
         db.session.commit()
+        print("Comment added successfully.")
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
 
@@ -345,14 +347,10 @@ def generate_sentiment_model():
     import importlib
     import numpy as np
     
-    # Import and run the model.py script
-    model_module = importlib.import_module('application.sentiment_model')
     
     # Access the trained model and vectorizer from model.py
-    sentences = model_module.sentences
-    labels = model_module.labels
-    vectorizer = model_module.vectorizer
-    model = model_module.model
+   
+    sentences, labels,vectorizer, model = sentiment_model.create_model()
     
     # Get the vocabulary from the vectorizer
     vocabulary = vectorizer.get_feature_names_out()
@@ -402,12 +400,9 @@ def analyze_sentiment():
         return jsonify({'error': 'No text provided'}), 400
     
     # Import the model from model.py
-    import importlib
-    model_module = importlib.import_module('application.sentiment_model')
-    
-    # Use the model to predict sentiment
-    vectorizer = model_module.vectorizer
-    model = model_module.model
+    from application import sentiment_model
+    sentences, labels,vectorizer, model = sentiment_model.create_model()
+
     
     # Vectorize the input text
     text_vector = vectorizer.transform([text])

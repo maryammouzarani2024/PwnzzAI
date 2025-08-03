@@ -8,10 +8,9 @@ def run_model_theft_attack(user_words=None):
         user_words = []
 
     # Import trained model and vectorizer
-    import importlib
-    model_module = importlib.import_module('application.sentiment_model')
-    model = model_module.model
-    vectorizer = model_module.vectorizer
+    from application import sentiment_model
+    sentences, labels,vectorizer, model = sentiment_model.create_model()
+
 
     # Build base probing set from vocabulary, if you want all words to be in from the beginning
     #probing_samples = list(vectorizer.vocabulary_.keys())
@@ -39,17 +38,9 @@ def run_model_theft_attack(user_words=None):
         text = f"This is {sample}."
         logs.append(f"Probing with: '{text}'")
         
-        # In a real attack, the attacker would use the public API
-        # Here we'll simulate API calls by using the sentiment analysis logic directly
-        # but in a more realistic scenario, this would be actual HTTP requests
-
+        
         try:
-            # In a real attack, this would be a call to the API endpoint
-            model_module = importlib.import_module('application.sentiment_model')
-            vectorizer = model_module.vectorizer
-            model = model_module.model
-
-
+           
             # Extract actual model weights using the trained vocabulary
             actual_weights = {
             word: model.coef_[0][vectorizer.vocabulary_[word]]
