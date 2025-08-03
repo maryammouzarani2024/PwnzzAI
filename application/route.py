@@ -207,6 +207,35 @@ def chat_with_pizza_assistant():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/chat-with-pizza-assistant-direct-prompt-injection', methods=['POST'])
+def chat_with_pizza_assistant_direct_prompt():
+    """API endpoint for the pizza assistant chat - using insecure plugin design"""
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # Get API token - note it's not needed with our local model but kept for UI consistency
+        api_token = data.get('api_token', '')
+        
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Import the conversational model plugin system
+        from application.vulnerabilities.ollama_direct_prompt_injection import chat_with_ollama_direct_prompt_injection
+        
+        # The vulnerability: Directly passing user message to the LLM+plugin system
+        # where the LLM can control function execution
+        response = chat_with_ollama_direct_prompt_injection(message)
+        
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 @app.route('/chat-with-openai-plugin', methods=['POST'])
 def chat_with_openai_plugin():
     """API endpoint for the OpenAI-based insecure plugin demo"""
@@ -728,6 +757,11 @@ def chat_with_ollama_dos():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/direct-prompt-injection')
+def direct_prompt_injection():
+    return render_template('direct_prompt_injection.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
