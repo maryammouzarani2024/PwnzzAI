@@ -216,6 +216,7 @@ def chat_with_pizza_assistant_direct_prompt():
         # Get data from request
         data = request.get_json()
         message = data.get('message', '')
+        level = data.get("level", "1")  # default to level 1
         
         # Get API token - note it's not needed with our local model but kept for UI consistency
         api_token = data.get('api_token', '')
@@ -228,8 +229,9 @@ def chat_with_pizza_assistant_direct_prompt():
         
         # The vulnerability: Directly passing user message to the LLM+plugin system
         # where the LLM can control function execution
-        response = chat_with_ollama_direct_prompt_injection(message)
-        
+        response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name="mistral:7b")
+
+
         return jsonify({'response': response})
         
     except Exception as e:
