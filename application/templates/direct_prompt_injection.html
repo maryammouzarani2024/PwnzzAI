@@ -82,6 +82,9 @@
                                     <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
                                     <button id="send-message">Send</button>
                                 </div>
+                                <div class="chat-export">
+                                <button id="export-chat-ollama" class="export-button">Export Chat as .txt</button>
+                            </div>
                             </div>
                         </div>
                         </div>
@@ -128,42 +131,45 @@
                                     <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." disabled>
                                     <button id="openai-send-message" disabled>Send</button>
                                 </div>
+                                <div class="chat-export">
+                                <button id="export-chat-openai" class="export-button">Export Chat as .txt</button>
                             </div>
-                            
+                            </div>
+        </details>
                                    
-    <details class="description-dropdown">
-        <summary class="dropdown-title">Mitigation Strategies</summary>
-        <div class="dropdown-content">
-            <section class="section-box">
-                <div class="vulnerability-summary">
-            <h4>Common Security Issues in Both Implementations:</h4>
-            <ul>
-                <li>The LLM has complete control over which functions are called</li>
-                <li>The LLM decides what parameters are passed to the functions</li>
-                <li>A malicious prompt could trick the model into calling dangerous functions</li>
-                <li>There's no validation of function parameters before execution</li>
-                <li>There's no restriction on what functions can be called</li>
-                <li>The system blindly trusts the model's decisions without proper security checks</li>
-            </ul>
-        </div>
-                <div class="security-tip">
-                    <h3><i class="fas "></i> Secure Alternative</h3>
-                    <p>A secure implementation would address both plugin security and SQL injection:</p>
-                    <ul>
-                        <li><strong>SQL Injection Prevention:</strong> Use parameterized queries instead of string concatenation</li>
-                        <li><strong>Input Validation:</strong> Validate and sanitize all parameters before function execution</li>
-                        <li><strong>Limited Database Access:</strong> Use ORM with proper access controls instead of raw SQL</li>
-                        <li><strong>Plugin Sandboxing:</strong> Run plugins in isolated environments with restricted permissions</li>
-                        <li><strong>Function Allowlisting:</strong> Use a limited set of pre-approved functions only</li>
-                        <li><strong>Error Handling:</strong> Never expose database errors or internal system details to users</li>
-                    </ul>
-                    <p>Example of a secure implementation:</p>
-                    
-                </div>
-            </section>
-        </div>
-    </details>
-        </div>
+        <details class="description-dropdown">
+            <summary class="dropdown-title">Mitigation Strategies</summary>
+            <div class="dropdown-content">
+                <section class="section-box">
+                    <div class="vulnerability-summary">
+                <h4>Common Security Issues in Both Implementations:</h4>
+                <ul>
+                    <li>The LLM has complete control over which functions are called</li>
+                    <li>The LLM decides what parameters are passed to the functions</li>
+                    <li>A malicious prompt could trick the model into calling dangerous functions</li>
+                    <li>There's no validation of function parameters before execution</li>
+                    <li>There's no restriction on what functions can be called</li>
+                    <li>The system blindly trusts the model's decisions without proper security checks</li>
+                </ul>
+            </div>
+                    <div class="security-tip">
+                        <h3><i class="fas "></i> Secure Alternative</h3>
+                        <p>A secure implementation would address both plugin security and SQL injection:</p>
+                        <ul>
+                            <li><strong>SQL Injection Prevention:</strong> Use parameterized queries instead of string concatenation</li>
+                            <li><strong>Input Validation:</strong> Validate and sanitize all parameters before function execution</li>
+                            <li><strong>Limited Database Access:</strong> Use ORM with proper access controls instead of raw SQL</li>
+                            <li><strong>Plugin Sandboxing:</strong> Run plugins in isolated environments with restricted permissions</li>
+                            <li><strong>Function Allowlisting:</strong> Use a limited set of pre-approved functions only</li>
+                            <li><strong>Error Handling:</strong> Never expose database errors or internal system details to users</li>
+                        </ul>
+                        <p>Example of a secure implementation:</p>
+                        
+                    </div>
+                </section>
+            </div>
+        </details>
+            </div>
     </main>
 
     <script>
@@ -175,6 +181,14 @@
             dpiLevelSelector.addEventListener('change', () => {
                 selectedDpiLevel = dpiLevelSelector.value;
             });
+
+            const dpiLevelSelectorOpenAI = document.getElementById('dpi-level-openai');
+            let selectedDpiLevelOpenAI = dpiLevelSelectorOpenAI.value;
+
+            dpiLevelSelectorOpenAI.addEventListener('change', () => {
+                selectedDpiLevelOpenAI = dpiLevelSelectorOpenAI.value;
+            });
+
 
             // BlenderBot tab elements
             const userMessageInput = document.getElementById('user-message');
@@ -378,16 +392,17 @@
                 
                 // INSECURE: Send OpenAI API key directly to OpenAI through our backend
                 fetch('/chat-with-openai-plugin-direct-prompt', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: userMessage,
-                        level: selectedDpiLevel,
-                        api_token: openaiApiToken // INSECURE! Using user-provided OpenAI API key
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    level: selectedDpiLevelOpenAI,
+                    api_token: openaiApiToken
                 })
+            })
+
                 .then(response => response.json())
                 .then(data => {
                     // Remove thinking indicator
@@ -439,7 +454,7 @@
             loadApiKeysFromCookies();
         });
 
-        document.getElementById('send-message').addEventListener('click', () => {
+        /*document.getElementById('send-message').addEventListener('click', () => {
             const message = document.getElementById('user-message').value;
 
         fetch('/chat-with-pizza-assistant-direct-prompt-injection', {
@@ -447,7 +462,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
             message: message,
-            level: document.getElementById('dpi-level').value  // <-- Important: get selected level
+            level: document.getElementById('dpi-level').value
             })
         })
         .then(response => response.json())
@@ -481,29 +496,56 @@
         if (event.key === 'Enter') {
             document.getElementById('send-message').click();
         }
+        });*/
+
+        // Export Ollama/BlenderBot chat
+        document.getElementById('export-chat-ollama').addEventListener('click', () => {
+            const messages = document.querySelectorAll('#chat-messages .message');
+            let exportText = '';
+
+            messages.forEach(msg => {
+                const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
+                const text = msg.textContent.trim();
+                exportText += `${sender}: ${text}\n\n`;
+            });
+
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ollama_chat_export.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
-        document.getElementById('export-chat').addEventListener('click', () => {
-    const messages = document.querySelectorAll('#chat-messages .message');
-    let exportText = '';
 
-    messages.forEach(msg => {
-        const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
-        const text = msg.textContent.trim();
-        exportText += `${sender}: ${text}\n\n`;
-    });
+        // Export OpenAI chat
+        document.getElementById('export-chat-openai').addEventListener('click', () => {
+            const messages = document.querySelectorAll('#openai-chat-messages .message');
+            let exportText = '';
 
-    const blob = new Blob([exportText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+            messages.forEach(msg => {
+                const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
+                const text = msg.textContent.trim();
+                exportText += `${sender}: ${text}\n\n`;
+            });
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chat_export.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-});
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'openai_chat_export.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+
 
         </script>
 </body>
