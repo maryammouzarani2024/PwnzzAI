@@ -1430,3 +1430,18 @@ code {
     border: none;
     background-color: #2d3748;
 }
+
+.export-button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    background-color: #2522e6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.export-button:hover {
+    background-color: #2522e6;
+}
