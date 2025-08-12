@@ -98,66 +98,6 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- DoS Attack Section -->
-                                        <div class="attack-section">
-                                            <h3>DoS Attack Demonstration</h3>
-                                            <p>Once connected, you can simulate a DoS attack by rapidly sending multiple requests to overwhelm the OpenAI API. <strong>This will use your API credits and cost money!</strong></p>
-                                            
-                                            <div class="attack-controls">
-                                                <div class="attack-settings">
-                                                    <div class="form-group">
-                                                        <label for="attack-request-count">Number of Requests:</label>
-                                                        <input type="number" id="attack-request-count" class="form-control" value="10" min="1" max="50">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="attack-prompt-template">Prompt Template:</label>
-                                                        <textarea id="attack-prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="attack-buttons">
-                                                    <button id="launch-attack-btn" class="btn btn-danger" disabled>
-                                                        <i class="fas fa-bomb"></i> Launch DoS Attack
-                                                    </button>
-                                                    <button id="stop-attack-btn" class="btn btn-secondary" disabled>
-                                                        <i class="fas fa-stop-circle"></i> Stop Attack
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div id="attack-progress" class="attack-progress" style="display: none;">
-                                                <div class="progress-bar-container">
-                                                    <div id="attack-progress-bar" class="progress-bar"></div>
-                                                </div>
-                                                <div class="progress-stats">
-                                                    <span id="attack-progress-text">0 / 0 requests sent</span>
-                                                    <span id="attack-success-count">Success: 0</span>
-                                                    <span id="attack-failure-count">Failed: 0</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div id="attack-results" class="attack-results" style="display: none;">
-                                                <h4>Attack Results</h4>
-                                                <div class="results-stats">
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Total Requests</div>
-                                                        <div id="total-requests" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Successful</div>
-                                                        <div id="total-success" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Failed</div>
-                                                        <div id="total-failed" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Estimated Cost</div>
-                                                        <div id="estimated-cost" class="stat-value">$0.00</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                             </div>
                         </div>
@@ -332,66 +272,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- DoS Attack Section -->
-                                        <div class="attack-section">
-                                            <h3>DoS Attack Demonstration</h3>
-                                            <p>This will send multiple requests to your local Ollama installation to demonstrate DoS attack patterns. <strong>This will consume local system resources!</strong></p>
-                                            
-                                            <div class="attack-controls">
-                                                <div class="attack-settings">
-                                                    <div class="form-group">
-                                                        <label for="ollama-attack-request-count">Number of Requests:</label>
-                                                        <input type="number" id="ollama-attack-request-count" class="form-control" value="10" min="1" max="50">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="ollama-attack-prompt-template">Prompt Template:</label>
-                                                        <textarea id="ollama-attack-prompt-template" class="form-control" rows="3">Generate a detailed pizza recipe with the following toppings: {random_toppings}. Include cooking time and temperature.</textarea>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="attack-buttons">
-                                                    <button id="ollama-launch-attack-btn" class="btn btn-danger">
-                                                        <i class="fas fa-bomb"></i> Launch DoS Attack
-                                                    </button>
-                                                    <button id="ollama-stop-attack-btn" class="btn btn-secondary" disabled>
-                                                        <i class="fas fa-stop-circle"></i> Stop Attack
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div id="ollama-attack-progress" class="attack-progress" style="display: none;">
-                                                <div class="progress-bar-container">
-                                                    <div id="ollama-attack-progress-bar" class="progress-bar"></div>
-                                                </div>
-                                                <div class="progress-stats">
-                                                    <span id="ollama-attack-progress-text">0 / 0 requests sent</span>
-                                                    <span id="ollama-attack-success-count">Success: 0</span>
-                                                    <span id="ollama-attack-failure-count">Failed: 0</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div id="ollama-attack-results" class="attack-results" style="display: none;">
-                                                <h4>Attack Results</h4>
-                                                <div class="results-stats">
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Total Requests</div>
-                                                        <div id="ollama-total-requests" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Successful</div>
-                                                        <div id="ollama-total-success" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Failed</div>
-                                                        <div id="ollama-total-failed" class="stat-value">0</div>
-                                                    </div>
-                                                    <div class="result-stat">
-                                                        <div class="stat-label">Avg Response Time</div>
-                                                        <div id="ollama-avg-response-time" class="stat-value">0 ms</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                             </div>
                         </div>
                     </div>
@@ -1216,7 +1096,6 @@
                     }
                     if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
                     if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
-                    if (launchAttackBtn) launchAttackBtn.disabled = false;
                     console.log("INSECURE: OpenAI API Token loaded from cookie:", savedOpenaiToken);
                 }
             }
@@ -1261,9 +1140,6 @@
                     // Enable OpenAI chat interface
                     openaiUserMessageInput.disabled = false;
                     openaiSendMessageButton.disabled = false;
-                    
-                    // Enable OpenAI attack button
-                    if (launchAttackBtn) launchAttackBtn.disabled = false;
                     
                     // Add welcome message
                     addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza recipes and information. Try asking about pizza recipes or ingredients.");
@@ -1505,10 +1381,6 @@
             // Attack button event handlers
             const simAttackBtn = document.getElementById('sim-attack-btn');
             const simStopAttackBtn = document.getElementById('sim-stop-attack-btn');
-            const launchAttackBtn = document.getElementById('launch-attack-btn');
-            const stopAttackBtn = document.getElementById('stop-attack-btn');
-            const ollamaLaunchAttackBtn = document.getElementById('ollama-launch-attack-btn');
-            const ollamaStopAttackBtn = document.getElementById('ollama-stop-attack-btn');
             
             // Simulation attack variables
             let simAttackInProgress = false;
@@ -1521,27 +1393,6 @@
                 totalTime: 0
             };
             
-            // OpenAI attack variables
-            let openaiAttackInProgress = false;
-            let openaiAttackRequests = [];
-            let openaiAttackTimeouts = [];
-            let openaiAttackResults = {
-                total: 0,
-                successful: 0,
-                failed: 0,
-                totalCost: 0
-            };
-            
-            // Ollama attack variables
-            let ollamaAttackInProgress = false;
-            let ollamaAttackRequests = [];
-            let ollamaAttackTimeouts = [];
-            let ollamaAttackResults = {
-                total: 0,
-                successful: 0,
-                failed: 0,
-                totalTime: 0
-            };
             
             // Simulation attack button handler
             if (simAttackBtn) {
@@ -1562,43 +1413,6 @@
                 });
             }
             
-            // OpenAI attack button handler
-            if (launchAttackBtn) {
-                launchAttackBtn.addEventListener('click', function() {
-                    if (openaiAttackInProgress) return;
-                    
-                    const requestCount = parseInt(document.getElementById('attack-request-count').value);
-                    const promptTemplate = document.getElementById('attack-prompt-template').value;
-                    
-                    startOpenAIAttack(requestCount, promptTemplate);
-                });
-            }
-            
-            // OpenAI stop attack button handler
-            if (stopAttackBtn) {
-                stopAttackBtn.addEventListener('click', function() {
-                    stopOpenAIAttack();
-                });
-            }
-            
-            // Ollama attack button handler
-            if (ollamaLaunchAttackBtn) {
-                ollamaLaunchAttackBtn.addEventListener('click', function() {
-                    if (ollamaAttackInProgress) return;
-                    
-                    const requestCount = parseInt(document.getElementById('ollama-attack-request-count').value);
-                    const promptTemplate = document.getElementById('ollama-attack-prompt-template').value;
-                    
-                    startOllamaAttack(requestCount, promptTemplate);
-                });
-            }
-            
-            // Ollama stop attack button handler
-            if (ollamaStopAttackBtn) {
-                ollamaStopAttackBtn.addEventListener('click', function() {
-                    stopOllamaAttack();
-                });
-            }
             
             // Simulation attack functions
             function startSimulationAttack(requestCount, promptTemplate) {
@@ -1713,113 +1527,6 @@
                 finishSimulationAttack();
             }
             
-            // OpenAI attack functions
-            function startOpenAIAttack(requestCount, promptTemplate) {
-                if (!openaiApiToken) {
-                    alert('Please connect to OpenAI API first');
-                    return;
-                }
-                
-                openaiAttackInProgress = true;
-                openaiAttackResults = { total: 0, successful: 0, failed: 0, totalCost: 0 };
-                openaiAttackTimeouts = []; // Clear any existing timeouts
-                
-                // Update UI
-                launchAttackBtn.disabled = true;
-                stopAttackBtn.disabled = false;
-                document.getElementById('attack-progress').style.display = 'block';
-                document.getElementById('attack-results').style.display = 'none';
-                
-                // Reset progress
-                document.getElementById('attack-progress-bar').style.width = '0%';
-                document.getElementById('attack-progress-text').textContent = '0 / ' + requestCount + ' requests sent';
-                document.getElementById('attack-success-count').textContent = 'Success: 0';
-                document.getElementById('attack-failure-count').textContent = 'Failed: 0';
-                
-                // Generate random toppings for prompts
-                const toppings = ['pepperoni', 'mushrooms', 'sausage', 'peppers', 'onions', 'olives', 'pineapple', 'ham', 'bacon', 'spinach'];
-                
-                // Send requests
-                for (let i = 0; i < requestCount; i++) {
-                    const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
-                    const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
-                    
-                    const timeoutId = setTimeout(() => {
-                        if (!openaiAttackInProgress) return;
-                        sendOpenAIAttackRequest(prompt, i + 1, requestCount);
-                    }, i * 200); // Stagger requests more for OpenAI
-                    
-                    openaiAttackTimeouts.push(timeoutId);
-                }
-            }
-            
-            function sendOpenAIAttackRequest(prompt, requestNum, totalRequests) {
-                fetch('/chat-with-openai-dos', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: prompt,
-                        api_token: openaiApiToken
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    openaiAttackResults.total++;
-                    openaiAttackResults.successful++;
-                    openaiAttackResults.totalCost += 0.002; // Rough estimate per request
-                    
-                    updateOpenAIProgress(requestNum, totalRequests);
-                })
-                .catch(error => {
-                    openaiAttackResults.total++;
-                    openaiAttackResults.failed++;
-                    
-                    updateOpenAIProgress(requestNum, totalRequests);
-                });
-            }
-            
-            function updateOpenAIProgress(requestNum, totalRequests) {
-                const completed = openaiAttackResults.total;
-                const progress = (completed / totalRequests) * 100;
-                document.getElementById('attack-progress-bar').style.width = progress + '%';
-                document.getElementById('attack-progress-text').textContent = completed + ' / ' + totalRequests + ' requests completed';
-                document.getElementById('attack-success-count').textContent = 'Success: ' + openaiAttackResults.successful;
-                document.getElementById('attack-failure-count').textContent = 'Failed: ' + openaiAttackResults.failed;
-                
-                // Only finish if attack is still in progress and all requests completed
-                if (openaiAttackInProgress && completed >= totalRequests) {
-                    finishOpenAIAttack();
-                }
-            }
-            
-            function finishOpenAIAttack() {
-                openaiAttackInProgress = false;
-                
-                // Update UI
-                launchAttackBtn.disabled = false;
-                stopAttackBtn.disabled = true;
-                document.getElementById('attack-results').style.display = 'block';
-                
-                // Show results
-                document.getElementById('total-requests').textContent = openaiAttackResults.total;
-                document.getElementById('total-success').textContent = openaiAttackResults.successful;
-                document.getElementById('total-failed').textContent = openaiAttackResults.failed;
-                document.getElementById('estimated-cost').textContent = '$' + openaiAttackResults.totalCost.toFixed(2);
-            }
-            
-            function stopOpenAIAttack() {
-                openaiAttackInProgress = false;
-                
-                // Cancel all pending timeouts
-                openaiAttackTimeouts.forEach(timeoutId => {
-                    clearTimeout(timeoutId);
-                });
-                openaiAttackTimeouts = [];
-                
-                finishOpenAIAttack();
-            }
             
             // Service Health Monitor functionality
             const healthTestBtn = document.getElementById('health-test-btn');
@@ -2038,112 +1745,6 @@
             // Initialize health monitoring as disabled
             disableHealthMonitoring();
             
-            // Ollama attack functions
-            function startOllamaAttack(requestCount, promptTemplate) {
-                ollamaAttackInProgress = true;
-                ollamaAttackResults = { total: 0, successful: 0, failed: 0, totalTime: 0 };
-                ollamaAttackTimeouts = []; // Clear any existing timeouts
-                
-                // Update UI
-                ollamaLaunchAttackBtn.disabled = true;
-                ollamaStopAttackBtn.disabled = false;
-                document.getElementById('ollama-attack-progress').style.display = 'block';
-                document.getElementById('ollama-attack-results').style.display = 'none';
-                
-                // Reset progress
-                document.getElementById('ollama-attack-progress-bar').style.width = '0%';
-                document.getElementById('ollama-attack-progress-text').textContent = '0 / ' + requestCount + ' requests sent';
-                document.getElementById('ollama-attack-success-count').textContent = 'Success: 0';
-                document.getElementById('ollama-attack-failure-count').textContent = 'Failed: 0';
-                
-                // Generate random toppings for prompts
-                const toppings = ['pepperoni', 'mushrooms', 'sausage', 'peppers', 'onions', 'olives', 'pineapple', 'ham', 'bacon', 'spinach'];
-                
-                // Send requests
-                for (let i = 0; i < requestCount; i++) {
-                    const randomToppings = toppings.sort(() => 0.5 - Math.random()).slice(0, 3).join(', ');
-                    const prompt = promptTemplate.replace('{random_toppings}', randomToppings);
-                    
-                    const timeoutId = setTimeout(() => {
-                        if (!ollamaAttackInProgress) return;
-                        sendOllamaAttackRequest(prompt, i + 1, requestCount);
-                    }, i * 150); // Stagger requests
-                    
-                    ollamaAttackTimeouts.push(timeoutId);
-                }
-            }
-            
-            function sendOllamaAttackRequest(prompt, requestNum, totalRequests) {
-                const startTime = Date.now();
-                
-                fetch('/chat-with-ollama-dos', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: prompt,
-                        api_token: null // No API token needed for local Ollama
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const endTime = Date.now();
-                    const responseTime = endTime - startTime;
-                    
-                    ollamaAttackResults.total++;
-                    ollamaAttackResults.successful++;
-                    ollamaAttackResults.totalTime += responseTime;
-                    
-                    updateOllamaProgress(requestNum, totalRequests);
-                })
-                .catch(error => {
-                    ollamaAttackResults.total++;
-                    ollamaAttackResults.failed++;
-                    
-                    updateOllamaProgress(requestNum, totalRequests);
-                });
-            }
-            
-            function updateOllamaProgress(completed, total) {
-                const progress = (completed / total) * 100;
-                document.getElementById('ollama-attack-progress-bar').style.width = progress + '%';
-                document.getElementById('ollama-attack-progress-text').textContent = completed + ' / ' + total + ' requests sent';
-                document.getElementById('ollama-attack-success-count').textContent = 'Success: ' + ollamaAttackResults.successful;
-                document.getElementById('ollama-attack-failure-count').textContent = 'Failed: ' + ollamaAttackResults.failed;
-                
-                if (completed >= total) {
-                    finishOllamaAttack();
-                }
-            }
-            
-            function finishOllamaAttack() {
-                ollamaAttackInProgress = false;
-                
-                // Update UI
-                ollamaLaunchAttackBtn.disabled = false;
-                ollamaStopAttackBtn.disabled = true;
-                document.getElementById('ollama-attack-results').style.display = 'block';
-                
-                // Show results
-                document.getElementById('ollama-total-requests').textContent = ollamaAttackResults.total;
-                document.getElementById('ollama-total-success').textContent = ollamaAttackResults.successful;
-                document.getElementById('ollama-total-failed').textContent = ollamaAttackResults.failed;
-                document.getElementById('ollama-avg-response-time').textContent = 
-                    ollamaAttackResults.successful > 0 ? Math.round(ollamaAttackResults.totalTime / ollamaAttackResults.successful) + ' ms' : '0 ms';
-            }
-            
-            function stopOllamaAttack() {
-                ollamaAttackInProgress = false;
-                
-                // Cancel all pending timeouts
-                ollamaAttackTimeouts.forEach(timeoutId => {
-                    clearTimeout(timeoutId);
-                });
-                ollamaAttackTimeouts = [];
-                
-                finishOllamaAttack();
-            }
             
             // INSECURE: Load OpenAI API key from cookies on page load
             loadApiKeysFromCookies();
