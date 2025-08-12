@@ -46,9 +46,14 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                
-                <p> To demonstrate this class of vulnerability, we focus on a common but dangerous scenario involving model file formats in frameworks like PyTorch. </p>
-                <p>Files such as .pt, .pth, or .pkl are often assumed to contain only model weights. However, when a model is saved using torch.save() on the entire object—instead of just the state_dict()—it serializes both the model data and the underlying Python code.</p>
-                <p> If an attacker embeds malicious logic in the __init__ method of a custom class, that code will automatically execute during deserialization with torch.load(). Simply loading the model is enough to trigger the attack, potentially leading to arbitrary system commands, data leaks, or full system compromise—making these files effective Trojan horses.</p>
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <p> To demonstrate this class of vulnerability, we focus on a common but dangerous scenario involving model file formats in frameworks like PyTorch. </p>
+                            <p>Files such as .pt, .pth, or .pkl are often assumed to contain only model weights. However, when a model is saved using torch.save() on the entire object—instead of just the state_dict()—it serializes both the model data and the underlying Python code.</p>
+                            <p> If an attacker embeds malicious logic in the __init__ method of a custom class, that code will automatically execute during deserialization with torch.load(). Simply loading the model is enough to trigger the attack, potentially leading to arbitrary system commands, data leaks, or full system compromise—making these files effective Trojan horses.</p>
+                        </div>
+                        <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/supply chain.png') }}" alt="Supply Chain Attack Diagram" class="demonstration-image">
+                    </div>
                 <h2>XSS Example</h2>
                 <p>Below is an example where a malicious JavaScript payload is embedded in the __init__ method of a custom SentimentModel class. When the model is loaded in a web-based environment, the payload is immediately executed on the client side.</p>
                 <p> This could be used to exfiltrate data, manipulate the DOM, or run any arbitrary JavaScript code. The payload here is illustrative—you can replace it with any other JavaScript to simulate different attack scenarios.</p>

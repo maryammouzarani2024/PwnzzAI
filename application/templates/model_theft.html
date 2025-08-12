@@ -21,7 +21,6 @@
 
     <main class="container">
         <h1>Model Theft Attack</h1>
-        
         <div class="model-theft-content">
             <details class="description-dropdown">
                 <summary class="dropdown-title">Description</summary>
@@ -68,15 +67,24 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                                        
-                <div class="attack-container">
-                    <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
-                    
-                    <h3>Add Words to Probing Set</h3>
-                    <p>Try to add positive or negative words that may help you to steal weights</p>
-                    <p>Of course you can only steal weights of words which are in the training data of our model</p>
-                    <p>Add at least two words for the attack to work</p>
 
+                <div class="attack-container">
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <p>Click the button below to start a model theft attack against our sentiment analysis model. This will demonstrate how an attacker can approximate model weights through API requests.</p>
+                             <p class="image-caption"> Model theft attack process: An attacker queries the model repeatedly to extract its knowledge and create a duplicate</p>
+                             <h3>Add Words to Probing Set</h3>
+                            <p>Try to add positive or negative words that may help you to steal weights</p>
+                            <p>Of course you can only steal weights of words which are in the training data of our model</p>
+                            <p> <b>At least two words in the training set are required. </b></p>
+
+                        </div>
+                        <img style="width: 200px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/model_theft.png') }}" alt="Model Theft Attack Diagram" class="demonstration-image">
+                    </div>
+                    
+                
+                    
                     <div class="words-form">
                         <div id="words-list">
                             <!-- Words will be listed here -->

@@ -11,7 +11,7 @@
         
         <ul class="nav-items">
             <li><a href="{{ url_for('basics') }}" {% if request.path == url_for('basics') %}class="active"{% endif %}><i class="fas fa-brain"></i> <span>Sentiment Analysis</span></a></li>
-            <li><a href="{{ url_for('model_theft_main') }}" {% if request.path == url_for('model_theft_main') %}class="active"{% endif %}><i class="fas fa-user-ninja"></i> <span>Model Theft Demo</span></a></li>
+            <li><a href="{{ url_for('model_theft_main') }}" {% if request.path == url_for('model_theft_main') %}class="active"{% endif %}><i class="fas fa-user-ninja"></i> <span>Model Theft</span></a></li>
             <li><a href="{{ url_for('data_poisoning_main') }}" {% if request.path == url_for('data_poisoning_main') %}class="active"{% endif %}><i class="fas fa-biohazard"></i> <span>Training Data Poisoning</span></a></li>
             <li><a href="{{ url_for('supply_chain') }}" {% if request.path == url_for('supply_chain') %}class="active"{% endif %}><i class="fas fa-box-open"></i> <span>Supply Chain Vulnerability</span></a></li>
             <li><a href="{{ url_for('insecure_plugin') }}" {% if request.path == url_for('insecure_plugin') %}class="active"{% endif %}><i class="fas fa-plug"></i> <span>Insecure Plugin Design</span></a></li>

@@ -86,7 +86,7 @@ with app.app_context():
         # Add sample comments with a good mix of positive and negative sentiments
         comments = [
             # Margherita comments
-            Comment(pizza_id=1, name='John', content='Best pizza ever! The basil was so fresh and the sauce was perfect.', rating=5),
+            Comment(pizza_id=1, name='Mike', content='Best pizza ever! The basil was so fresh and the sauce was perfect.', rating=5),
             Comment(pizza_id=1, name='Sarah', content='Love the fresh basil! Simple but delicious.', rating=4),
             Comment(pizza_id=1, name='Miguel', content='Classic Margherita done right. The cheese was fantastic.', rating=5),
             Comment(pizza_id=1, name='Laura', content='A bit too basic for my taste, but well executed.', rating=3),
@@ -102,7 +102,7 @@ with app.app_context():
             # Veggie Supreme comments
             Comment(pizza_id=3, name='Emma', content='So many veggies, delicious! Great flavor combination.', rating=4),
             Comment(pizza_id=3, name='Noah', content='Fresh veggies and excellent sauce. Would order again!', rating=5),
-            Comment(pizza_id=3, name='Sophia', content='The vegetables were fresh but there was too much sauce.', rating=3),
+            Comment(pizza_id=3, name='Mike', content='The vegetables were fresh but there was too much sauce.', rating=3),
             Comment(pizza_id=3, name='William', content='As a vegetarian, this is my favorite! Amazing taste.', rating=5),
             Comment(pizza_id=3, name='Olivia', content='Boring and bland. The vegetables seemed frozen, not fresh.', rating=1),
             
@@ -179,8 +179,160 @@ def test_huggingface_leakage():
 @app.route('/training-data-leak/openai', methods=['POST'])
 def test_openai_leakage():
     """API endpoint for testing OpenAI model for training data leakage"""
-    from training_data_leakage import openai_leak_endpoint
-    return openai_leak_endpoint()
+    try:
+        from application.vulnerabilities.openai_sensitive_data_leakage import query_rag_system_openai, detect_sensitive_info
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        api_token = data.get('api_token', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_leakage': False,
+                'leaked_info': []
+            }), 400
+        
+        # If no API token provided, return clear error message
+        if not api_token:
+            return jsonify({
+                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'has_leakage': False,
+                'leaked_info': [],
+                'model_type': 'error'
+            })
+        
+        # Query the OpenAI RAG system with the provided API key
+        response, success = query_rag_system_openai(user_query, api_token)
+        
+        if not success:
+            return jsonify({
+                'error': response,
+                'response': '',
+                'has_leakage': False,
+                'leaked_info': [],
+                'model_type': 'real'
+            }), 500
+        
+        # Detect sensitive information in the response
+        leaked_info = detect_sensitive_info(response)
+        has_leakage = len(leaked_info) > 0
+        
+        return jsonify({
+            'response': response,
+            'has_leakage': has_leakage,
+            'leaked_info': leaked_info,
+            'model_type': 'real'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_leakage': False,
+            'leaked_info': []
+        }), 500
+
+@app.route('/training-data-leak/ollama', methods=['POST'])
+def test_ollama_leakage():
+    """API endpoint for testing Ollama model for training data leakage"""
+    try:
+        from application.vulnerabilities.ollama_sensitive_data_leakage import query_rag_system, detect_sensitive_info
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_leakage': False,
+                'leaked_info': []
+            }), 400
+        
+        # Query the RAG system
+        response, success = query_rag_system(user_query)
+        
+        if not success:
+            return jsonify({
+                'error': 'Error querying model',
+                'response': response,
+                'has_leakage': False,
+                'leaked_info': []
+            }), 500
+        
+        # Detect sensitive information in the response
+        leaked_info = detect_sensitive_info(response)
+        has_leakage = len(leaked_info) > 0
+        
+        return jsonify({
+            'response': response,
+            'has_leakage': has_leakage,
+            'leaked_info': leaked_info,
+            'model_type': 'real',
+            'model': 'ollama'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_leakage': False,
+            'leaked_info': []
+        }), 500
+
+@app.route('/update-rag-ollama', methods=['POST'])
+def update_rag_ollama():
+    """API endpoint for updating the RAG system with latest comments"""
+    try:
+        from application.vulnerabilities.ollama_sensitive_data_leakage import initialize_rag_system
+        
+        # Reinitialize the RAG system with latest data
+        success = initialize_rag_system()
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'RAG system updated successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to update RAG system'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error updating RAG system: {str(e)}'
+        }), 500
+
+@app.route('/update-rag-openai', methods=['POST'])
+def update_rag_openai():
+    """API endpoint for updating the OpenAI RAG system with latest comments"""
+    try:
+        from application.vulnerabilities.openai_sensitive_data_leakage import initialize_rag_system
+        
+        # Reinitialize the RAG system with latest data
+        success = initialize_rag_system()
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'OpenAI RAG system updated successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to update OpenAI RAG system'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error updating OpenAI RAG system: {str(e)}'
+        }), 500
 
 @app.route('/chat-with-pizza-assistant', methods=['POST'])
 def chat_with_pizza_assistant():
