@@ -1,14 +1,24 @@
+<!-- Horizontal main menu -->
+<div class="main-nav-horizontal">
+    <div class="container">
+        <ul class="horizontal-nav-items">
+            <li><a href="{{ url_for('index') }}" class="logo-link">Pwnzza Shop <span>💻🍕</span> – <span class="tagline">the hacked pizza shop</span></a></li>
+            {% if 'username' in session %}
+                <li class="user-section">
+                    <span class="welcome-text">Welcome, {{ session.username }}!</span>
+                    <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" {% if request.path == url_for('login') %}class="active"{% endif %}><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<!-- Sidebar for LLM vulnerabilities -->
 <nav class="nav-menu">
     <div class="nav-container">
-        <div class="sidebar-heading">MAIN MENU</div>
-        <ul class="nav-items">
-            <li><a href="{{ url_for('index') }}" {% if request.path == url_for('index') %}class="active"{% endif %}><i class="fas fa-home"></i> <span>Home</span></a></li>
-            <li><a href="{{ url_for('index') }}"><i class="fas fa-pizza-slice"></i> <span>Our Pizzas</span></a></li>
-        </ul>
-        
-        <div class="sidebar-divider"></div>
         <div class="sidebar-heading">LLM VULNERABILITIES</div>
-        
         <ul class="nav-items">
             <li><a href="{{ url_for('basics') }}" {% if request.path == url_for('basics') %}class="active"{% endif %}><i class="fas fa-brain"></i> <span>Sentiment Analysis</span></a></li>
             <li><a href="{{ url_for('model_theft_main') }}" {% if request.path == url_for('model_theft_main') %}class="active"{% endif %}><i class="fas fa-user-ninja"></i> <span>Model Theft</span></a></li>
@@ -18,7 +28,99 @@
             <li><a href="{{ url_for('direct_prompt_injection') }}" {% if request.path == url_for('direct_prompt_injection') %}class="active"{% endif %}><i class="fas fa-comment-dots"></i> <span>Direct Prompt Injection</span> </a></li>
             <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') or request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas fa-bomb"></i> <span>LLM DoS Attack</span></a></li>
             <li><a href="{{ url_for('sensitive_info') }}" {% if request.path == url_for('sensitive_info') %}class="active"{% endif %}><i class="fas fa-key"></i> <span>Sensitive Information Disclosure</span></a></li>
-
         </ul>
     </div>
 </nav>
+
+<style>
+.main-nav-horizontal {
+    background: #2c3e50;
+    border-bottom: 2px solid #e74c3c;
+    padding: 0.75rem 0;
+    position: relative;
+    z-index: 1000;
+}
+
+.horizontal-nav-items {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.horizontal-nav-items li a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.horizontal-nav-items li a:hover {
+    background: #34495e;
+    color: #e74c3c;
+}
+
+.horizontal-nav-items li a.active {
+    background: #e74c3c;
+    color: white;
+}
+
+.user-section {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.welcome-text {
+    color: #ecf0f1;
+    font-size: 0.9rem;
+}
+
+.logout-link {
+    background: #e74c3c;
+    color: white !important;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.3s ease;
+}
+
+.logout-link:hover {
+    background: #c0392b;
+}
+
+.logo-link {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: #ecf0f1 !important;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.logo-link:hover {
+    background: none !important;
+    color: #e74c3c !important;
+}
+
+.logo-link span {
+    color: #e74c3c;
+}
+
+.logo-link .tagline {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #bdc3c7;
+    font-style: italic;
+}
+</style>
