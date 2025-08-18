@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM DoS Simulation - Pizza Paradise</title>
+    <title>LLM DoS Simulation - Pwnzza Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <nav class="navbar">
-                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
-            </nav>
-        </div>
-    </header>
+
     
     {% include 'navbar.html' %}
 
@@ -48,9 +42,22 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        <p>This demonstration shows two different approaches to performing DoS attacks against LLM services: a simulation using a local API and a real attack using OpenAI's API.</p>
-                        <p><b>Warning:</b> The real attack demonstration will use your OpenAI API key and will incur actual costs. Use responsibly for educational purposes only.</p>
+                        <div style="display: flex; align-items: flex-start; margin: 40px auto 25px auto;">
+                        <div style="flex: 1;">
+                         
+                        <p>This demo illustrates three different approaches to carrying out Denial of Service (DoS) attacks against LLM services:
+                            <ol>
+                            <li>An attack targeting OpenAI models.</li>
 
+                            <li>An attack against free Ollama models.</li>
+
+                            <li>A safe simulation that lets you experience the effects of a DoS attack without incurring costs or wasting energy.</li></p>
+                            </ol>
+                        <p><b>Warning:</b> Running real attacks on OpenAI API models will generate actual costs and may have real-world consequences. Use this feature responsibly and strictly for educational purposes only.</p>
+   
+                            </div>
+                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/dos.png') }}" alt="DoS attack" class="demonstration-image">
+                </div> 
                 <!-- Main demo tabs -->
                 <div class="model-tabs">
                     <div class="tab-headers">

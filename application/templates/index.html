@@ -3,34 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza Paradise</title>
+    <title>Pwnzza Shop 💻🍕 – the hacked pizza shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <nav class="navbar">
-                <a href="{{ url_for('index') }}" class="logo">Pizza<span>Paradise</span></a>
-            </nav>
-        </div>
-    </header>
     
     {% include 'navbar.html' %}
 
     <main class="container">
-        <div class="llm-chat">
-            <h2 class="llm-chat-title">Ask our Pizza Assistant</h2>
-            <form id="llm-form">
-                <div class="form-group">
-                    <label for="prompt">What would you like to know about our pizzas?</label>
-                    <input type="text" id="prompt" name="prompt" class="form-control" placeholder="e.g., Can you recommend a pizza?">
-                </div>
-                <button type="submit" class="btn">Ask</button>
-            </form>
-            <div id="chat-response" class="chat-response" style="display: none;"></div>
-        </div>
+        <div style=" padding: 40px 20px 20px 20px;  margin: 40px auto 25px auto; background-color: #f3e5cfff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 25px;">
+
+          <h1 id="pwnzza-title">🍕 Welcome to Pwnzza Shop – The Hacked Pizza Shop! 💻</h1>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <p>At Pwnzza Shop, every slice comes with a side of <strong>AI security lessons</strong>. This educational web app serves up the <strong>OWASP Top 10 LLM Vulnerabilities</strong>
+                            in a fun, hands-on environment. </p>
+                            <p>Just as the wrong ingredient can ruin a pizza, the wrong
+                            prompt or poor design can expose AI systems to serious risks—like data leaks, model theft,
+                            or unauthorized access. </p>
+                            <p>Here, you’ll explore <strong>practical examples</strong> of how
+                            vulnerabilities are created, exploited, and mitigated.You need to login as alice/alice or bob/bob for some pages.  Grab a slice, dig in, and discover
+                            how delicious learning about AI security can be.
+                            </p>
+                            
+                            </div>
+                            <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/index.png') }}" alt="Supply Chain Attack Diagram" class="demonstration-image">
+                </div> 
+            </div>
 
         <h1>Our Delicious Pizzas</h1>
         <div class="pizza-grid">

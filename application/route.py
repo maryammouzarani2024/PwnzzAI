@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 import os
 import math
 import time
@@ -7,7 +7,7 @@ import random
 from datetime import datetime
 
 from application import app, db 
-from application.model import Pizza, Comment
+from application.model import Pizza, Comment, User
 
 from application.vulnerabilities import data_poisoning
 from application.vulnerabilities import model_theft
@@ -125,6 +125,43 @@ with app.app_context():
             db.session.add(comment)
             
         db.session.commit()
+    
+    # Create users if they don't exist
+    if User.query.count() == 0:
+        alice = User(username='alice')
+        alice.set_password('alice')
+        
+        bob = User(username='bob')
+        bob.set_password('bob')
+        
+        db.session.add(alice)
+        db.session.add(bob)
+        db.session.commit()
+
+# Authentication routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('index'))
 
 # Routes
 @app.route('/')
