@@ -18,7 +18,6 @@
 <!-- Sidebar for LLM vulnerabilities -->
 <nav class="nav-menu">
     <div class="nav-container">
-        <div class="sidebar-heading">LLM VULNERABILITIES</div>
         <ul class="nav-items">
             <li><a href="{{ url_for('basics') }}" {% if request.path == url_for('basics') %}class="active"{% endif %}><i class="fas fa-brain"></i> <span>Sentiment Analysis</span></a></li>
             <li><a href="{{ url_for('model_theft_main') }}" {% if request.path == url_for('model_theft_main') %}class="active"{% endif %}><i class="fas fa-user-ninja"></i> <span>Model Theft</span></a></li>
