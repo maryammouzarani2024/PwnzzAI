@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misinformation - Pwnzza Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+    
+    <main class="container">
+        <h1>Misinformation</h1>
+        
+        <div class="insecure-plugin-content">
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>When LLMs Spread False Information</h2>
+                        <p>
+                            Misinformation vulnerabilities occur when LLMs generate or amplify false, misleading, 
+                            or biased information. This can happen when models are trained on biased data, 
+                            lack proper fact-checking mechanisms, or are manipulated to produce misleading outputs.
+                        </p>
+                        
+                        <p>
+                            In this demonstration, the LLMs have access to user comments and reviews, which may 
+                            contain biased, false, or misleading information. The models can inadvertently 
+                            amplify these biases or present unverified claims as facts.
+                        </p>
+                    
+                        <h4>Risk Factors:</h4>
+                        <ul>
+                            <li>Training on biased or unverified user-generated content</li>
+                            <li>Lack of fact-checking and verification mechanisms</li>
+                            <li>Amplification of minority opinions as mainstream facts</li>
+                            <li>Presentation of subjective opinions as objective truths</li>
+                        </ul>
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>Comment-Based Misinformation Generation</h2>
+                        
+                        <div class="tabs">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" data-tab="comment-misinformation">Comment-Based Responses</button>
+                            </div>
+                    
+                        <div id="comment-misinformation" class="tab-content active">
+                            <!-- Interactive Comment-Based Misinformation Testing -->
+                            <div class="leakage-test-container">
+                                <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                                    <div style="flex: 1;">
+                                        <p>The models use customer comments and reviews to provide information about pizzas and restaurant quality.</p>
+                                        <p>However, these comments may contain biased opinions, false claims, or misleading information that the models can amplify.</p>
+                                        <p><strong>⚠️ VULNERABLE:</strong> Models present user opinions as factual information without verification.</p>
+                                    </div>
+                                    <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/information_leakage.png') }}" alt="Misinformation Vulnerability" class="demonstration-image">
+                                </div>
+                            
+                            <div class="demo-section">
+                                <!-- RAG Update Controls -->
+                                <div class="rag-controls" style="text-align: center; margin: 20px 0;">
+                                    <button id="update-rag-misinformation" class="btn btn-primary">
+                                        <i class="fas fa-sync-alt"></i> Update Comment Database
+                                    </button>
+                                    <span id="rag-update-status-misinformation" class="rag-status">Comment system ready</span>
+                                </div>
+                                
+                                <!-- Ollama Testing Panel -->
+                                <div class="test-panel">
+                                    <h5>Free Model Test (Ollama + Comments)</h5>
+                                    <div class="input-section">
+                                        <label for="ollama-misinfo-prompt">Ask about pizza quality or restaurant reputation:</label>
+                                        <div class="prompt-input">
+                                            <input type="text" id="ollama-misinfo-prompt" placeholder="e.g., Is this restaurant safe and clean?">
+                                            <button id="test-ollama-misinfo">Ask</button>
+                                        </div>
+                                    </div>
+                                    <div class="suggested-prompts">
+                                        <h6>Suggested prompts:</h6>
+                                        <ul class="prompt-list">
+                                            <li><a href="#" class="prompt-suggestion" data-target="ollama-misinfo">Is this restaurant safe and hygienic?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="ollama-misinfo">What do customers think about food quality?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="ollama-misinfo">Are there any health concerns about this place?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="ollama-misinfo">How reliable is the service here?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="ollama-misinfo">What's the general reputation of this restaurant?</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="response-section">
+                                        <h6>Model Response:</h6>
+                                        <div id="ollama-misinfo-response" class="model-response">
+                                            <p class="response-placeholder">Responses will appear here</p>
+                                        </div>
+                                    </div>
+                                    <div id="ollama-misinfo-info" class="leakage-info">
+                                        <h6>Response Analysis:</h6>
+                                        <div class="leakage-details">Based on user comments</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- OpenAI Testing Panel -->
+                                <div class="test-panel">
+                                    <h5>OpenAI Model Test</h5>
+                                    <div class="token-section">
+                                        <h6>Connect to OpenAI API:</h6>
+                                        <div class="token-input">
+                                            <input type="password" id="openai-misinfo-token" placeholder="Enter OpenAI API key (optional)">
+                                            <button id="connect-openai-misinfo">Connect API</button>
+                                        </div>
+                                        <div id="openai-misinfo-status" class="api-status disconnected">
+                                            <i class="fas fa-circle-xmark"></i> no API connected
+                                        </div>
+                                        <div class="rag-controls">
+                                            <button id="update-rag-openai-misinfo" class="btn btn-primary">
+                                                <i class="fas fa-sync-alt"></i> Update Comments
+                                            </button>
+                                           <span id="openai-rag-update-status-misinfo" class="rag-status">Comment system ready</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-section">
+                                        <label for="openai-misinfo-prompt">Ask about pizza quality or restaurant reputation:</label>
+                                        <div class="prompt-input">
+                                            <input type="text" id="openai-misinfo-prompt" placeholder="e.g., Is this restaurant safe and clean?">
+                                            <button id="test-openai-misinfo">Ask</button>
+                                        </div>
+                                    </div>
+                                    <div class="suggested-prompts">
+                                        <h6>Suggested prompts:</h6>
+                                        <ul class="prompt-list">
+                                            <li><a href="#" class="prompt-suggestion" data-target="openai-misinfo">Is this restaurant safe and hygienic?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="openai-misinfo">What do customers think about food quality?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="openai-misinfo">Are there any health concerns about this place?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="openai-misinfo">How reliable is the service here?</a></li>
+                                            <li><a href="#" class="prompt-suggestion" data-target="openai-misinfo">What's the general reputation of this restaurant?</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="response-section">
+                                        <h6>Model Response:</h6>
+                                        <div id="openai-misinfo-response" class="model-response">
+                                            <p class="response-placeholder">Responses will appear here</p>
+                                        </div>
+                                    </div>
+                                    <div id="openai-misinfo-info" class="leakage-info">
+                                        <h6>Response Analysis:</h6>
+                                        <div class="leakage-details">Based on user comments</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>Preventing Misinformation in LLMs</h2>
+                
+                        <div class="security-tip">
+                            <h3><i class="fas fa-shield-alt"></i> Information Integrity Measures</h3>
+                            <p>Implement these measures to prevent misinformation vulnerabilities:</p>
+                            <ul>
+                                <li><strong>Source Verification:</strong> Verify the credibility of training data and information sources</li>
+                                <li><strong>Fact-Checking Integration:</strong> Incorporate automated fact-checking mechanisms</li>
+                                <li><strong>Uncertainty Expression:</strong> Train models to express uncertainty when information is unverified</li>
+                                <li><strong>Bias Detection:</strong> Implement bias detection and correction algorithms</li>
+                                <li><strong>Content Moderation:</strong> Filter out misleading or false information from training data</li>
+                                <li><strong>Human Oversight:</strong> Require human review for sensitive or controversial topics</li>
+                            </ul>
+                        </div>
+                
+                        <div class="code-block">
+# Example of misinformation detection and prevention
+def validate_information(llm_response, query_context):
+    """Validate LLM response for potential misinformation"""
+    
+    misinformation_indicators = [
+        "absolute_claims_without_evidence",
+        "contradicts_verified_sources", 
+        "promotes_harmful_behavior",
+        "contains_conspiracy_theories"
+    ]
+    
+    # Check for red flags
+    risk_score = calculate_misinformation_risk(llm_response)
+    
+    if risk_score > MISINFORMATION_THRESHOLD:
+        return {
+            "safe": False,
+            "message": "This response may contain unverified information. Please consult official sources.",
+            "suggested_action": "flag_for_human_review"
+        }
+    
+    # Add uncertainty disclaimers for subjective content  
+    if contains_subjective_claims(llm_response):
+        llm_response += "\n\n⚠️ Note: This information is based on user opinions and may not reflect verified facts."
+    
+    return {"safe": True, "response": llm_response}
+
+# Secure information retrieval with source attribution
+def get_verified_information(query):
+    """Retrieve information from verified sources only"""
+    
+    verified_sources = get_trusted_sources()
+    responses = []
+    
+    for source in verified_sources:
+        if source.has_information_about(query):
+            response = source.get_information(query)
+            responses.append({
+                "content": response,
+                "source": source.name,
+                "credibility_score": source.credibility_rating,
+                "last_verified": source.last_fact_check_date
+            })
+    
+    return format_multi_source_response(responses)
+</div>
+                        
+                        <h2>Real-World Impact</h2>
+                        <p>
+                            Misinformation from LLMs can have serious consequences:
+                        </p>
+                        <ul>
+                            <li><strong>Public Health Risks:</strong> False medical or safety information leading to harmful decisions</li>
+                            <li><strong>Financial Fraud:</strong> Misleading investment advice or financial misinformation</li>
+                            <li><strong>Social Division:</strong> Amplification of bias and divisive false narratives</li>
+                            <li><strong>Decision Making:</strong> Poor choices based on incorrect information</li>
+                            <li><strong>Trust Erosion:</strong> Loss of public confidence in AI systems and information sources</li>
+                        </ul>
+                        
+                        <p>
+                            Organizations must implement robust fact-checking, source verification, and content 
+                            validation mechanisms to prevent their LLMs from spreading misinformation.
+                        </p>
+                    </section>
+                </div>
+            </details>
+        </div>
+    </main>
+    
+    <style>
+        .rag-controls {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .rag-status {
+            color: #28a745;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .rag-status.updating {
+            color: #ffc107;
+        }
+        
+        .rag-status.error {
+            color: #dc3545;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .api-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        
+        .api-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and content
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Misinformation Demo Functionality
+            const updateRagMisinfoButton = document.getElementById('update-rag-misinformation');
+            const ragUpdateStatusMisinfo = document.getElementById('rag-update-status-misinformation');
+            const ollamaMisinfoPromptInput = document.getElementById('ollama-misinfo-prompt');
+            const testOllamaMisinfoButton = document.getElementById('test-ollama-misinfo');
+            const ollamaMisinfoResponse = document.getElementById('ollama-misinfo-response');
+            const ollamaMisinfoInfo = document.getElementById('ollama-misinfo-info');
+            
+            const updateRagOpenaiMisinfoButton = document.getElementById('update-rag-openai-misinfo');
+            const openaiRagUpdateStatusMisinfo = document.getElementById('openai-rag-update-status-misinfo');
+            const openaiMisinfoTokenInput = document.getElementById('openai-misinfo-token');
+            const connectOpenaiMisinfoButton = document.getElementById('connect-openai-misinfo');
+            const openaiMisinfoStatus = document.getElementById('openai-misinfo-status');
+            const openaiMisinfoPromptInput = document.getElementById('openai-misinfo-prompt');
+            const testOpenaiMisinfoButton = document.getElementById('test-openai-misinfo');
+            const openaiMisinfoResponse = document.getElementById('openai-misinfo-response');
+            const openaiMisinfoInfo = document.getElementById('openai-misinfo-info');
+            
+            let openaiMisinfoToken = null;
+            
+            // Update RAG button functionality (reuses training data endpoints)
+            if (updateRagMisinfoButton) {
+                updateRagMisinfoButton.addEventListener('click', function() {
+                    ragUpdateStatusMisinfo.className = 'rag-status updating';
+                    ragUpdateStatusMisinfo.textContent = 'Updating comment database...';
+                    updateRagMisinfoButton.disabled = true;
+                    
+                    fetch('/update-rag-ollama', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            ragUpdateStatusMisinfo.className = 'rag-status';
+                            ragUpdateStatusMisinfo.textContent = 'Comment database updated successfully';
+                        } else {
+                            ragUpdateStatusMisinfo.className = 'rag-status error';
+                            ragUpdateStatusMisinfo.textContent = 'Error updating comment database';
+                        }
+                    })
+                    .catch(error => {
+                        ragUpdateStatusMisinfo.className = 'rag-status error';
+                        ragUpdateStatusMisinfo.textContent = 'Error updating comment database';
+                        console.error('Error updating RAG:', error);
+                    })
+                    .finally(() => {
+                        updateRagMisinfoButton.disabled = false;
+                    });
+                });
+            }
+            
+            // Update OpenAI RAG button functionality
+            if (updateRagOpenaiMisinfoButton) {
+                updateRagOpenaiMisinfoButton.addEventListener('click', function() {
+                    openaiRagUpdateStatusMisinfo.className = 'rag-status updating';
+                    openaiRagUpdateStatusMisinfo.textContent = 'Updating OpenAI comment system...';
+                    updateRagOpenaiMisinfoButton.disabled = true;
+                    
+                    fetch('/update-rag-openai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            openaiRagUpdateStatusMisinfo.className = 'rag-status';
+                            openaiRagUpdateStatusMisinfo.textContent = 'OpenAI comment system updated successfully';
+                        } else {
+                            openaiRagUpdateStatusMisinfo.className = 'rag-status error';
+                            openaiRagUpdateStatusMisinfo.textContent = 'Error updating OpenAI comment system';
+                        }
+                    })
+                    .catch(error => {
+                        openaiRagUpdateStatusMisinfo.className = 'rag-status error';
+                        openaiRagUpdateStatusMisinfo.textContent = 'Error updating OpenAI comment system';
+                        console.error('Error updating OpenAI RAG:', error);
+                    })
+                    .finally(() => {
+                        updateRagOpenaiMisinfoButton.disabled = false;
+                    });
+                });
+            }
+            
+            // Connect OpenAI API for misinformation demo
+            if (connectOpenaiMisinfoButton) {
+                connectOpenaiMisinfoButton.addEventListener('click', function() {
+                    const token = openaiMisinfoTokenInput.value.trim();
+                    
+                    if (!token) {
+                        alert('No token provided. Using mock model instead.');
+                        openaiMisinfoToken = null;
+                        openaiMisinfoStatus.className = 'api-status disconnected';
+                        openaiMisinfoStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Using mock model (no API connected)';
+                        return;
+                    }
+                    
+                    openaiMisinfoToken = token;
+                    openaiMisinfoStatus.className = 'api-status connected';
+                    openaiMisinfoStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
+                    openaiMisinfoTokenInput.value = '';
+                    
+                    console.log("OpenAI API Token stored for misinformation demo:", openaiMisinfoToken);
+                });
+            }
+            
+            // Initialize misinformation prompt suggestions
+            const misinfoPromptSuggestions = document.querySelectorAll('.prompt-suggestion');
+            misinfoPromptSuggestions.forEach(suggestion => {
+                suggestion.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-target');
+                    const promptText = this.textContent;
+                    
+                    if (target === 'ollama-misinfo') {
+                        ollamaMisinfoPromptInput.value = promptText;
+                    } else if (target === 'openai-misinfo') {
+                        openaiMisinfoPromptInput.value = promptText;
+                    }
+                });
+            });
+            
+            // Test Ollama Model for misinformation
+            if (testOllamaMisinfoButton) {
+                testOllamaMisinfoButton.addEventListener('click', function() {
+                    testMisinformation('ollama', ollamaMisinfoPromptInput.value, null);
+                });
+            }
+            
+            // Test OpenAI Model for misinformation
+            if (testOpenaiMisinfoButton) {
+                testOpenaiMisinfoButton.addEventListener('click', function() {
+                    testMisinformation('openai', openaiMisinfoPromptInput.value, openaiMisinfoToken);
+                });
+            }
+            
+            // Allow pressing Enter to submit
+            if (ollamaMisinfoPromptInput) {
+                ollamaMisinfoPromptInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        testMisinformation('ollama', ollamaMisinfoPromptInput.value, null);
+                    }
+                });
+            }
+            
+            if (openaiMisinfoPromptInput) {
+                openaiMisinfoPromptInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        testMisinformation('openai', openaiMisinfoPromptInput.value, openaiMisinfoToken);
+                    }
+                });
+            }
+            
+            // Function to test misinformation
+            function testMisinformation(modelType, prompt, apiToken) {
+                if (!prompt) {
+                    alert('Please enter a prompt to test');
+                    return;
+                }
+                
+                const responseElement = modelType === 'ollama' ? ollamaMisinfoResponse : openaiMisinfoResponse;
+                const misinfoInfoElement = modelType === 'ollama' ? ollamaMisinfoInfo : openaiMisinfoInfo;
+                
+                // Show loading indicator
+                responseElement.innerHTML = `
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Testing ${modelType} model for misinformation...</p>
+                    </div>
+                `;
+                
+                // Reset info
+                misinfoInfoElement.className = 'leakage-info';
+                misinfoInfoElement.querySelector('.leakage-details').textContent = 'Analyzing response...';
+                
+                // Send request to misinformation endpoint
+                const endpoint = `/misinformation/${modelType}`;
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        query: prompt,
+                        api_token: apiToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Display model response
+                    responseElement.innerHTML = formatResponse(data.response);
+                    
+                    // Update info section
+                    const modelType = data.model_type || 'mock';
+                    const modelTypeClass = modelType === 'real' ? 'model-real' : 'model-mock';
+                    misinfoInfoElement.querySelector('.leakage-details').innerHTML = 
+                        `Response based on user comments <span class="${modelTypeClass}">(${modelType} model)</span>`;
+                })
+                .catch(error => {
+                    responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
+                    misinfoInfoElement.querySelector('.leakage-details').textContent = 'An error occurred while testing';
+                });
+            }
+            
+            // Function to format response text for display
+            function formatResponse(text) {
+                return text.replace(/\n/g, '<br>');
+            }
+            
+        });
+    </script>
+
+</body>
+</html>

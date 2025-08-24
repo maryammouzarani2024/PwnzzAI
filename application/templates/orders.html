@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Pwnzza Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div id="flash-message" class="flash-message flash-{{ category }}" style="display: none;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="orders-page">
+            <h1 class="orders-title">My Orders</h1>
+            
+            {% if orders %}
+                <div class="orders-list">
+                    {% for order in orders %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3 class="order-pizza-name">{{ order.pizza.name }}</h3>
+                            <span class="order-date">{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                        
+                        <div class="order-details">
+                            <div class="order-info">
+                                <div class="order-quantity">
+                                    <i class="fas fa-pizza-slice"></i>
+                                    <span>Quantity: {{ order.quantity }}</span>
+                                </div>
+                                <div class="order-price">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>Total: ${{ "%.2f"|format(order.total_price) }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pizza-thumbnail">
+                                <img src="{{ url_for('static', filename='img/' + order.pizza.image) }}" alt="{{ order.pizza.name }}">
+                            </div>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <a href="{{ url_for('pizza_detail', pizza_id=order.pizza_id) }}" class="btn btn-sm">View Pizza</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-orders">
+                    <i class="fas fa-shopping-cart empty-cart"></i>
+                    <h3>No orders yet</h3>
+                    <p>You haven't placed any orders yet. Browse our delicious pizzas and place your first order!</p>
+                    <a href="{{ url_for('index') }}" class="btn">Browse Pizzas</a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        // Show flash message as popup
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                // Show the popup
+                flashMessage.style.display = 'block';
+                flashMessage.classList.add('show');
+                
+                // Hide after 4 seconds
+                setTimeout(function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                }, 4000);
+                
+                // Allow manual close by clicking
+                flashMessage.addEventListener('click', function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
