@@ -35,13 +35,8 @@
                             </p>
                     
                         
-                            <h4>Risk Factors:</h4>
-                            <ul>
-                                <li>Training on datasets containing sensitive information without proper filtering</li>
-                                <li>Insufficient data sanitization before model training</li>
-                                <li>Lack of privacy-preserving techniques during training</li>
-                            </ul>
-wh                    </section>
+                           
+                      </section>
                 </div>
             </details>
             
@@ -49,7 +44,6 @@ wh                    </section>
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        <h2>Common Information Disclosure Vulnerabilities</h2>
                         
                         <div class="tabs">
                             <div class="tab-buttons">
@@ -63,9 +57,10 @@ wh                    </section>
                             <div class="leakage-test-container">
                                 <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                                     <div style="flex: 1;">
-                                        <p>The models use user comments to provide feedback about the pizzas.</p>
-                            <p> However, we have not fine-tuned the models using comment data, since comments are updated frequently and continuously fine-tuning for each update would be costly.</p>
-                            <p>Instead, the models use a Retrieval-Augmented Generation (RAG) approach. Every time you press the Update button, the latest comment information is vectorized and the RAG system is updated in real time.  </p>
+                                        <p>Pwnzza Shop now leverages user feedback to offer insights and suggestions on different pizza options. </p>
+                                        <p> Importantly, the models are not fine-tuned on comment data. Since user comments are updated continuously, retraining the model for every new comment would be impractical and costly.</p>                          
+                                        <p>Instead, Pwnzza uses a <b>Retrieval-Augmented Generation (RAG)</b> approach. Whenever you press the <b>Update RAG</b> button, the system vectorizes the latest comments and updates the RAG database in real time, ensuring recommendations are always based on the most recent feedback.</p>
+                                        <p>See if you can find any sensitive info, like what other people have ordered or the names of other customers.</p>
 
                                     </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/information_leakage.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
@@ -115,6 +110,7 @@ wh                    </section>
                                         <h6>Detected Leakage:</h6>
                                         <div class="leakage-details">No leakage detected yet</div>
                                     </div>
+                                     
                                 </div>
                                 
                                 <!-- OpenAI Testing Panel -->
@@ -166,6 +162,15 @@ wh                    </section>
                                         <div class="leakage-details">No leakage detected yet</div>
                                     </div>
                                 </div>
+                                <div class="vulnerability-card">
+
+                                     <h4>Risk Factors:</h4>
+                                            <ul>
+                                                <li>Training on datasets containing sensitive information without proper filtering</li>
+                                                <li>Insufficient data sanitization before model training</li>
+                                                <li>Lack of privacy-preserving techniques during training</li>
+                                            </ul>
+                                </div>
                             </div>
                         </div>
                         
@@ -174,7 +179,6 @@ wh                    </section>
                     </div>
                     
                     <div id="access-control" class="tab-content">
-                        <h3>Insufficient Access Controls - Order Access Demo</h3>
                         <p>
                             When LLMs are integrated with backend systems without proper access controls,
                             they can access and reveal sensitive information they shouldn't have access to.
@@ -184,10 +188,10 @@ wh                    </section>
                         
                         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                             <div style="flex: 1;">
-                                <p><strong>⚠️ VULNERABLE IMPLEMENTATION:</strong> Both models have direct access to your order database.</p>
+                                <p>Both models have direct access to your order database.</p>
                                 <p>Try asking: "What are my previous orders?" or use prompt injection techniques to extract more information.</p>
                             </div>
-                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/information_leakage.png') }}" alt="Access Control Vulnerability" class="demonstration-image">
+                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/insufficient.png') }}" alt="Access Control Vulnerability" class="demonstration-image">
                         </div>
                         
                         <div class="demo-section">
@@ -216,10 +220,6 @@ wh                    </section>
                                     <div id="ollama-order-response" class="model-response">
                                         <p class="response-placeholder">Responses will appear here</p>
                                     </div>
-                                </div>
-                                <div id="ollama-access-info" class="leakage-info">
-                                    <h6>Detected Access Violations:</h6>
-                                    <div class="leakage-details">No violations detected yet</div>
                                 </div>
                             </div>
                             
@@ -258,10 +258,6 @@ wh                    </section>
                                     <div id="openai-order-response" class="model-response">
                                         <p class="response-placeholder">Responses will appear here</p>
                                     </div>
-                                </div>
-                                <div id="openai-access-info" class="leakage-info">
-                                    <h6>Detected Access Violations:</h6>
-                                    <div class="leakage-details">No violations detected yet</div>
                                 </div>
                             </div>
                         </div>
@@ -672,7 +668,6 @@ def query_database(query, llm_context):
             const ollamaOrderPromptInput = document.getElementById('ollama-order-prompt');
             const testOllamaOrdersButton = document.getElementById('test-ollama-orders');
             const ollamaOrderResponse = document.getElementById('ollama-order-response');
-            const ollamaAccessInfo = document.getElementById('ollama-access-info');
             
             const openaiOrderTokenInput = document.getElementById('openai-order-token');
             const connectOpenaiOrdersButton = document.getElementById('connect-openai-orders');
@@ -680,7 +675,6 @@ def query_database(query, llm_context):
             const openaiOrderPromptInput = document.getElementById('openai-order-prompt');
             const testOpenaiOrdersButton = document.getElementById('test-openai-orders');
             const openaiOrderResponse = document.getElementById('openai-order-response');
-            const openaiAccessInfo = document.getElementById('openai-access-info');
             
             let openaiOrderToken = null;
             
@@ -761,7 +755,6 @@ def query_database(query, llm_context):
                 }
                 
                 const responseElement = modelType === 'ollama' ? ollamaOrderResponse : openaiOrderResponse;
-                const accessInfoElement = modelType === 'ollama' ? ollamaAccessInfo : openaiAccessInfo;
                 
                 // Show loading indicator
                 responseElement.innerHTML = `
@@ -771,9 +764,6 @@ def query_database(query, llm_context):
                     </div>
                 `;
                 
-                // Reset access info
-                accessInfoElement.className = 'leakage-info';
-                accessInfoElement.querySelector('.leakage-details').textContent = 'Analyzing response...';
                 
                 // Send request to appropriate endpoint
                 const endpoint = `/order-access/${modelType}`;
@@ -792,49 +782,12 @@ def query_database(query, llm_context):
                 .then(data => {
                     // Display model response
                     responseElement.innerHTML = formatResponse(data.response);
-                    
-                    // Process and display access violation info
-                    displayAccessInfo(data, accessInfoElement);
                 })
                 .catch(error => {
                     responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
-                    accessInfoElement.querySelector('.leakage-details').textContent = 'An error occurred while testing';
                 });
             }
             
-            // Function to display access violation info
-            function displayAccessInfo(data, accessInfoElement) {
-                const accessDetailsElement = accessInfoElement.querySelector('.leakage-details');
-                
-                const modelType = data.model_type || 'mock';
-                const modelTypeClass = modelType === 'real' ? 'model-real' : 'model-mock';
-                
-                if (data.has_access_violation && data.accessed_info && data.accessed_info.length > 0) {
-                    let accessHtml = '<div class="leakage-summary">';
-                    accessHtml += `<p><strong>🚨 Access Violation Detected!</strong> <span class="${modelTypeClass}">(${modelType} model)</span></p>`;
-                    
-                    const accessByType = {};
-                    data.accessed_info.forEach(access => {
-                        if (!accessByType[access.type]) {
-                            accessByType[access.type] = [];
-                        }
-                        accessByType[access.type].push(access.content);
-                    });
-                    
-                    for (const type in accessByType) {
-                        accessHtml += `<div class="leakage-type">${type}</div>`;
-                        accessByType[type].forEach(content => {
-                            accessHtml += `<div class="leaked-item">${content}</div>`;
-                        });
-                    }
-                    
-                    accessHtml += '</div>';
-                    accessDetailsElement.innerHTML = accessHtml;
-                } else {
-                    accessInfoElement.classList.add('no-leakage');
-                    accessDetailsElement.innerHTML = `No access violations detected <span class="${modelTypeClass}">(${modelType} model)</span>`;
-                }
-            }
         });
     </script>
 </body>

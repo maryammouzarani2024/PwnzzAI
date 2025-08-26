@@ -102,10 +102,6 @@
                                             <p class="response-placeholder">Responses will appear here</p>
                                         </div>
                                     </div>
-                                    <div id="ollama-misinfo-info" class="leakage-info">
-                                        <h6>Response Analysis:</h6>
-                                        <div class="leakage-details">Based on user comments</div>
-                                    </div>
                                 </div>
                                 
                                 <!-- OpenAI Testing Panel -->
@@ -149,10 +145,6 @@
                                         <div id="openai-misinfo-response" class="model-response">
                                             <p class="response-placeholder">Responses will appear here</p>
                                         </div>
-                                    </div>
-                                    <div id="openai-misinfo-info" class="leakage-info">
-                                        <h6>Response Analysis:</h6>
-                                        <div class="leakage-details">Based on user comments</div>
                                     </div>
                                 </div>
                             </div>
@@ -332,7 +324,6 @@ def get_verified_information(query):
             const ollamaMisinfoPromptInput = document.getElementById('ollama-misinfo-prompt');
             const testOllamaMisinfoButton = document.getElementById('test-ollama-misinfo');
             const ollamaMisinfoResponse = document.getElementById('ollama-misinfo-response');
-            const ollamaMisinfoInfo = document.getElementById('ollama-misinfo-info');
             
             const updateRagOpenaiMisinfoButton = document.getElementById('update-rag-openai-misinfo');
             const openaiRagUpdateStatusMisinfo = document.getElementById('openai-rag-update-status-misinfo');
@@ -342,7 +333,6 @@ def get_verified_information(query):
             const openaiMisinfoPromptInput = document.getElementById('openai-misinfo-prompt');
             const testOpenaiMisinfoButton = document.getElementById('test-openai-misinfo');
             const openaiMisinfoResponse = document.getElementById('openai-misinfo-response');
-            const openaiMisinfoInfo = document.getElementById('openai-misinfo-info');
             
             let openaiMisinfoToken = null;
             
@@ -491,7 +481,6 @@ def get_verified_information(query):
                 }
                 
                 const responseElement = modelType === 'ollama' ? ollamaMisinfoResponse : openaiMisinfoResponse;
-                const misinfoInfoElement = modelType === 'ollama' ? ollamaMisinfoInfo : openaiMisinfoInfo;
                 
                 // Show loading indicator
                 responseElement.innerHTML = `
@@ -500,10 +489,6 @@ def get_verified_information(query):
                         <p>Testing ${modelType} model for misinformation...</p>
                     </div>
                 `;
-                
-                // Reset info
-                misinfoInfoElement.className = 'leakage-info';
-                misinfoInfoElement.querySelector('.leakage-details').textContent = 'Analyzing response...';
                 
                 // Send request to misinformation endpoint
                 const endpoint = `/misinformation/${modelType}`;
@@ -522,16 +507,9 @@ def get_verified_information(query):
                 .then(data => {
                     // Display model response
                     responseElement.innerHTML = formatResponse(data.response);
-                    
-                    // Update info section
-                    const modelType = data.model_type || 'mock';
-                    const modelTypeClass = modelType === 'real' ? 'model-real' : 'model-mock';
-                    misinfoInfoElement.querySelector('.leakage-details').innerHTML = 
-                        `Response based on user comments <span class="${modelTypeClass}">(${modelType} model)</span>`;
                 })
                 .catch(error => {
                     responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
-                    misinfoInfoElement.querySelector('.leakage-details').textContent = 'An error occurred while testing';
                 });
             }
             

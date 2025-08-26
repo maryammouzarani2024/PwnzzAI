@@ -40,8 +40,7 @@
                             In this demonstration, the LLMs have been given the ability to create pizza orders 
                             directly in the database based on natural language requests, without proper validation 
                             or confirmation mechanisms.
-                        </p>
-                    
+                        </p>                   
                         <h4>Risk Factors:</h4>
                         <ul>
                             <li>LLMs with direct database write access</li>
@@ -49,6 +48,7 @@
                             <li>Insufficient validation of LLM-generated actions</li>
                             <li>No rate limiting or fraud detection on automated actions</li>
                         </ul>
+
                     </section>
                 </div>
             </details>
@@ -57,15 +57,25 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        <h2>Autonomous Order Creation Vulnerability</h2>
+                        <h2>Our Pwnzza Shop just got an upgrade! 🍕</h2>
                         
                         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                             <div style="flex: 1;">
-                                <p><strong>⚠️ DANGEROUS IMPLEMENTATION:</strong> Both models can create real orders in the database.</p>
-                                <p>Try asking: "I want to order 3 pepperoni pizzas" or "Place an order for 2 margherita pizzas"</p>
-                                <p><strong>Warning:</strong> These models will actually create real orders in your account!</p>
+                                <p>
+                                    Now you can place your order by chatting directly with our AI.</p>
+                                    <p> The free Ollama and OpenAI models can access the database and insert new orders—but keep in mind, they might not have full access control.  </p>
+                                    <p>Have fun talking to the model, ordering your pizza, and maybe even surprising other users with a special order! 😉</p>
+                                    <p>For example, you can try:
+                                            <ul>
+                                            <li>I want three pepperoni pizzas.</li>
+
+                                            <li>I’d like to order five Hawaiian pizzas.</li>
+                                            <li>Can you order 5 BBQ chicken pizzas?</li>
+                                            <li>Please create an order: 4 veggie supreme pizzas</li>
+                                            </ul>
+                                            <p>Each pizza order is processed separately, so the AI will create a new record for each request you send.</p>
                             </div>
-                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/information_leakage.png') }}" alt="Excessive Agency Vulnerability" class="demonstration-image">
+                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/excessive.png') }}" alt="Excessive Agency Vulnerability" class="demonstration-image">
                         </div>
                         
                         <div class="demo-section">
@@ -79,25 +89,12 @@
                                         <button id="test-ollama-agency">Ask</button>
                                     </div>
                                 </div>
-                                <div class="suggested-prompts">
-                                    <h6>Suggested prompts:</h6>
-                                    <ul class="prompt-list">
-                                        <li><a href="#" class="prompt-suggestion" data-target="ollama-agency">I want to order 3 pepperoni pizzas</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="ollama-agency">Place an order for 2 margherita pizzas</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="ollama-agency">Order 1 Hawaiian pizza for alice</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="ollama-agency">Can you order 5 BBQ chicken pizzas?</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="ollama-agency">Please create an order: 4 veggie supreme pizzas</a></li>
-                                    </ul>
-                                </div>
+                                
                                 <div class="response-section">
                                     <h6>Model Response:</h6>
                                     <div id="ollama-agency-response" class="model-response">
                                         <p class="response-placeholder">Responses will appear here</p>
                                     </div>
-                                </div>
-                                <div id="ollama-agency-info" class="leakage-info">
-                                    <h6>Detected Actions:</h6>
-                                    <div class="leakage-details">No actions detected yet</div>
                                 </div>
                             </div>
                             
@@ -121,38 +118,17 @@
                                         <button id="test-openai-agency">Ask</button>
                                     </div>
                                 </div>
-                                <div class="suggested-prompts">
-                                    <h6>Suggested prompts:</h6>
-                                    <ul class="prompt-list">
-                                        <li><a href="#" class="prompt-suggestion" data-target="openai-agency">I want to order 3 pepperoni pizzas</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="openai-agency">Place an order for 2 margherita pizzas</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="openai-agency">Order 1 Hawaiian pizza for alice</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="openai-agency">Can you order 5 BBQ chicken pizzas?</a></li>
-                                        <li><a href="#" class="prompt-suggestion" data-target="openai-agency">Please create an order: 4 veggie supreme pizzas</a></li>
-                                    </ul>
-                                </div>
+                               
                                 <div class="response-section">
                                     <h6>Model Response:</h6>
                                     <div id="openai-agency-response" class="model-response">
                                         <p class="response-placeholder">Responses will appear here</p>
                                     </div>
                                 </div>
-                                <div id="openai-agency-info" class="leakage-info">
-                                    <h6>Detected Actions:</h6>
-                                    <div class="leakage-details">No actions detected yet</div>
-                                </div>
                             </div>
                         </div>
                         
-                        <div class="vulnerability-card">
-                            <h4>Risk Factors:</h4>
-                            <ul>
-                                <li>LLMs can execute high-impact actions without human confirmation</li>
-                                <li>No validation or approval workflow for automated orders</li>
-                                <li>Potential for unintended or malicious order creation</li>
-                                <li>Lack of rate limiting on LLM-driven actions</li>
-                            </ul>
-                        </div>
+                       
                     </section>
                 </div>
             </details>
@@ -161,7 +137,6 @@
                 <summary class="dropdown-title">Mitigation Strategies</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        <h2>Secure Implementation Best Practices</h2>
                 
                         <div class="security-tip">
                             <h3><i class="fas fa-shield-alt"></i> Controlling LLM Agency</h3>
@@ -176,52 +151,7 @@
                             </ul>
                         </div>
                 
-                        <div class="code-block">
-# Example of secure LLM action handling
-def handle_llm_order_request(user_request, user_id):
-    # Parse the request
-    order_intent = parse_order_intent(user_request)
-    
-    if order_intent:
-        # SECURE: Don't execute immediately, return for confirmation
-        return {
-            "action": "order_confirmation_required",
-            "message": f"I understand you want to order {order_intent['quantity']} {order_intent['pizza']}. Would you like me to proceed?",
-            "pending_action": {
-                "type": "create_order",
-                "pizza": order_intent['pizza'],
-                "quantity": order_intent['quantity'],
-                "estimated_total": calculate_total(order_intent)
-            }
-        }
-    
-    return {"action": "no_action", "message": "I can help you browse our menu or answer questions."}
-
-# Secure order creation with explicit confirmation
-def confirm_and_create_order(user_id, pending_action, user_confirmation):
-    if not user_confirmation or user_confirmation.lower() not in ['yes', 'confirm', 'proceed']:
-        return {"success": False, "message": "Order cancelled."}
-    
-    # Additional validation
-    if not validate_order_limits(user_id, pending_action):
-        return {"success": False, "message": "Order exceeds daily limits."}
-    
-    # Create order with audit logging
-    order = create_order_with_audit(user_id, pending_action)
-    return {"success": True, "order_id": order.id, "message": "Order created successfully!"}
-</div>
                         
-                        <h2>Real-World Impact</h2>
-                        <p>
-                            Excessive Agency in LLMs can lead to serious consequences:
-                        </p>
-                        <ul>
-                            <li><strong>Financial Loss:</strong> Unintended purchases or transactions executed by LLMs</li>
-                            <li><strong>Data Manipulation:</strong> Unauthorized modification or deletion of critical data</li>
-                            <li><strong>Account Takeover:</strong> LLMs performing actions that compromise user accounts</li>
-                            <li><strong>System Abuse:</strong> Automated spam or fraudulent activity generated by LLMs</li>
-                            <li><strong>Regulatory Violations:</strong> Actions performed without proper authorization or consent</li>
-                        </ul>
                         
                         <p>
                             Organizations must implement proper controls and confirmation mechanisms when giving LLMs 
@@ -274,7 +204,6 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
             const ollamaAgencyPromptInput = document.getElementById('ollama-agency-prompt');
             const testOllamaAgencyButton = document.getElementById('test-ollama-agency');
             const ollamaAgencyResponse = document.getElementById('ollama-agency-response');
-            const ollamaAgencyInfo = document.getElementById('ollama-agency-info');
             
             const openaiAgencyTokenInput = document.getElementById('openai-agency-token');
             const connectOpenaiAgencyButton = document.getElementById('connect-openai-agency');
@@ -282,7 +211,6 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
             const openaiAgencyPromptInput = document.getElementById('openai-agency-prompt');
             const testOpenaiAgencyButton = document.getElementById('test-openai-agency');
             const openaiAgencyResponse = document.getElementById('openai-agency-response');
-            const openaiAgencyInfo = document.getElementById('openai-agency-info');
             
             let openaiAgencyToken = null;
             
@@ -363,7 +291,6 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
                 }
                 
                 const responseElement = modelType === 'ollama' ? ollamaAgencyResponse : openaiAgencyResponse;
-                const agencyInfoElement = modelType === 'ollama' ? ollamaAgencyInfo : openaiAgencyInfo;
                 
                 // Show loading indicator
                 responseElement.innerHTML = `
@@ -373,9 +300,6 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
                     </div>
                 `;
                 
-                // Reset agency info
-                agencyInfoElement.className = 'leakage-info';
-                agencyInfoElement.querySelector('.leakage-details').textContent = 'Analyzing response...';
                 
                 // Send request to appropriate endpoint
                 const endpoint = `/excessive-agency/${modelType}`;
@@ -394,13 +318,9 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
                 .then(data => {
                     // Display model response
                     responseElement.innerHTML = formatResponse(data.response);
-                    
-                    // Process and display agency info
-                    displayAgencyInfo(data, agencyInfoElement);
                 })
                 .catch(error => {
                     responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
-                    agencyInfoElement.querySelector('.leakage-details').textContent = 'An error occurred while testing';
                 });
             }
             
@@ -409,29 +329,6 @@ def confirm_and_create_order(user_id, pending_action, user_confirmation):
                 return text.replace(/\n/g, '<br>');
             }
             
-            // Function to display agency info
-            function displayAgencyInfo(data, agencyInfoElement) {
-                const agencyDetailsElement = agencyInfoElement.querySelector('.leakage-details');
-                
-                const modelType = data.model_type || 'mock';
-                const modelTypeClass = modelType === 'real' ? 'model-real' : 'model-mock';
-                
-                if (data.action_taken && data.actions_performed && data.actions_performed.length > 0) {
-                    let agencyHtml = '<div class="leakage-summary">';
-                    agencyHtml += `<p><strong>🚨 Action Performed!</strong> <span class="${modelTypeClass}">(${modelType} model)</span></p>`;
-                    
-                    data.actions_performed.forEach(action => {
-                        agencyHtml += `<div class="leakage-type">${action.type}</div>`;
-                        agencyHtml += `<div class="leaked-item">${action.content}</div>`;
-                    });
-                    
-                    agencyHtml += '</div>';
-                    agencyDetailsElement.innerHTML = agencyHtml;
-                } else {
-                    agencyInfoElement.classList.add('no-leakage');
-                    agencyDetailsElement.innerHTML = `No actions performed <span class="${modelTypeClass}">(${modelType} model)</span>`;
-                }
-            }
         });
     </script>
 

@@ -15,30 +15,6 @@ from application import sentiment_model
 
 
 
-# Simple LLM responses for demonstration
-# class SimpleLLM:
-#     def generate_response(self, prompt):
-#         # Very simple response generation based on pizza-related keywords
-#         prompt = prompt.lower()
-        
-#         if "margherita" in prompt:
-#             return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
-#         elif "pepperoni" in prompt:
-#             return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
-#         elif "veggie" in prompt:
-#             return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
-#         elif "hawaiian" in prompt:
-#             return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
-#         elif "bbq" in prompt:
-#             return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
-#         elif "recommendation" in prompt or "suggest" in prompt:
-#             return "I recommend trying our Pepperoni pizza. It's our most popular!"
-#         else:
-#             return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
-
-# # Initialize our simple LLM
-# llm = SimpleLLM()
-
 # Create tables and initialize sample data
 with app.app_context():
     db.create_all()
@@ -710,7 +686,7 @@ def excessive_agency():
 def test_ollama_excessive_agency():
     """Test Ollama model with excessive agency"""
     try:
-        from application.vulnerabilities.ollama_excessive_agency import query_ollama_with_agency, detect_agency_actions
+        from application.vulnerabilities.ollama_excessive_agency import place_order
         
         data = request.get_json()
         user_query = data.get('query', '')
@@ -718,47 +694,28 @@ def test_ollama_excessive_agency():
         if not user_query:
             return jsonify({
                 'error': 'No query provided',
-                'response': '',
-                'action_taken': False,
-                'actions_performed': []
+                'response': 'Please provide a query to test.'
             }), 400
         
-        # Query Ollama model with agency capabilities
-        response, success = query_ollama_with_agency(user_query)
-        
-        if not success:
-            return jsonify({
-                'error': 'Error querying model',
-                'response': response,
-                'action_taken': False,
-                'actions_performed': [],
-                'model_type': 'ollama'
-            }), 500
-        
-        # Detect if actions were performed
-        actions_performed = detect_agency_actions(response, user_query)
-        action_taken = len(actions_performed) > 0
+        # Use the place_order function to process the user query
+        response = place_order(user_query)
         
         return jsonify({
             'response': response,
-            'action_taken': action_taken,
-            'actions_performed': actions_performed,
-            'model_type': 'ollama'
+            'model_type': 'real'
         })
         
     except Exception as e:
         return jsonify({
             'error': f'Server error: {str(e)}',
-            'response': '',
-            'action_taken': False,
-            'actions_performed': []
+            'response': f'Error processing order: {str(e)}'
         }), 500
 
 @app.route('/excessive-agency/openai', methods=['POST'])
 def test_openai_excessive_agency():
     """Test OpenAI model with excessive agency"""
     try:
-        from application.vulnerabilities.openai_excessive_agency import query_openai_with_agency, detect_agency_actions
+        from application.vulnerabilities.openai_excessive_agency import place_order
         
         data = request.get_json()
         user_query = data.get('query', '')
@@ -767,49 +724,28 @@ def test_openai_excessive_agency():
         if not user_query:
             return jsonify({
                 'error': 'No query provided',
-                'response': '',
-                'action_taken': False,
-                'actions_performed': []
+                'response': 'Please provide a query to test.'
             }), 400
         
         # If no API token, return error
         if not api_token:
             return jsonify({
                 'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
-                'action_taken': False,
-                'actions_performed': [],
                 'model_type': 'error'
             })
         
-        # Query OpenAI model with agency capabilities
-        response, success = query_openai_with_agency(user_query, api_token)
-        
-        if not success:
-            return jsonify({
-                'error': response,
-                'response': '',
-                'action_taken': False,
-                'actions_performed': [],
-                'model_type': 'real'
-            }), 500
-        
-        # Detect if actions were performed
-        actions_performed = detect_agency_actions(response, user_query)
-        action_taken = len(actions_performed) > 0
+        # Use the place_order function to process the user query
+        response = place_order(user_query, api_token)
         
         return jsonify({
             'response': response,
-            'action_taken': action_taken,
-            'actions_performed': actions_performed,
             'model_type': 'real'
         })
         
     except Exception as e:
         return jsonify({
             'error': f'Server error: {str(e)}',
-            'response': '',
-            'action_taken': False,
-            'actions_performed': []
+            'response': f'Error processing order: {str(e)}'
         }), 500
 
 @app.route('/misinformation')
