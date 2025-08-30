@@ -4,12 +4,13 @@
         <ul class="horizontal-nav-items">
             <li><a href="{{ url_for('index') }}" class="logo-link">Pwnzza Shop <span>💻🍕</span> – <span class="tagline">the hacked pizza shop</span></a></li>
             {% if 'username' in session %}
-                <li class="user-section">
+                <li class="user-section auth-section">
+                    <a href="{{ url_for('my_orders') }}" {% if request.path == url_for('my_orders') %}class="active"{% endif %}><i class="fas fa-receipt"></i> My Orders</a>
                     <span class="welcome-text">Welcome, {{ session.username }}!</span>
                     <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
             {% else %}
-                <li><a href="{{ url_for('login') }}" {% if request.path == url_for('login') %}class="active"{% endif %}><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li class="auth-section"><a href="{{ url_for('login') }}" {% if request.path == url_for('login') %}class="active"{% endif %}><i class="fas fa-sign-in-alt"></i> Login</a></li>
             {% endif %}
         </ul>
     </div>
@@ -27,6 +28,8 @@
             <li><a href="{{ url_for('direct_prompt_injection') }}" {% if request.path == url_for('direct_prompt_injection') %}class="active"{% endif %}><i class="fas fa-comment-dots"></i> <span>Direct Prompt Injection</span> </a></li>
             <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') or request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas fa-bomb"></i> <span>LLM DoS Attack</span></a></li>
             <li><a href="{{ url_for('sensitive_info') }}" {% if request.path == url_for('sensitive_info') %}class="active"{% endif %}><i class="fas fa-key"></i> <span>Sensitive Information Disclosure</span></a></li>
+            <li><a href="{{ url_for('excessive_agency') }}" {% if request.path == url_for('excessive_agency') %}class="active"{% endif %}><i class="fas fa-robot"></i> <span>Excessive Agency</span></a></li>
+            <li><a href="{{ url_for('misinformation') }}" {% if request.path == url_for('misinformation') %}class="active"{% endif %}><i class="fas fa-exclamation-triangle"></i> <span>Misinformation</span></a></li>
         </ul>
     </div>
 </nav>
@@ -47,6 +50,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    width: 100%;
 }
 
 .horizontal-nav-items li a {
@@ -121,5 +125,9 @@
     font-weight: 400;
     color: #bdc3c7;
     font-style: italic;
+}
+
+.auth-section {
+    margin-left: auto;
 }
 </style>

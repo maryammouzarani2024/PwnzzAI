@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excessive Agency - Pwnzza Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+    
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div id="flash-message" class="flash-message flash-{{ category }}" style="display: none;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h1>Excessive Agency</h1>
+        
+        <div class="insecure-plugin-content">
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Description</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>When LLMs Have Too Much Power</h2>
+                        <p>
+                            Excessive Agency occurs when LLMs are granted too much autonomy and capability to perform 
+                            actions on behalf of users without proper safeguards. This vulnerability emerges when 
+                            LLMs can execute high-impact operations like creating orders, making payments, or 
+                            modifying data based solely on natural language requests.
+                        </p>
+                        
+                        <p>
+                            In this demonstration, the LLMs have been given the ability to create pizza orders 
+                            directly in the database based on natural language requests, without proper validation 
+                            or confirmation mechanisms.
+                        </p>                   
+                        <h4>Risk Factors:</h4>
+                        <ul>
+                            <li>LLMs with direct database write access</li>
+                            <li>Lack of confirmation or approval workflows for high-impact actions</li>
+                            <li>Insufficient validation of LLM-generated actions</li>
+                            <li>No rate limiting or fraud detection on automated actions</li>
+                        </ul>
+
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Demonstration</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <h2>Our Pwnzza Shop just got an upgrade! 🍕</h2>
+                        
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="flex: 1;">
+                                <p>
+                                    Now you can place your order by chatting directly with our AI.</p>
+                                    <p> The free Ollama and OpenAI models can access the database and insert new orders—but keep in mind, they might not have full access control.  </p>
+                                    <p>Have fun talking to the model, ordering your pizza, and maybe even surprising other users with a special order! 😉</p>
+                                    <p>For example, you can try:
+                                            <ul>
+                                            <li>I want three pepperoni pizzas.</li>
+
+                                            <li>I’d like to order five Hawaiian pizzas.</li>
+                                            <li>Can you order 5 BBQ chicken pizzas?</li>
+                                            <li>Please create an order: 4 veggie supreme pizzas</li>
+                                            </ul>
+                                            <p>Each pizza order is processed separately, so the AI will create a new record for each request you send.</p>
+                            </div>
+                            <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/excessive.png') }}" alt="Excessive Agency Vulnerability" class="demonstration-image">
+                        </div>
+                        
+                        <div class="demo-section">
+                            <!-- Ollama Testing Panel -->
+                            <div class="test-panel">
+                                <h5>Free Model Test (Ollama)</h5>
+                                <div class="input-section">
+                                    <label for="ollama-agency-prompt">Request an order:</label>
+                                    <div class="prompt-input">
+                                        <input type="text" id="ollama-agency-prompt" placeholder="e.g., I want to order 2 pepperoni pizzas">
+                                        <button id="test-ollama-agency">Ask</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="response-section">
+                                    <h6>Model Response:</h6>
+                                    <div id="ollama-agency-response" class="model-response">
+                                        <p class="response-placeholder">Responses will appear here</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- OpenAI Testing Panel -->
+                            <div class="test-panel">
+                                <h5>OpenAI Model Test</h5>
+                                <div class="token-section">
+                                    <h6>Connect to OpenAI API:</h6>
+                                    <div class="token-input">
+                                        <input type="password" id="openai-agency-token" placeholder="Enter OpenAI API key (optional)">
+                                        <button id="connect-openai-agency">Connect API</button>
+                                    </div>
+                                    <div id="openai-agency-status" class="api-status disconnected">
+                                        <i class="fas fa-circle-xmark"></i> no API connected
+                                    </div>
+                                </div>
+                                <div class="input-section">
+                                    <label for="openai-agency-prompt">Request an order:</label>
+                                    <div class="prompt-input">
+                                        <input type="text" id="openai-agency-prompt" placeholder="e.g., I want to order 2 pepperoni pizzas">
+                                        <button id="test-openai-agency">Ask</button>
+                                    </div>
+                                </div>
+                               
+                                <div class="response-section">
+                                    <h6>Model Response:</h6>
+                                    <div id="openai-agency-response" class="model-response">
+                                        <p class="response-placeholder">Responses will appear here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                       
+                    </section>
+                </div>
+            </details>
+            
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                
+                        <div class="security-tip">
+                            <h3><i class="fas fa-shield-alt"></i> Controlling LLM Agency</h3>
+                            <p>Implement these measures to prevent excessive agency vulnerabilities:</p>
+                            <ul>
+                                <li><strong>Confirmation Workflows:</strong> Require explicit human confirmation for high-impact actions</li>
+                                <li><strong>Action Validation:</strong> Implement strict validation of all LLM-generated actions</li>
+                                <li><strong>Read-Only by Default:</strong> Give LLMs read-only access by default, with explicit permissions for write operations</li>
+                                <li><strong>Rate Limiting:</strong> Implement rate limits on actions that can be performed by LLMs</li>
+                                <li><strong>Audit Logging:</strong> Log all actions performed by LLMs for accountability</li>
+                                <li><strong>Scope Limitation:</strong> Restrict LLM capabilities to only what's necessary for their function</li>
+                            </ul>
+                        </div>
+                
+                        
+                        
+                        <p>
+                            Organizations must implement proper controls and confirmation mechanisms when giving LLMs 
+                            the ability to perform actions that have real-world consequences.
+                        </p>
+                    </section>
+                </div>
+            </details>
+        </div>
+    </main>
+    
+    <style>
+        .api-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+    <script>
+        // Show flash message as popup
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                flashMessage.style.display = 'block';
+                flashMessage.classList.add('show');
+                
+                setTimeout(function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                }, 4000);
+                
+                flashMessage.addEventListener('click', function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                });
+            }
+
+            // Excessive Agency Demo Functionality
+            const ollamaAgencyPromptInput = document.getElementById('ollama-agency-prompt');
+            const testOllamaAgencyButton = document.getElementById('test-ollama-agency');
+            const ollamaAgencyResponse = document.getElementById('ollama-agency-response');
+            
+            const openaiAgencyTokenInput = document.getElementById('openai-agency-token');
+            const connectOpenaiAgencyButton = document.getElementById('connect-openai-agency');
+            const openaiAgencyStatus = document.getElementById('openai-agency-status');
+            const openaiAgencyPromptInput = document.getElementById('openai-agency-prompt');
+            const testOpenaiAgencyButton = document.getElementById('test-openai-agency');
+            const openaiAgencyResponse = document.getElementById('openai-agency-response');
+            
+            let openaiAgencyToken = null;
+            
+            // Connect OpenAI API for agency demo
+            if (connectOpenaiAgencyButton) {
+                connectOpenaiAgencyButton.addEventListener('click', function() {
+                    const token = openaiAgencyTokenInput.value.trim();
+                    
+                    if (!token) {
+                        alert('No token provided. Queries will return error messages.');
+                        openaiAgencyToken = null;
+                        openaiAgencyStatus.className = 'api-status disconnected';
+                        openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> no API connected';
+                        return;
+                    }
+                    
+                    openaiAgencyToken = token;
+                    openaiAgencyStatus.className = 'api-status connected';
+                    openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
+                    openaiAgencyTokenInput.value = '';
+                    
+                    console.log("OpenAI API Token stored for agency demo:", openaiAgencyToken);
+                });
+            }
+            
+            // Initialize agency prompt suggestions
+            const agencyPromptSuggestions = document.querySelectorAll('.prompt-suggestion');
+            agencyPromptSuggestions.forEach(suggestion => {
+                suggestion.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-target');
+                    const promptText = this.textContent;
+                    
+                    if (target === 'ollama-agency') {
+                        ollamaAgencyPromptInput.value = promptText;
+                    } else if (target === 'openai-agency') {
+                        openaiAgencyPromptInput.value = promptText;
+                    }
+                });
+            });
+            
+            // Test Ollama Model for agency
+            if (testOllamaAgencyButton) {
+                testOllamaAgencyButton.addEventListener('click', function() {
+                    testAgency('ollama', ollamaAgencyPromptInput.value, null);
+                });
+            }
+            
+            // Test OpenAI Model for agency
+            if (testOpenaiAgencyButton) {
+                testOpenaiAgencyButton.addEventListener('click', function() {
+                    testAgency('openai', openaiAgencyPromptInput.value, openaiAgencyToken);
+                });
+            }
+            
+            // Allow pressing Enter to submit agency queries
+            if (ollamaAgencyPromptInput) {
+                ollamaAgencyPromptInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        testAgency('ollama', ollamaAgencyPromptInput.value, null);
+                    }
+                });
+            }
+            
+            if (openaiAgencyPromptInput) {
+                openaiAgencyPromptInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        testAgency('openai', openaiAgencyPromptInput.value, openaiAgencyToken);
+                    }
+                });
+            }
+            
+            // Function to test excessive agency
+            function testAgency(modelType, prompt, apiToken) {
+                if (!prompt) {
+                    alert('Please enter a prompt to test');
+                    return;
+                }
+                
+                const responseElement = modelType === 'ollama' ? ollamaAgencyResponse : openaiAgencyResponse;
+                
+                // Show loading indicator
+                responseElement.innerHTML = `
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Testing ${modelType} model for excessive agency...</p>
+                    </div>
+                `;
+                
+                
+                // Send request to appropriate endpoint
+                const endpoint = `/excessive-agency/${modelType}`;
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        query: prompt,
+                        api_token: apiToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Display model response
+                    responseElement.innerHTML = formatResponse(data.response);
+                })
+                .catch(error => {
+                    responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
+                });
+            }
+            
+            // Function to format response text for display
+            function formatResponse(text) {
+                return text.replace(/\n/g, '<br>');
+            }
+            
+        });
+    </script>
+
+</body>
+</html>

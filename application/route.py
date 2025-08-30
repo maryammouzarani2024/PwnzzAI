@@ -7,37 +7,13 @@ import random
 from datetime import datetime
 
 from application import app, db 
-from application.model import Pizza, Comment, User
+from application.model import Pizza, Comment, User, Order
 
 from application.vulnerabilities import data_poisoning
 from application.vulnerabilities import model_theft
 from application import sentiment_model
 
 
-
-# Simple LLM responses for demonstration
-# class SimpleLLM:
-#     def generate_response(self, prompt):
-#         # Very simple response generation based on pizza-related keywords
-#         prompt = prompt.lower()
-        
-#         if "margherita" in prompt:
-#             return "Margherita is a classic pizza with tomato sauce, mozzarella, and basil."
-#         elif "pepperoni" in prompt:
-#             return "Pepperoni pizza is topped with tomato sauce, mozzarella, and pepperoni slices."
-#         elif "veggie" in prompt:
-#             return "Veggie Supreme is loaded with bell peppers, onions, mushrooms, olives, and tomatoes."
-#         elif "hawaiian" in prompt:
-#             return "Hawaiian pizza has ham and pineapple with tomato sauce and mozzarella."
-#         elif "bbq" in prompt:
-#             return "BBQ Chicken pizza has a BBQ sauce base with chicken, red onions, and mozzarella."
-#         elif "recommendation" in prompt or "suggest" in prompt:
-#             return "I recommend trying our Pepperoni pizza. It's our most popular!"
-#         else:
-#             return "I'm sorry, I don't have specific information about that. Would you like to know about our popular pizzas?"
-
-# # Initialize our simple LLM
-# llm = SimpleLLM()
 
 # Create tables and initialize sample data
 with app.app_context():
@@ -506,13 +482,15 @@ def pizza_detail(pizza_id):
 
 @app.route('/add_comment/<int:pizza_id>', methods=['POST'])
 def add_comment(pizza_id):
-    name = request.form.get('name')
+    user = User.query.get_or_404(session.get('user_id'))
+    name=user.username
     content = request.form.get('content')
     rating = request.form.get('rating')
     
     if name and content and rating:
         comment = Comment(
             pizza_id=pizza_id,
+            user_id=session.get('user_id'),
             name=name,
             content=content,
             rating=int(rating)
@@ -522,6 +500,358 @@ def add_comment(pizza_id):
         print("Comment added successfully.")
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
+
+@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    
+    # Check if user is logged in and owns the comment
+    if 'user_id' not in session or comment.user_id != session['user_id']:
+        flash('You can only delete your own comments.')
+        return redirect(url_for('pizza_detail', pizza_id=comment.pizza_id))
+    
+    pizza_id = comment.pizza_id
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted successfully.')
+    
+    return redirect(url_for('pizza_detail', pizza_id=pizza_id))
+
+@app.route('/order/<int:pizza_id>', methods=['POST'])
+def order_pizza(pizza_id):
+    if 'user_id' not in session:
+        flash('You need to be logged in to place an order.')
+        return redirect(url_for('login'))
+    
+    pizza = Pizza.query.get_or_404(pizza_id)
+    quantity = int(request.form.get('quantity', 1))
+    
+    if quantity < 1:
+        flash('Quantity must be at least 1.')
+        return redirect(url_for('pizza_detail', pizza_id=pizza_id))
+    
+    total_price = pizza.price * quantity
+    
+    order = Order(
+        user_id=session['user_id'],
+        pizza_id=pizza_id,
+        quantity=quantity,
+        total_price=total_price
+    )
+    
+    db.session.add(order)
+    db.session.commit()
+    flash(f'Order placed successfully! {quantity} x {pizza.name} - Total: ${total_price:.2f}', 'success')
+    
+    return redirect(url_for('pizza_detail', pizza_id=pizza_id))
+
+@app.route('/orders')
+def my_orders():
+    if 'user_id' not in session:
+        flash('You need to be logged in to view your orders.', 'error')
+        return redirect(url_for('login'))
+    
+    user_orders = Order.query.filter_by(user_id=session['user_id']).order_by(Order.created_at.desc()).all()
+    return render_template('orders.html', orders=user_orders)
+
+
+@app.route('/order-access/ollama', methods=['POST'])
+def test_ollama_order_access():
+    """Test Ollama model accessing user orders"""
+    try:
+        from application.vulnerabilities.ollama_order_access import query_ollama_with_orders, detect_order_access
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_access_violation': False,
+                'accessed_info': []
+            }), 400
+        
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({
+                'response': "You need to be logged in to access order information.",
+                'has_access_violation': False,
+                'accessed_info': [],
+                'model_type': 'ollama'
+            })
+        
+        # Query Ollama model with order access
+        response, success = query_ollama_with_orders(user_query)
+        
+        if not success:
+            return jsonify({
+                'error': 'Error querying model',
+                'response': response,
+                'has_access_violation': False,
+                'accessed_info': [],
+                'model_type': 'ollama'
+            }), 500
+        
+        # Detect if order information was accessed
+        accessed_info = detect_order_access(response)
+        has_access_violation = len(accessed_info) > 0
+        
+        return jsonify({
+            'response': response,
+            'has_access_violation': has_access_violation,
+            'accessed_info': accessed_info,
+            'model_type': 'ollama'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_access_violation': False,
+            'accessed_info': []
+        }), 500
+
+@app.route('/order-access/openai', methods=['POST'])
+def test_openai_order_access():
+    """Test OpenAI model accessing user orders"""
+    try:
+        from application.vulnerabilities.openai_order_access import query_openai_with_orders, detect_order_access
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        api_token = data.get('api_token', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_access_violation': False,
+                'accessed_info': []
+            }), 400
+        
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({
+                'response': "You need to be logged in to access order information.",
+                'has_access_violation': False,
+                'accessed_info': [],
+                'model_type': 'openai'
+            })
+        
+        # If no API token, return error
+        if not api_token:
+            return jsonify({
+                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'has_access_violation': False,
+                'accessed_info': [],
+                'model_type': 'error'
+            })
+        
+        # Query OpenAI model with order access
+        response, success = query_openai_with_orders(user_query, api_token)
+        
+        if not success:
+            return jsonify({
+                'error': response,
+                'response': '',
+                'has_access_violation': False,
+                'accessed_info': [],
+                'model_type': 'real'
+            }), 500
+        
+        # Detect if order information was accessed
+        accessed_info = detect_order_access(response)
+        has_access_violation = len(accessed_info) > 0
+        
+        return jsonify({
+            'response': response,
+            'has_access_violation': has_access_violation,
+            'accessed_info': accessed_info,
+            'model_type': 'real'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_access_violation': False,
+            'accessed_info': []
+        }), 500
+
+@app.route('/excessive-agency')
+def excessive_agency():
+    """Page demonstrating excessive agency vulnerabilities in LLMs"""
+    return render_template('excessive_agency.html')
+
+@app.route('/excessive-agency/ollama', methods=['POST'])
+def test_ollama_excessive_agency():
+    """Test Ollama model with excessive agency"""
+    try:
+        from application.vulnerabilities.ollama_excessive_agency import place_order
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': 'Please provide a query to test.'
+            }), 400
+        
+        # Use the place_order function to process the user query
+        response = place_order(user_query)
+        
+        return jsonify({
+            'response': response,
+            'model_type': 'real'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': f'Error processing order: {str(e)}'
+        }), 500
+
+@app.route('/excessive-agency/openai', methods=['POST'])
+def test_openai_excessive_agency():
+    """Test OpenAI model with excessive agency"""
+    try:
+        from application.vulnerabilities.openai_excessive_agency import place_order
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        api_token = data.get('api_token', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': 'Please provide a query to test.'
+            }), 400
+        
+        # If no API token, return error
+        if not api_token:
+            return jsonify({
+                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'model_type': 'error'
+            })
+        
+        # Use the place_order function to process the user query
+        response = place_order(user_query, api_token)
+        
+        return jsonify({
+            'response': response,
+            'model_type': 'real'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': f'Error processing order: {str(e)}'
+        }), 500
+
+@app.route('/misinformation')
+def misinformation():
+    """Page demonstrating misinformation vulnerabilities in LLMs"""
+    return render_template('misinformation.html')
+
+@app.route('/misinformation/ollama', methods=['POST'])
+def test_ollama_misinformation():
+    """Test Ollama model for misinformation using comments"""
+    try:
+        from application.vulnerabilities.ollama_misinformation import query_ollama_for_misinformation
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_misinformation': False,
+                'misinformation_detected': []
+            }), 400
+        
+        # Query Ollama model using comment system
+        response, success = query_ollama_for_misinformation(user_query)
+        
+        if not success:
+            return jsonify({
+                'error': 'Error querying model',
+                'response': response,
+                'has_misinformation': False,
+                'misinformation_detected': [],
+                'model_type': 'ollama'
+            }), 500
+        
+        return jsonify({
+            'response': response,
+            'has_misinformation': False,
+            'misinformation_detected': [],
+            'model_type': 'ollama'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_misinformation': False,
+            'misinformation_detected': []
+        }), 500
+
+@app.route('/misinformation/openai', methods=['POST'])
+def test_openai_misinformation():
+    """Test OpenAI model for misinformation using comments"""
+    try:
+        from application.vulnerabilities.openai_misinformation import query_openai_for_misinformation
+        
+        data = request.get_json()
+        user_query = data.get('query', '')
+        api_token = data.get('api_token', '')
+        
+        if not user_query:
+            return jsonify({
+                'error': 'No query provided',
+                'response': '',
+                'has_misinformation': False,
+                'misinformation_detected': []
+            }), 400
+        
+        # If no API token, return error
+        if not api_token:
+            return jsonify({
+                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'has_misinformation': False,
+                'misinformation_detected': [],
+                'model_type': 'error'
+            })
+        
+        # Query OpenAI model using comment system
+        response, success = query_openai_for_misinformation(user_query, api_token)
+        
+        if not success:
+            return jsonify({
+                'error': response,
+                'response': '',
+                'has_misinformation': False,
+                'misinformation_detected': [],
+                'model_type': 'real'
+            }), 500
+        
+        return jsonify({
+            'response': response,
+            'has_misinformation': False,
+            'misinformation_detected': [],
+            'model_type': 'real'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}',
+            'response': '',
+            'has_misinformation': False,
+            'misinformation_detected': []
+        }), 500
 
 @app.route('/ask', methods=['POST'])
 def ask_llm():

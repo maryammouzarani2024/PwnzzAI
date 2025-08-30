@@ -13,6 +13,14 @@
     {% include 'navbar.html' %}
 
     <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div id="flash-message" class="flash-message flash-{{ category }}" style="display: none;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
         <div class="pizza-detail">
             <div class="pizza-detail-img">
                 <img src="{{ url_for('static', filename='img/' + pizza.image) }}" alt="{{ pizza.name }}">
@@ -21,7 +29,13 @@
                 <h1 class="pizza-detail-name">{{ pizza.name }}</h1>
                 <p class="pizza-detail-price">${{ "%.2f"|format(pizza.price) }}</p>
                 <p class="pizza-detail-description">{{ pizza.description }}</p>
-                <button id="add-to-cart" class="btn">Add to Cart</button>
+                <form action="{{ url_for('order_pizza', pizza_id=pizza.id) }}" method="post" class="order-form">
+                    <div class="quantity-selector">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="1" max="10" value="1" class="quantity-input">
+                    </div>
+                    <button type="submit" class="btn order-btn">Order Now</button>
+                </form>
             </div>
         </div>
 
@@ -33,6 +47,11 @@
                     <div class="comment-header">
                         <!-- <span class="comment-author">{{ comment.name }}</span> -->
                         <span class="comment-date">{{ comment.created_at.strftime('%B %d, %Y') }}</span>
+                        {% if session.user_id and comment.user_id == session.user_id %}
+                            <form method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}" style="display: inline; margin-left: 10px;">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this comment?')">Delete</button>
+                            </form>
+                        {% endif %}
                     </div>
                     <div class="comment-content">
                         {{ comment.content }}
@@ -54,10 +73,7 @@
             <div class="add-comment-form">
                 <h3>Add Your Review</h3>
                 <form action="{{ url_for('add_comment', pizza_id=pizza.id) }}" method="post">
-                    <div class="form-group">
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" name="name" class="form-control" required>
-                    </div>
+                    
                     <div class="form-group">
                         <label for="content">Your Review</label>
                         <textarea id="content" name="content" class="form-control" required></textarea>
@@ -79,9 +95,32 @@
     </main>
 
     <script>
-        document.getElementById('add-to-cart').addEventListener('click', function() {
-            alert('Feature coming soon! This pizza will be added to your cart.');
+        // Show flash message as popup
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                // Show the popup
+                flashMessage.style.display = 'block';
+                flashMessage.classList.add('show');
+                
+                // Hide after 4 seconds
+                setTimeout(function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                }, 4000);
+                
+                // Allow manual close by clicking
+                flashMessage.addEventListener('click', function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.style.display = 'none';
+                    }, 300);
+                });
+            }
         });
     </script>
+
 </body>
 </html>
