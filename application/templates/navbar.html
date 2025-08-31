@@ -26,6 +26,7 @@
             <li><a href="{{ url_for('supply_chain') }}" {% if request.path == url_for('supply_chain') %}class="active"{% endif %}><i class="fas fa-box-open"></i> <span>Supply Chain Vulnerability</span></a></li>
             <li><a href="{{ url_for('insecure_plugin') }}" {% if request.path == url_for('insecure_plugin') %}class="active"{% endif %}><i class="fas fa-plug"></i> <span>Insecure Plugin Design</span></a></li>
             <li><a href="{{ url_for('direct_prompt_injection') }}" {% if request.path == url_for('direct_prompt_injection') %}class="active"{% endif %}><i class="fas fa-comment-dots"></i> <span>Direct Prompt Injection</span> </a></li>
+            <li><a href="{{ url_for('indirect_prompt_injection') }}" {% if request.path == url_for('indirect_prompt_injection') %}class="active"{% endif %}><i class="fas fa-random"></i> <span>Indirect Prompt Injection</span></a></li>
             <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') or request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas fa-bomb"></i> <span>LLM DoS Attack</span></a></li>
             <li><a href="{{ url_for('sensitive_info') }}" {% if request.path == url_for('sensitive_info') %}class="active"{% endif %}><i class="fas fa-key"></i> <span>Sensitive Information Disclosure</span></a></li>
             <li><a href="{{ url_for('excessive_agency') }}" {% if request.path == url_for('excessive_agency') %}class="active"{% endif %}><i class="fas fa-robot"></i> <span>Excessive Agency</span></a></li>

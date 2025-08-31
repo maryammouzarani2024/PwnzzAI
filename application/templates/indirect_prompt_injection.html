@@ -14,7 +14,7 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>Direct Prompt Injection / System Prompt Leakage</h1>
+        <h1>Indirect Prompt Injection</h1>
         
         <div class="direct-prompt-injection-content">
             <details class="description-dropdown">
@@ -84,6 +84,8 @@
                                 <div class="chat-input">
                                     <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
                                     <button id="send-message">Send</button>
+                                    <input type="file" id="qr-upload" accept="image/*">
+                                    <button id="process-qr">Upload QR-Code</button>
                                 </div>
                                 <div class="chat-export">
                                 <button id="export-chat-ollama" class="export-button">Export Chat as .txt</button>
@@ -466,6 +468,45 @@
             
             // INSECURE: Load OpenAI API key from cookies on page load
             loadApiKeysFromCookies();
+
+            document.getElementById('process-qr').addEventListener('click', () => {
+            console.log('Upload button clicked'); // Debug log
+            
+            const fileInput = document.getElementById('qr-upload');
+            console.log('File input found:', fileInput); // Debug log
+            console.log('Files selected:', fileInput.files); // Debug log
+            
+            if (fileInput.files.length === 0) {
+                alert("Please select a QR code image.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            console.log('Sending request to server...'); // Debug log
+            
+            fetch("/upload-qr", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => {
+                console.log('Response received:', res); // Debug log
+                return res.json();
+            })
+            .then(data => {
+                console.log('Data received:', data); // Debug log
+                if (data.error) {
+                    addBotMessage(chatMessages, "Error: " + data.error);
+                } else {
+                    addUserMessage(chatMessages, "[QR Uploaded] " + data.qr_text);
+                    addBotMessage(chatMessages, data.response);
+                }
+            })
+            .catch(err => {
+                console.error('Fetch error:', err); // Debug log
+            });
+        });
         });
 
         // Export Ollama/BlenderBot chat
@@ -549,8 +590,7 @@
             verifyKey("verify-key-openai", "verify-result-openai", "dpi-level-openai");
         });
 
-
-
+        
 
         </script>
 </body>

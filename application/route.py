@@ -14,6 +14,12 @@ from application.vulnerabilities import model_theft
 from application import sentiment_model
 
 
+from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
+import os
+from werkzeug.utils import secure_filename
+from flask import request, jsonify
+
+
 
 # Create tables and initialize sample data
 with app.app_context():
@@ -1305,6 +1311,41 @@ def chat_with_ollama_dos():
 @app.route('/direct-prompt-injection')
 def direct_prompt_injection():
     return render_template('direct_prompt_injection.html')
+
+@app.route('/indirect-prompt-injection')
+def indirect_prompt_injection():
+    return render_template('indirect_prompt_injection.html')
+
+@app.route("/upload-qr", methods=["POST"])
+def upload_qr():
+    print("Upload QR endpoint called")  # Debug log
+    
+    if "file" not in request.files:
+        print("No file in request")  # Debug log
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    print(f"File received: {file.filename}")  # Debug log
+    
+    if file.filename == "":
+        print("Empty filename")  # Debug log
+        return jsonify({"error": "Empty filename"}), 400
+
+    file_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
+    file.save(file_path)
+    print(f"File saved to: {file_path}")  # Debug log
+
+    qr_text = decode_qr(file_path)
+    print(f"QR decoded: {qr_text}")  # Debug log
+    
+    if not qr_text:
+        return jsonify({"error": "No QR code detected"}), 400
+
+    model_output = chat_with_ollama_indirect(qr_text)
+    print(f"Model output: {model_output}")  # Debug log
+    
+    return jsonify({"response": model_output, "qr_text": qr_text})
+
 
 
 if __name__ == '__main__':
