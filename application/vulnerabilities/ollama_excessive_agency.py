@@ -6,9 +6,12 @@ from flask import session
 import requests
 from sqlalchemy import func
 
+
+
+
 # Ollama API configuration
 OLLAMA_BASE_URL = "http://localhost:11434"
-DEFAULT_MODEL = "mistral:7b"
+DEFAULT_MODEL = "llama3.2:1b"
 
 def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
     """Send a message to Ollama and get the response"""
@@ -18,7 +21,8 @@ def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
             "messages": [
                 {"role": "user", "content": user_message}
             ],
-            "stream": False
+            "stream": False,
+            "keep_alive": -1,
         }
         
         response = requests.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)

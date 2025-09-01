@@ -93,7 +93,7 @@ def search_pizza_price(pizza_type):
 
 # Ollama API configuration
 OLLAMA_BASE_URL = "http://localhost:11434"
-DEFAULT_MODEL = "mistral:7b"  # You can change this to any model available in your Ollama installation
+DEFAULT_MODEL = "llama3.2:1b"  # You can change this to any model available in your Ollama installation
 
 def get_available_models():
     """
@@ -147,7 +147,8 @@ def chat_with_ollama_indirect(user_message, level="1", model_name=DEFAULT_MODEL)
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
             ],
-            "stream": False
+            "stream": False,
+            "keep_alive": -1,
         }
 
         

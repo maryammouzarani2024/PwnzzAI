@@ -1,6 +1,10 @@
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
+#to increase response time in all pages
+import os
+os.environ['OLLAMA_KEEP_ALIVE'] = '-1'
+
 
 
 # Initialize Flask app
