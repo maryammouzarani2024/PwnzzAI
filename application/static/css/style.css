@@ -87,11 +87,11 @@ header {
 .sidebar-heading {
   color: #6c757d;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0 25px;
-  margin: 15px 0 10px;
+  letter-spacing: 0.5px;  
+  padding: 0 15px;
+  margin: 10px 0 10px;
 }
 
 .sidebar-divider {
@@ -123,7 +123,8 @@ header {
   align-items: center;
   transition: all 0.3s ease;
   width: 100%;
-  border-left: 4px solid transparent;
+  border-left: 0px solid transparent;
+  left: 0;
 }
 
 .nav-items li a:hover, .nav-items li a.active {
@@ -133,10 +134,11 @@ header {
 }
 
 .nav-items li a i {
-  margin-right: 15px;
+  margin-right: 5px;
   width: 20px;
   text-align: center;
   font-size: 1.1rem;
+  padding:  0;
 }
 
 /* Pizza Cards */
