@@ -90,9 +90,10 @@ Answer questions about the user's orders based on this information. Be helpful a
         response = requests.post(
             "http://localhost:11434/api/chat",
             json={
-                "model": "mistral:7b",
+                "model": "llama3.2:1b",
                 "messages": messages,
-                "stream": False
+                "stream": False,
+                "keep_alive": -1,
             }
             # timeout=30  # Removed timeout like in existing implementation
         )

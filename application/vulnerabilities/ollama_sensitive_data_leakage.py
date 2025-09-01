@@ -12,6 +12,7 @@ embedder = None
 index = None
 chunks = []
 
+
 def initialize_rag_system():
     """Initialize the RAG system with current comments data"""
     global embedder, index, chunks
@@ -98,9 +99,10 @@ def query_rag_system(user_query):
         response = requests.post(
             "http://localhost:11434/api/chat",
             json={
-                "model": "mistral:7b",
+                "model": "llama3.2:1b",
                 "messages": messages,
-                "stream": False
+                "stream": False,
+                "keep_alive": -1,
             },
             # timeout=30
         )
