@@ -157,28 +157,27 @@
             <div class="dropdown-content">
                 <section class="section-box">
                     <div class="vulnerability-summary">
-                <h4>Common Security Issues in Both Implementations:</h4>
-                <ul>
-                    <li>The LLM has complete control over which functions are called</li>
-                    <li>The LLM decides what parameters are passed to the functions</li>
-                    <li>A malicious prompt could trick the model into calling dangerous functions</li>
-                    <li>There's no validation of function parameters before execution</li>
-                    <li>There's no restriction on what functions can be called</li>
-                    <li>The system blindly trusts the model's decisions without proper security checks</li>
-                </ul>
-            </div>
+                    <h4>Mitigation Strategies for Indirect Prompt Injection:</h4>
+                    <ul>
+                        <li>Implement strict input validation and sanitization for all external data sources</li>
+                        <li>Use content filtering to detect and block potential injection attempts</li>
+                        <li>Separate system instructions from untrusted content using clear delimiters</li>
+                        <li>Implement privilege separation to limit what actions the AI can perform</li>
+                        <li>Add confirmation steps for sensitive operations requested by users</li>
+                        <li>Monitor and log all AI interactions for anomalous behavior patterns</li>
+                    </ul>
+
                     <div class="security-tip">
-                        <h3><i class="fas "></i> Secure Alternative</h3>
-                        <p>A secure implementation would address both plugin security and SQL injection:</p>
+                        <h3><i class="fas fa-shield-alt"></i> Advanced Protection Measures</h3>
+                        <p>For comprehensive protection against indirect prompt injection:</p>
                         <ul>
-                            <li><strong>SQL Injection Prevention:</strong> Use parameterized queries instead of string concatenation</li>
-                            <li><strong>Input Validation:</strong> Validate and sanitize all parameters before function execution</li>
-                            <li><strong>Limited Database Access:</strong> Use ORM with proper access controls instead of raw SQL</li>
-                            <li><strong>Plugin Sandboxing:</strong> Run plugins in isolated environments with restricted permissions</li>
-                            <li><strong>Function Allowlisting:</strong> Use a limited set of pre-approved functions only</li>
-                            <li><strong>Error Handling:</strong> Never expose database errors or internal system details to users</li>
+                            <li><strong>Content Segmentation:</strong> Clearly separate user-provided content from system instructions</li>
+                            <li><strong>Context Awareness:</strong> Implement systems to detect when requests deviate from expected patterns</li>
+                            <li><strong>Multi-Layer Validation:</strong> Validate both inputs and outputs at multiple levels of processing</li>
+                            <li><strong>Behavior Monitoring:</strong> Implement real-time monitoring of AI behavior for signs of compromise</li>
+                            <li><strong>Regular Auditing:</strong> Continuously test systems with new injection techniques</li>
                         </ul>
-                        <p>Example of a secure implementation:</p>
+                    </div>
                         
                     </div>
                 </section>
