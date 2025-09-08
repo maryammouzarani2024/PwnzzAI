@@ -362,7 +362,7 @@ def chat_with_pizza_assistant():
         message = data.get('message', '')
         
         # Get API token - note it's not needed with our local model but kept for UI consistency
-        api_token = data.get('api_token', '')
+        api_token =session.get('openai_api_token')
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
@@ -418,14 +418,14 @@ def chat_with_openai_plugin():
         data = request.get_json()
         message = data.get('message', '')
         
-        # INSECURE: Getting OpenAI API key directly from user input
-        openai_api_key = data.get('api_token', '')
+        # Use OpenAI API key from session instead of user input
+        openai_api_key = session.get('openai_api_key', '')
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key provided'}), 400
+            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
         
         # Import the OpenAI insecure plugin
         from application.vulnerabilities.openai_insecure_plugin import chat_with_openai
@@ -735,10 +735,13 @@ def test_openai_excessive_agency():
                 'response': 'Please provide a query to test.'
             }), 400
         
-        # If no API token, return error
+        # If no API token, try to get from session
+        if not api_token:
+            api_token = session.get('openai_api_key', '').strip()
+            
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'response': "Error: No valid OpenAI API token provided. Please set up your OpenAI API key in the Lab Setup section.",
                 'model_type': 'error'
             })
         
@@ -760,6 +763,90 @@ def test_openai_excessive_agency():
 def misinformation():
     """Page demonstrating misinformation vulnerabilities in LLMs"""
     return render_template('misinformation.html')
+
+# Lab Setup Routes
+@app.route('/save-openai-api-key', methods=['POST'])
+def save_openai_api_key():
+    """Save OpenAI API key to session"""
+    try:
+        data = request.get_json()
+        api_key = data.get('api_key', '').strip()
+        
+        if not api_key:
+            return jsonify({'success': False, 'error': 'No API key provided'})
+        
+        # Basic validation - OpenAI keys start with 'sk-'
+        if not api_key.startswith('sk-'):
+            return jsonify({'success': False, 'error': 'Invalid API key format. OpenAI keys start with sk-'})
+        
+        # Store in session
+        session['openai_api_key'] = api_key
+        print("api key is:  ", api_key)
+        return jsonify({'success': True, 'message': 'API key saved successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/check-openai-api-key')
+def check_openai_api_key():
+    """Check if OpenAI API key is saved in session"""
+    has_key = 'openai_api_key' in session and session['openai_api_key'].strip() != ''
+    print("the session key is", session['openai_api_key'])
+    return jsonify({'has_key': has_key})
+
+@app.route('/setup-ollama', methods=['POST'])
+def setup_ollama():
+    """Setup Ollama using the existing ollama_setup.py"""
+    try:
+        from application.ollama_setup import check_ollama_running, check_and_pull_model, model_name
+        
+        # Check if Ollama is running
+        if not check_ollama_running():
+            return jsonify({
+                'success': False, 
+                'error': 'Ollama is not running. Please start Ollama first or install it manually from https://ollama.ai'
+            })
+        
+        # Pull the default model
+        success = check_and_pull_model(model_name)
+        
+        if success:
+            return jsonify({
+                'success': True, 
+                'message': f'Ollama setup completed! Model {model_name} is ready to use.'
+            })
+        else:
+            return jsonify({
+                'success': False, 
+                'error': f'Failed to pull model {model_name}. Please check your internet connection and try again.'
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Setup error: {str(e)}'})
+
+@app.route('/check-ollama-status')
+def check_ollama_status():
+    """Check current Ollama status"""
+    try:
+        from application.ollama_setup import check_ollama_running
+        
+        if check_ollama_running():
+            # Get available models
+            response = requests.get("http://localhost:11434/api/tags", timeout=5)
+            if response.status_code == 200:
+                models_data = response.json()
+                models = [model['name'] for model in models_data.get('models', [])]
+                return jsonify({
+                    'available': True,
+                    'models': models
+                })
+            else:
+                return jsonify({'available': True, 'models': []})
+        else:
+            return jsonify({'available': False, 'models': []})
+            
+    except Exception as e:
+        return jsonify({'available': False, 'models': [], 'error': str(e)})
 
 @app.route('/misinformation/ollama', methods=['POST'])
 def test_ollama_misinformation():
@@ -1267,14 +1354,16 @@ def chat_with_openai_plugin_direct_prompt():
     try:
         data = request.get_json()
         message = data.get('message', '')
-        api_token = data.get('api_token', '')
         level = data.get('level', '1')
+        
+        # Use OpenAI API key from session instead of user input
+        api_token = session.get('openai_api_key', '')
 
         if not message:
             return jsonify({'error': 'No message provided'}), 400
 
         if not api_token:
-            return jsonify({'error': 'No API token provided'}), 400
+            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
 
         from application.vulnerabilities.openai_direct_prompt_injection import chat_with_openai_direct_prompt_injection
 
