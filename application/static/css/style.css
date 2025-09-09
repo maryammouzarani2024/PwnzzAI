@@ -752,7 +752,7 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dropdown-content {
-    margin-top: 0;
+    margin-top: 10px;
     padding: 0;
     background-color: transparent;
 }

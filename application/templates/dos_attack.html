@@ -76,17 +76,15 @@
                                             <p>This demo will use your OpenAI API key to make real API calls. If you use the attack feature, you <strong>WILL</strong> be charged for all the API calls made during the attack. Use at your own risk and only for educational purposes.</p>
                                         </div>
                                         
-                                        <!-- OpenAI Token Input Section -->
+                                        <!-- OpenAI Status Section -->
                                         <div class="token-section openai-token-section">
-                                            <h3>Connect to OpenAI API</h3>
-                                            <p>Enter your OpenAI API key to enable the real DoS attack demonstration:</p>
-                                            <div class="token-input">
-                                                <input type="password" id="openai-api-token" placeholder="Enter OpenAI API key...">
-                                                <button id="connect-openai-api">Connect API</button>
-                                            </div>
+                                            <h3>OpenAI API Status</h3>
                                             <div id="openai-api-status" class="api-status disconnected">
-                                                <i class="fas fa-circle-xmark"></i> Not connected to OpenAI API
+                                                <i class="fas fa-circle-xmark"></i> Checking API key...
                                             </div>
+                                            <p class="help-text">
+                                                <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                            </p>
                                         </div>
                                         
                                         <!-- OpenAI Chat Interface -->
@@ -1057,8 +1055,6 @@
             const chatMessages = document.getElementById('chat-history');
             
             // OpenAI tab elements
-            const openaiApiTokenInput = document.getElementById('openai-api-token');
-            const connectOpenaiButton = document.getElementById('connect-openai-api');
             const openaiApiStatus = document.getElementById('openai-api-status');
             const openaiUserMessageInput = document.getElementById('openai-user-message');
             const openaiSendMessageButton = document.getElementById('openai-send-message');
@@ -1070,7 +1066,6 @@
             const ollamaChatMessages = document.getElementById('ollama-chat-history');
             
             // INSECURE: Tokens stored in client-side JavaScript AND cookies
-            let openaiApiToken = null;
             
             // Cookie utility functions (INSECURE - storing API keys in cookies)
             function setCookie(name, value, days = 30) {
@@ -1090,22 +1085,47 @@
                 return null;
             }
             
-            // Load API keys from cookies on page load (INSECURE)
-            function loadApiKeysFromCookies() {
-                const savedOpenaiToken = getCookie('openai_api_token');
-                
-                if (savedOpenaiToken) {
-                    openaiApiToken = savedOpenaiToken;
-                    if (openaiApiTokenInput) openaiApiTokenInput.value = '••••••••••••••••'; // Show masked token
-                    if (openaiApiStatus) {
-                        openaiApiStatus.className = 'api-status connected';
-                        openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from cookie)';
+            // Check for session-stored API key from basics page
+            async function checkSessionApiKey() {
+                console.log('Checking session API key...');
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    console.log('API key check result:', data);
+                    
+                    if (data.has_key) {
+                        console.log('API key found in session, enabling OpenAI interface');
+                        if (openaiApiStatus) {
+                            openaiApiStatus.className = 'api-status connected';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                        }
+                        if (openaiUserMessageInput) {
+                            openaiUserMessageInput.disabled = false;
+                        }
+                        if (openaiSendMessageButton) {
+                            openaiSendMessageButton.disabled = false;
+                        }
+                        // Add welcome message if chat is empty
+                        if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
+                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to demonstrate direct prompt injection with OpenAI.");
+                        }
+                    } else {
+                        console.log('No API key found in session');
+                        // No token found in session
+                        if (openaiApiStatus) {
+                            openaiApiStatus.className = 'api-status disconnected';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                        }
                     }
-                    if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
-                    if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
-                    console.log("INSECURE: OpenAI API Token loaded from cookie:", savedOpenaiToken);
+                } catch (error) {
+                    console.error('Error checking API key:', error);
+                    if (openaiApiStatus) {
+                        openaiApiStatus.className = 'api-status disconnected';
+                        openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    }
                 }
             }
+            
             
             // No tab functionality needed - content is displayed directly
             
@@ -1126,38 +1146,7 @@
             // Initialize simulation chat on page load
             initializeSimulationChat();
             
-            // Connect OpenAI API button
-            if (connectOpenaiButton) {
-                connectOpenaiButton.addEventListener('click', function() {
-                    const token = openaiApiTokenInput.value.trim();
-                    
-                    if (!token) {
-                        alert('Please enter an OpenAI API key');
-                        return;
-                    }
-                    
-                    // INSECURE: Store OpenAI token in a JavaScript variable AND cookie
-                    openaiApiToken = token;
-                    setCookie('openai_api_token', token, 30); // Store for 30 days
-                    
-                    // Update UI to show connected state
-                    openaiApiStatus.className = 'api-status connected';
-                    openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
-                    
-                    // Enable OpenAI chat interface
-                    openaiUserMessageInput.disabled = false;
-                    openaiSendMessageButton.disabled = false;
-                    
-                    // Add welcome message
-                    addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza recipes and information. Try asking about pizza recipes or ingredients.");
-                    
-                    // Show masked token in input
-                    openaiApiTokenInput.value = '••••••••••••••••';
-                    
-                    // VULNERABLE: Log the token to console for demonstration purposes
-                    console.log("INSECURE: OpenAI API Token stored in client-side JavaScript AND cookie:", openaiApiToken);
-                });
-            }
+            // Session-based API key handling - no connect button needed
             
             // Simulation Send message button
             if (sendMessageButton) {
@@ -1279,8 +1268,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        message: userMessage,
-                        api_token: openaiApiToken
+                        message: userMessage
+                        // API key now comes from session, not client-side
                     })
                 })
                 .then(response => response.json())
@@ -1754,7 +1743,7 @@
             
             
             // INSECURE: Load OpenAI API key from cookies on page load
-            loadApiKeysFromCookies();
+            checkSessionApiKey();
         });
 
     </script>

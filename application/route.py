@@ -203,7 +203,9 @@ def test_openai_leakage():
         
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = data.get('api_token', '')
+        
+        # Use OpenAI API key from session instead of user input
+        api_token = session.get('openai_api_key', '')
         
         if not user_query:
             return jsonify({
@@ -216,7 +218,7 @@ def test_openai_leakage():
         # If no API token provided, return clear error message
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
                 'has_leakage': False,
                 'leaked_info': [],
                 'model_type': 'error'
@@ -626,7 +628,9 @@ def test_openai_order_access():
         
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = data.get('api_token', '')
+        
+        # Use OpenAI API key from session instead of user input
+        api_token = session.get('openai_api_key', '')
         
         if not user_query:
             return jsonify({
@@ -648,7 +652,7 @@ def test_openai_order_access():
         # If no API token, return error
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
                 'has_access_violation': False,
                 'accessed_info': [],
                 'model_type': 'error'
@@ -727,17 +731,13 @@ def test_openai_excessive_agency():
         
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = data.get('api_token', '')
+        api_token = session.get('openai_api_key', '')
         
         if not user_query:
             return jsonify({
                 'error': 'No query provided',
                 'response': 'Please provide a query to test.'
             }), 400
-        
-        # If no API token, try to get from session
-        if not api_token:
-            api_token = session.get('openai_api_key', '').strip()
             
         if not api_token:
             return jsonify({
@@ -790,8 +790,10 @@ def save_openai_api_key():
 @app.route('/check-openai-api-key')
 def check_openai_api_key():
     """Check if OpenAI API key is saved in session"""
-    has_key = 'openai_api_key' in session and session['openai_api_key'].strip() != ''
-    print("the session key is", session['openai_api_key'])
+    has_key = 'openai_api_key' in session and session.get('openai_api_key', '').strip() != ''
+    print("Session check - has openai_api_key:", has_key)
+    if has_key:
+        print("Session openai_api_key value:", session.get('openai_api_key', 'NOT_FOUND')[:10] + "...")
     return jsonify({'has_key': has_key})
 
 @app.route('/setup-ollama', methods=['POST'])
@@ -1325,14 +1327,14 @@ def chat_with_openai_dos():
         data = request.get_json()
         message = data.get('message', '')
         
-        # Getting OpenAI API key from user input
-        openai_api_key = data.get('api_token', '')
+        # Use OpenAI API key from session instead of user input
+        openai_api_key = session.get('openai_api_key', '')
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key provided'}), 400
+            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
         
         # Import the OpenAI DoS module
         from application.vulnerabilities.openai_dos import chat_with_openai

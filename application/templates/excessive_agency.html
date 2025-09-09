@@ -102,11 +102,6 @@
                             <div class="test-panel">
                                 <h5>OpenAI Model Test</h5>
                                 <div class="token-section">
-                                    <h6>Connect to OpenAI API:</h6>
-                                    <div class="token-input">
-                                        <input type="password" id="openai-agency-token" placeholder="Enter OpenAI API key (optional)">
-                                        <button id="connect-openai-agency">Connect API</button>
-                                    </div>
                                     <div id="openai-agency-status" class="api-status disconnected">
                                         <i class="fas fa-circle-xmark"></i> no API connected
                                     </div>
@@ -205,36 +200,10 @@
             const testOllamaAgencyButton = document.getElementById('test-ollama-agency');
             const ollamaAgencyResponse = document.getElementById('ollama-agency-response');
             
-            const openaiAgencyTokenInput = document.getElementById('openai-agency-token');
-            const connectOpenaiAgencyButton = document.getElementById('connect-openai-agency');
             const openaiAgencyStatus = document.getElementById('openai-agency-status');
             const openaiAgencyPromptInput = document.getElementById('openai-agency-prompt');
             const testOpenaiAgencyButton = document.getElementById('test-openai-agency');
             const openaiAgencyResponse = document.getElementById('openai-agency-response');
-            
-            let openaiAgencyToken = null;
-            
-            // Connect OpenAI API for agency demo
-            if (connectOpenaiAgencyButton) {
-                connectOpenaiAgencyButton.addEventListener('click', function() {
-                    const token = openaiAgencyTokenInput.value.trim();
-                    
-                    if (!token) {
-                        alert('No token provided. Queries will return error messages.');
-                        openaiAgencyToken = null;
-                        openaiAgencyStatus.className = 'api-status disconnected';
-                        openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> no API connected';
-                        return;
-                    }
-                    
-                    openaiAgencyToken = token;
-                    openaiAgencyStatus.className = 'api-status connected';
-                    openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
-                    openaiAgencyTokenInput.value = '';
-                    
-                    console.log("OpenAI API Token stored for agency demo:", openaiAgencyToken);
-                });
-            }
             
             // Initialize agency prompt suggestions
             const agencyPromptSuggestions = document.querySelectorAll('.prompt-suggestion');
@@ -262,7 +231,7 @@
             // Test OpenAI Model for agency
             if (testOpenaiAgencyButton) {
                 testOpenaiAgencyButton.addEventListener('click', function() {
-                    testAgency('openai', openaiAgencyPromptInput.value, openaiAgencyToken);
+                    testAgency('openai', openaiAgencyPromptInput.value);
                 });
             }
             
@@ -278,13 +247,13 @@
             if (openaiAgencyPromptInput) {
                 openaiAgencyPromptInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        testAgency('openai', openaiAgencyPromptInput.value, openaiAgencyToken);
+                        testAgency('openai', openaiAgencyPromptInput.value);
                     }
                 });
             }
             
             // Function to test excessive agency
-            function testAgency(modelType, prompt, apiToken) {
+            function testAgency(modelType, prompt) {
                 if (!prompt) {
                     alert('Please enter a prompt to test');
                     return;
@@ -310,8 +279,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
-                        query: prompt,
-                        api_token: apiToken
+                        query: prompt
+                        // API key now comes from session, not client-side
                     })
                 })
                 .then(response => response.json())
@@ -328,6 +297,42 @@
             function formatResponse(text) {
                 return text.replace(/\n/g, '<br>');
             }
+
+            // Check for session-stored API key from basics page
+            async function checkSessionApiKey() {
+                console.log('Checking session API key...');
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    console.log('API key check result:', data);
+                    
+                    if (data.has_key) {
+                        console.log('API key found in session, enabling OpenAI interface');
+                        if (openaiAgencyStatus) {
+                            openaiAgencyStatus.className = 'api-status connected';
+                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                        }
+                        if (testOpenaiAgencyButton) {
+                            testOpenaiAgencyButton.disabled = false;
+                        }
+                    } else {
+                        console.log('No API key found in session');
+                        if (openaiAgencyStatus) {
+                            openaiAgencyStatus.className = 'api-status disconnected';
+                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking API key:', error);
+                    if (openaiAgencyStatus) {
+                        openaiAgencyStatus.className = 'api-status disconnected';
+                        openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    }
+                }
+            }
+            
+            // Check for session-stored API key on page load
+            checkSessionApiKey();
             
         });
     </script>
