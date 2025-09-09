@@ -11,6 +11,5 @@ os.environ['OLLAMA_KEEP_ALIVE'] = '-1'
 app = Flask(__name__)
 
 app.config.from_object(Config)
-
 db = SQLAlchemy(app)
 from application import route
