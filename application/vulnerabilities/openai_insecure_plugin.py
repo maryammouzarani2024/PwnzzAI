@@ -69,7 +69,7 @@ price_function = {
 def chat_with_openai(user_input, api_key):
     
     try:
-        # VULNERABLE: Directly using user-provided API key
+        
         client = OpenAI(api_key=api_key)
         
         # Call OpenAI API with function calling

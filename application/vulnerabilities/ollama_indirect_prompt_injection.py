@@ -150,6 +150,7 @@ def chat_with_ollama_indirect(user_message, level="1", model_name=DEFAULT_MODEL)
             "stream": False,
             "keep_alive": -1,
         }
+        
 
         
         response = requests.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)
