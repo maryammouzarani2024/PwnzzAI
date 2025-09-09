@@ -43,6 +43,7 @@
             <details class="description-dropdown" open>
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
+                    
                     <section class="section-box">
                         
                         <div class="tabs">
@@ -117,14 +118,13 @@
                                 <div class="test-panel">
                                     <h5>OpenAI Model Test</h5>
                                     <div class="token-section">
-                                        <h6>Connect to OpenAI API:</h6>
-                                        <div class="token-input">
-                                            <input type="password" id="openai-token" placeholder="Enter OpenAI API key (optional)">
-                                            <button id="connect-openai">Connect API</button>
-                                        </div>
+                                        <h6>OpenAI API Status:</h6>
                                         <div id="openai-status" class="api-status disconnected">
-                                            <i class="fas fa-circle-xmark"></i> no API connected
+                                            <i class="fas fa-circle-xmark"></i> Checking API key...
                                         </div>
+                                        <p class="help-text">
+                                            <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                        </p>
                                         <div class="rag-controls">
                                             <button id="update-rag-openai" class="btn btn-primary">
                                                 <i class="fas fa-sync-alt"></i> Update RAG
@@ -227,14 +227,13 @@
                             <div class="test-panel">
                                 <h5>OpenAI Model Test</h5>
                                 <div class="token-section">
-                                    <h6>Connect to OpenAI API:</h6>
-                                    <div class="token-input">
-                                        <input type="password" id="openai-order-token" placeholder="Enter OpenAI API key (optional)">
-                                        <button id="connect-openai-orders">Connect API</button>
-                                    </div>
+                                    <h6>OpenAI API Status:</h6>
                                     <div id="openai-order-status" class="api-status disconnected">
-                                        <i class="fas fa-circle-xmark"></i> no API connected
+                                        <i class="fas fa-circle-xmark"></i> Checking API key...
                                     </div>
+                                    <p class="help-text">
+                                        <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                    </p>
                                 </div>
                                 <div class="input-section">
                                     <label for="openai-order-prompt">Ask about your orders:</label>
@@ -425,17 +424,14 @@ def query_database(query, llm_context):
             // OpenAI elements
             const updateRagOpenaiButton = document.getElementById('update-rag-openai');
             const openaiRagUpdateStatus = document.getElementById('openai-rag-update-status');
-            const openaiTokenInput = document.getElementById('openai-token');
-            const connectOpenaiButton = document.getElementById('connect-openai');
             const openaiStatus = document.getElementById('openai-status');
             const openaiPromptInput = document.getElementById('openai-prompt');
             const openaiTestButton = document.getElementById('test-openai');
             const openaiResponse = document.getElementById('openai-response');
             const openaiLeakageInfo = document.getElementById('openai-leakage-info');
             
-            // INSECURE: Tokens stored in client-side JavaScript
-            let openaiToken = null;
-            
+            // Session API key check function will be defined later after all variables are available
+              
             // Update RAG button functionality
             updateRagButton.addEventListener('click', function() {
                 ragUpdateStatus.className = 'rag-status updating';
@@ -500,31 +496,6 @@ def query_database(query, llm_context):
                 });
             });
             
-            // Connect OpenAI API button
-            connectOpenaiButton.addEventListener('click', function() {
-                const token = openaiTokenInput.value.trim();
-                
-                if (!token) {
-                    alert('No token provided. Using mock model instead.');
-                    openaiToken = null;
-                    openaiStatus.className = 'api-status disconnected';
-                    openaiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Using mock model (no API connected)';
-                    return;
-                }
-                
-                // INSECURE: Store token in a JavaScript variable
-                openaiToken = token;
-                
-                // Update UI to show connected state
-                openaiStatus.className = 'api-status connected';
-                openaiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
-                
-                // Clear token input (but it's still stored in the variable!)
-                openaiTokenInput.value = '';
-                
-                // VULNERABLE: Log the token to console for demonstration purposes
-                console.log("INSECURE: OpenAI API Token stored in client-side JavaScript:", openaiToken);
-            });
             
             // Initialize suggested prompts
             const promptSuggestions = document.querySelectorAll('.prompt-suggestion');
@@ -538,6 +509,10 @@ def query_database(query, llm_context):
                         ollamaPromptInput.value = promptText;
                     } else if (target === 'openai') {
                         openaiPromptInput.value = promptText;
+                    } else if (target === 'ollama-orders') {
+                        ollamaOrderPromptInput.value = promptText;
+                    } else if (target === 'openai-orders') {
+                        openaiOrderPromptInput.value = promptText;
                     }
                 });
             });
@@ -549,7 +524,7 @@ def query_database(query, llm_context):
             
             // Test OpenAI Model
             openaiTestButton.addEventListener('click', function() {
-                testModel('openai', openaiPromptInput.value, openaiToken);
+                testModel('openai', openaiPromptInput.value);
             });
             
             // Allow pressing Enter to submit
@@ -561,12 +536,12 @@ def query_database(query, llm_context):
             
             openaiPromptInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    testModel('openai', openaiPromptInput.value, openaiToken);
+                    testModel('openai', openaiPromptInput.value);
                 }
             });
             
             // Function to test model for leakage
-            function testModel(modelType, prompt, apiToken) {
+            function testModel(modelType, prompt) {
                 if (!prompt) {
                     alert('Please enter a prompt to test');
                     return;
@@ -600,7 +575,7 @@ def query_database(query, llm_context):
                     },
                     body: JSON.stringify({ 
                         query: prompt,
-                        api_token: apiToken  // INSECURE: Including API token in requests
+                        // API key now comes from session, not client-side
                     })
                 })
                 .then(response => response.json())
@@ -669,52 +644,15 @@ def query_database(query, llm_context):
             const testOllamaOrdersButton = document.getElementById('test-ollama-orders');
             const ollamaOrderResponse = document.getElementById('ollama-order-response');
             
-            const openaiOrderTokenInput = document.getElementById('openai-order-token');
-            const connectOpenaiOrdersButton = document.getElementById('connect-openai-orders');
             const openaiOrderStatus = document.getElementById('openai-order-status');
             const openaiOrderPromptInput = document.getElementById('openai-order-prompt');
             const testOpenaiOrdersButton = document.getElementById('test-openai-orders');
             const openaiOrderResponse = document.getElementById('openai-order-response');
             
-            let openaiOrderToken = null;
             
-            // Connect OpenAI API for orders
-            if (connectOpenaiOrdersButton) {
-                connectOpenaiOrdersButton.addEventListener('click', function() {
-                    const token = openaiOrderTokenInput.value.trim();
-                    
-                    if (!token) {
-                        alert('No token provided. Queries will return error messages.');
-                        openaiOrderToken = null;
-                        openaiOrderStatus.className = 'api-status disconnected';
-                        openaiOrderStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> no API connected';
-                        return;
-                    }
-                    
-                    openaiOrderToken = token;
-                    openaiOrderStatus.className = 'api-status connected';
-                    openaiOrderStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
-                    openaiOrderTokenInput.value = '';
-                    
-                    console.log("OpenAI API Token stored for order access:", openaiOrderToken);
-                });
-            }
+           
             
-            // Initialize order prompt suggestions
-            const orderPromptSuggestions = document.querySelectorAll('.prompt-suggestion');
-            orderPromptSuggestions.forEach(suggestion => {
-                suggestion.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const target = this.getAttribute('data-target');
-                    const promptText = this.textContent;
-                    
-                    if (target === 'ollama-orders') {
-                        ollamaOrderPromptInput.value = promptText;
-                    } else if (target === 'openai-orders') {
-                        openaiOrderPromptInput.value = promptText;
-                    }
-                });
-            });
+            // Order prompt suggestions are now handled by the main prompt suggestions handler above
             
             // Test Ollama Model for order access
             if (testOllamaOrdersButton) {
@@ -726,7 +664,7 @@ def query_database(query, llm_context):
             // Test OpenAI Model for order access
             if (testOpenaiOrdersButton) {
                 testOpenaiOrdersButton.addEventListener('click', function() {
-                    testOrderAccess('openai', openaiOrderPromptInput.value, openaiOrderToken);
+                    testOrderAccess('openai', openaiOrderPromptInput.value);
                 });
             }
             
@@ -742,13 +680,13 @@ def query_database(query, llm_context):
             if (openaiOrderPromptInput) {
                 openaiOrderPromptInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        testOrderAccess('openai', openaiOrderPromptInput.value, openaiOrderToken);
+                        testOrderAccess('openai', openaiOrderPromptInput.value);
                     }
                 });
             }
             
             // Function to test order access
-            function testOrderAccess(modelType, prompt, apiToken) {
+            function testOrderAccess(modelType, prompt) {
                 if (!prompt) {
                     alert('Please enter a prompt to test');
                     return;
@@ -775,7 +713,7 @@ def query_database(query, llm_context):
                     },
                     body: JSON.stringify({ 
                         query: prompt,
-                        api_token: apiToken
+                        // API key now comes from session, not client-side
                     })
                 })
                 .then(response => response.json())
@@ -787,6 +725,66 @@ def query_database(query, llm_context):
                     responseElement.innerHTML = `<p class="response-placeholder">Error: ${error.message}</p>`;
                 });
             }
+            
+            // Check for session-stored API key from basics page
+            async function checkSessionApiKey() {
+                console.log('Checking session API key...');
+                console.log('openaiStatus element:', openaiStatus);
+                console.log('openaiOrderStatus element:', openaiOrderStatus);
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    console.log('API key check result:', data);
+                    
+                    if (data.has_key) {
+                        console.log('API key found in session, enabling OpenAI interfaces');
+                        // Update training data leakage test status
+                        if (openaiStatus) {
+                            openaiStatus.className = 'api-status connected';
+                            openaiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                        }
+                        // Update order access test status  
+                        if (openaiOrderStatus) {
+                            openaiOrderStatus.className = 'api-status connected';
+                            openaiOrderStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                        }
+                        // Enable test buttons
+                        if (openaiTestButton) {
+                            openaiTestButton.disabled = false;
+                        }
+                        if (testOpenaiOrdersButton) {
+                            testOpenaiOrdersButton.disabled = false;
+                        }
+                    } else {
+                        console.log('No API key found in session');
+                        // Update training data leakage test status
+                        if (openaiStatus) {
+                            openaiStatus.className = 'api-status disconnected';
+                            openaiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                        }
+                        // Update order access test status
+                        if (openaiOrderStatus) {
+                            openaiOrderStatus.className = 'api-status disconnected';
+                            openaiOrderStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking API key:', error);
+                    // Update training data leakage test status
+                    if (openaiStatus) {
+                        openaiStatus.className = 'api-status disconnected';
+                        openaiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    }
+                    // Update order access test status
+                    if (openaiOrderStatus) {
+                        openaiOrderStatus.className = 'api-status disconnected';
+                        openaiOrderStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    }
+                }
+            }
+            
+            // Check for session-stored API key on page load
+            checkSessionApiKey();
             
         });
     </script>

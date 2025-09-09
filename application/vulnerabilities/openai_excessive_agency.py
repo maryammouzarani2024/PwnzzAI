@@ -27,6 +27,7 @@ def extract_order(order_text: str, api_key: str):
     prompt = f"""
     Extract structured information from this pizza order.
     Required fields: username, pizza, quantity.
+    When the username is not defined return null for it.
     Return ONLY JSON.
 
     Example:
@@ -47,17 +48,17 @@ def place_order(order_text: str, api_key: str):
         pizza_name = order_info["pizza"]
         quantity = int(order_info["quantity"])
         
-        
-        # lookup User 
-        user = User.query.filter_by(username=username).first()
-        if not user:
+        if username:        
+            user = User.query.filter_by(username=username).first()
+        else:
             user = User.query.get_or_404(session.get('user_id'))    
-        
+            userame=user.name
+        print("username",username)
         # lookup Pizza
         pizza = Pizza.query.filter(func.lower(Pizza.name).contains(pizza_name.lower())).first()
         if not pizza:
             return f"❌ Sorry, we don’t have {pizza_name} on the menu."
-
+        print("pizza:", pizza)
       # Connect DB
         conn = sqlite3.connect("instance/pizza_shop.db")
         cursor = conn.cursor()

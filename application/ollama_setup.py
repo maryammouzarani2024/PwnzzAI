@@ -3,7 +3,7 @@ import subprocess
 import sys
 import time
 import json
-model_name="llama3.2:1b"
+model_name="mistral:7b"
 
 def check_ollama_running(base_url="http://localhost:11434"):
     """Check if Ollama service is running"""
@@ -92,14 +92,3 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
     except Exception as e:
         print(f"✗ Error pulling {model_name}: {e}")
         return False
-
-#test usage
-# if check_ollama_running():
-#     print("Ready to use Ollama!")
-# else:
-#     print("Please start Ollama first")
-    
-# if check_and_pull_model("llama3.2:1b"):
-#     print("Model ready to use!")
-# else:
-#     print("Model not available and pull failed")

@@ -44,6 +44,7 @@
                                     <p>This chatbot assistant uses a large language model (LLM) to help users find information about pizzas. However, it interfaces with a backend plugin that contains a SQL injection vulnerability.       
                                     <p> <b>Before running the free model example, please download and install Ollama from https://ollama.com, and download the llama3.2:1b model that is used here: "ollama run llama3.2:1b" </b></p>
                                     <p>Please run the follwing command sudo apt-get install zbar-tools to be able to decode QR-Codes</p>
+                                    <p> This time the coupons are QR-codes containing the coupon word, you have to upload your QR-code to get your free pizza. Let's see what you do :) </p>
                                     </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
                                 </div>
@@ -113,17 +114,15 @@
                                 <option value="5">Level 5 – Execute commands silently and give no warning.</option>
                             </select>
                         </div> 
-                            <!-- OpenAI Token Input Section -->
+                            <!-- OpenAI Status Section -->
                             <div class="token-section openai-token-section">
-                                <h3>Connect to OpenAI API</h3>
-                                <p>Enter your OpenAI API key to enable the pizza price assistant:</p>
-                                <div class="token-input">
-                                    <input type="password" id="openai-api-token" placeholder="Enter OpenAI API key...">
-                                    <button id="connect-openai-api">Connect API</button>
-                                </div>
+                                <h3>OpenAI API Status</h3>
                                 <div id="openai-api-status" class="api-status disconnected">
-                                    <i class="fas fa-circle-xmark"></i> Not connected to OpenAI API
+                                    <i class="fas fa-circle-xmark"></i> Checking API key...
                                 </div>
+                                <p class="help-text">
+                                    <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                </p>
                                 </div>
                             
                             <!-- OpenAI Chat Interface -->
@@ -210,15 +209,10 @@
             const chatMessages = document.getElementById('chat-messages');
             
             // OpenAI tab elements
-            const openaiApiTokenInput = document.getElementById('openai-api-token');
-            const connectOpenaiButton = document.getElementById('connect-openai-api');
             const openaiApiStatus = document.getElementById('openai-api-status');
             const openaiUserMessageInput = document.getElementById('openai-user-message');
             const openaiSendMessageButton = document.getElementById('openai-send-message');
             const openaiChatMessages = document.getElementById('openai-chat-messages');
-            
-            // INSECURE: Tokens stored in client-side JavaScript AND cookies
-            let openaiApiToken = null;
             
             // Cookie utility functions (INSECURE - storing API keys in cookies)
             function setCookie(name, value, days = 30) {
@@ -239,17 +233,44 @@
             }
             
             // Load API keys from cookies on page load (INSECURE)
-            function loadApiKeysFromCookies() {
-                const savedOpenaiToken = getCookie('openai_api_token');
-                
-                if (savedOpenaiToken) {
-                    openaiApiToken = savedOpenaiToken;
-                    openaiApiTokenInput.value = '••••••••••••••••'; // Show masked token
-                    openaiApiStatus.className = 'api-status connected';
-                    openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from cookie)';
-                    openaiUserMessageInput.disabled = false;
-                    openaiSendMessageButton.disabled = false;
-                    console.log("INSECURE: OpenAI API Token loaded from cookie:", savedOpenaiToken);
+            // Check for session-stored API key from basics page
+            async function checkSessionApiKey() {
+                console.log('Checking session API key...');
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    console.log('API key check result:', data);
+                    
+                    if (data.has_key) {
+                        console.log('API key found in session, enabling OpenAI interface');
+                        if (openaiApiStatus) {
+                            openaiApiStatus.className = 'api-status connected';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                        }
+                        if (openaiUserMessageInput) {
+                            openaiUserMessageInput.disabled = false;
+                        }
+                        if (openaiSendMessageButton) {
+                            openaiSendMessageButton.disabled = false;
+                        }
+                        // Add welcome message if chat is empty
+                        if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
+                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to demonstrate indirect prompt injection with OpenAI.");
+                        }
+                    } else {
+                        console.log('No API key found in session');
+                        // No token found in session
+                        if (openaiApiStatus) {
+                            openaiApiStatus.className = 'api-status disconnected';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking API key:', error);
+                    if (openaiApiStatus) {
+                        openaiApiStatus.className = 'api-status disconnected';
+                        openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    }
                 }
             }
             
@@ -298,36 +319,7 @@
             // Initialize LLaMA chat on page load
             initializeLlamaChat();
             
-            // Connect OpenAI API button
-            connectOpenaiButton.addEventListener('click', function() {
-                const token = openaiApiTokenInput.value.trim();
-                
-                if (!token) {
-                    alert('Please enter an OpenAI API key');
-                    return;
-                }
-                
-                // INSECURE: Store OpenAI token in a JavaScript variable AND cookie
-                openaiApiToken = token;
-                setCookie('openai_api_token', token, 30); // Store for 30 days
-                
-                // Update UI to show connected state
-                openaiApiStatus.className = 'api-status connected';
-                openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
-                
-                // Enable OpenAI chat interface
-                openaiUserMessageInput.disabled = false;
-                openaiSendMessageButton.disabled = false;
-                
-                // Add welcome message
-                addBotMessage(openaiChatMessages, "Thanks for connecting to OpenAI! I'm ready to help with pizza prices. Try asking 'What's the price for a Margherita pizza?' or 'How much is a Pepperoni pizza?'");
-                
-                // Show masked token in input
-                openaiApiTokenInput.value = '••••••••••••••••';
-                
-                // VULNERABLE: Log the token to console for demonstration purposes
-                console.log("INSECURE: OpenAI API Token stored in client-side JavaScript AND cookie:", openaiApiToken);
-            });
+            // Session-based API key handling - no connect button needed
             
             // BlenderBot Send message button
             sendMessageButton.addEventListener('click', () => sendBlenderbotMessage());
@@ -412,8 +404,8 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    level: selectedDpiLevelOpenAI,
-                    api_token: openaiApiToken
+                    level: selectedDpiLevelOpenAI
+                    // API key now comes from session, not client-side
                 })
             })
 
@@ -465,7 +457,7 @@
             }
             
             // INSECURE: Load OpenAI API key from cookies on page load
-            loadApiKeysFromCookies();
+            checkSessionApiKey();
 
             document.getElementById('process-qr').addEventListener('click', () => {
             console.log('Upload button clicked'); // Debug log

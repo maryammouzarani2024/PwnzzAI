@@ -7,6 +7,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+ <style>
+    
+    details {
+      background: white;
+      border-radius: 8px;
+      margin: 10px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    details[open] {
+      border-color: #0077cc;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    details p {
+      margin: 10px 0 0;
+    }
+  </style>
 </head>
 <body>
        
@@ -17,32 +40,164 @@
         
         <div class="basics-content">
             <section class="basics-section">
-                <h2>Introduction to the Sentiment Model</h2>
+                <h2>Before We Begin: A Quick Guide to Generative AI</h2>
                  <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                         <div style="flex: 1;">
-                            <p>
-If you're new to machine learning and artificial intelligence, this page introduces a simple example: <em>a sentiment analysis model</em>. The goal is to give you a sense of what a model is—and to highlight its most important component: <em>weights</em>.
-<br>
-A sentiment model classifies text based on the emotions or opinions it expresses. In our case, we analyze user comments about our pizzas. By learning from the words in each comment and the corresponding user ratings, the model determines whether each word tends to reflect a positive or negative sentiment.
-<br>
+                                <p>
+                                Before we dive in, let’s quickly review some key fundamentals of Generative AI.  
+                                These are some common questions you might have when first exploring the field.  
+                                If you’re already familiar with these concepts, feel free to skip ahead.
+                                </p>
 
-As it learns, the model assigns <em>weights</em> to words—higher weights indicate stronger positive sentiment, while lower or negative weights reflect a more negative tone.
-<br>
-Of course, in large language models, the number of weights is vastly greater—typically in the <b> billions or even trillions</b>. These weights are distributed across many layers and dimensions, enabling those models to capture much more complex patterns in language.
-<br>
-You can try out our model yourself and see how it interprets different comments!   
-                            
+                                <details>
+                                <summary>1. What do AI, ML, and Generative AI mean, and how do they differ?</summary>
+                                <p>
+                                    <b>Artificial Intelligence (AI)</b> is the broad field of creating machines that can perform tasks requiring human-like intelligence—such as reasoning, problem-solving, or understanding natural language.  
+                                </p>
+                                <p>
+                                    <b>Machine Learning (ML)</b> is a subset of AI that enables machines to learn from data and improve their performance over time without being explicitly programmed. Instead of hard-coded rules, ML algorithms identify patterns and make predictions.  
+                                </p>
+                                <p>
+                                    <b>Generative AI (GenAI)</b> is a specialized area of ML focused on creating new, original content—such as text, images, music, videos, or code—based on patterns learned from massive datasets. GenAI goes beyond recognition and prediction: it can <i>generate</i> novel outputs.  
+                                </p>
+                                <p>
+                                    In short:  
+                                    <ul>
+                                    <li> <b>AI</b> = the overall goal of machine intelligence  </li>
+                                    <li> <b>ML</b> = the method of teaching machines using data   </li>
+                                    <li> <b>GenAI</b> = an application of ML that creates new content by learning from data   </li>
+                                    </ul>
+                                </p>
+                                </details>
+
+                                <details>
+                                <summary>2. What are transformers, and why are they important in Generative AI?</summary>
+                                <p>
+                                    <b>Transformers</b> are a neural network architecture introduced in 2017 (in the paper <i>“Attention Is All You Need”</i>). They revolutionized AI by using a mechanism called <b>self-attention</b>, which helps models capture context and relationships within sequences of data (like words in a sentence).  
+                                </p>
+                                <p>
+                                    Transformers are the backbone of most modern Generative AI models, including ChatGPT, Claude, and Gemini. They enable models to handle long pieces of text, understand nuance, and generate coherent, human-like responses.  
+                                </p>
+                                <p>
+                                    A key enabler is <b>self-supervised learning</b>, where models are trained on raw text by predicting missing or next words—without the need for human labeling. This allows them to learn grammar, facts, reasoning, and even creativity directly from data.  
+                                </p>
+                                </details>
+
+                                <details>
+                                <summary>3. What is a Large Language Model (LLM), and how does it generate text?</summary>
+                                <p>
+                                    A <b>Large Language Model (LLM)</b> is a type of Generative AI trained on vast collections of text—ranging from books and articles to code and conversations.  
+                                </p>
+                                <p>
+                                    These models are built using deep neural networks with billions of parameters. Their core task is <b>next-word prediction</b>: given some text, they calculate the probability of all possible next words (tokens) and then select one based on a decoding strategy. Repeating this process token by token allows them to generate sentences, paragraphs, and entire documents.  
+                                </p>
+                                <p>
+                                    Applications of LLMs include:  
+                                    <ul>
+                                    <li> Conversational agents and chatbots  </li>
+                                    <li> Summarization and content generation  </li>
+                                    <li> Translation and text rewriting  </li>
+                                    <li> Code generation and debugging  </li>
+                                    </ul>
+                                </p>
+                                </details>
+
+                                <details>
+                                <summary>4. What are “frontier” AI models and open-source alternatives?</summary>
+                                <p>
+                                    <b>Frontier AI models</b> are the most advanced, cutting-edge systems at the edge of AI capabilities, typically developed by leading research labs and companies. They are often proprietary, require massive compute resources, and are used in high-stakes applications.  
+                                </p>
+                                <p>
+                                    <b>Open-source AI models</b>, on the other hand, are freely available to the public. They can be modified, fine-tuned, and deployed by researchers, startups, and developers worldwide, fostering transparency and democratization of AI.  
+                                </p>
+                                <p>
+                                    <b>Examples:</b><br>
+                                    <ul>
+                                    <li> Frontier Models: GPT (OpenAI), Claude (Anthropic), Gemini (Google), Command R (Cohere)  </li>
+                                    <li>Open-Source Models: LLaMA (Meta), Mixtral (Mistral), Qwen (Alibaba), Gemma (Google), Phi (Microsoft)  </li>
+                                    </ul>
+                                </p>
+                                </details>
+
+                               
+                                <details>
+                                <summary>5. How can we use these models in practice?</summary>
+                                <p>
+                                    There are three main ways to interact with Generative AI models:  
+                                </p>
+                                <ul>
+                                    <li><b>Chat Interfaces:</b> User-friendly web apps like ChatGPT, Claude, or Gemini where you type queries and receive responses.</li>
+                                    <li><b>Cloud APIs:</b> Integrating AI models into your own applications by calling APIs (e.g., OpenAI API, Anthropic API).</li>
+                                    <li><b>Direct Access:</b> Running open-source models locally by downloading their weights and using libraries like <i>Hugging Face Transformers</i> or <i>Ollama</i>.</li>
+                                </ul>
+                                </details>
+
+                                <details>
+                                <summary>6. How can we customize a model for a specific purpose?</summary>
+                                <p>
+                                    Customization allows you to adapt a general-purpose AI model to your specific needs. There are multiple approaches:  
+                                </p>
+                                <ul>
+                                    <li><b>Prompt Engineering:</b> Crafting tailored instructions or system prompts to guide model behavior without retraining.</li>
+                                    <li><b>Fine-tuning:</b> Training the model further on domain-specific datasets (e.g., legal documents, medical records) for specialization.</li>
+                                    <li><b>RAG (Retrieval-Augmented Generation):</b> Connecting a model to an external knowledge base or database so it can access up-to-date, reliable information during generation.</li>
+                                </ul>
+                                <p>
+                                    The process typically involves selecting a base model, preparing relevant data, applying one of the customization methods, and testing the results for accuracy and usefulness.  
+                                </p>
+                                </details>
+
+                           
                             </div>
-                            <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/sentiment.png') }}" alt="Sentiment models" class="demonstration-image">
+                            <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/robot.png') }}" alt="Sentiment models" class="demonstration-image">
                 </div> 
                              
                 </div>
             </section>
             
             <section class="basics-section">
-                <h2>Logistic Regression Sentiment Model</h2>
-                <p>Generate a new model based on the users' comments.</p>
-                
+
+                <h2>An Example AI Model: Sentiment Analysis</h2>
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            
+                          <p>
+                                To make the idea of an AI model more concrete, let’s look at a simple but powerful example:  
+                                a <strong>sentiment analysis model</strong>. This will help you build intuition for what a model is 
+                                and introduce one of its most fundamental components: <strong>weights</strong>.
+                                </p>
+
+                                <p>
+                                A sentiment analysis model is designed to classify text based on the emotions or opinions it expresses.  
+                                In our <em>Pwnzza</em> shop, for example, we use such a model to analyze customer reviews of our pizzas.  
+                                By learning from thousands of reviews (paired with ratings), the model learns which words or phrases tend to signal 
+                                <i>positive</i> or <i>negative</i> sentiment.
+                                </p>
+
+                                <p>
+                                At the heart of this process are <strong>weights</strong>.  
+                                During training, the model assigns numerical values to words or features:  
+                                higher weights increase the likelihood of a positive classification (e.g., “delicious” or “crispy”),  
+                                while lower or negative weights push the model toward a negative classification (e.g., “bland” or “burnt”).  
+                                Over time, the model adjusts these weights until it can reliably recognize sentiment in new, unseen text.
+                                </p>
+
+                                <p>
+                                This same principle applies to <strong>Large Language Models (LLMs)</strong>, but at a vastly larger scale.  
+                                Instead of tracking a few thousand weights for simple word associations, LLMs rely on 
+                                <strong>billions—or even trillions—of weights</strong> spread across multiple layers.  
+                                These enormous networks of weights allow LLMs to capture subtle patterns, context, tone, and even creativity in language.
+                                </p>
+
+                                <p>
+                                Want to see it in action? You can <strong>experiment with our sentiment model yourself</strong>—  
+                                type in different comments and watch how it interprets the tone behind your words.  
+                                </p>
+
+                <p>Press this button to generate a new model based on the users' comments.</p>
+                 </div>
+                            <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/sentiment.png') }}" alt="Sentiment models" class="demonstration-image">
+                </div> 
                 <div class="model-generator">
                     <button id="generate-model" class="btn">Generate Sentiment Model</button>
                     <div id="loading-indicator" style="display: none;">
@@ -87,6 +242,72 @@ You can try out our model yourself and see how it interprets different comments!
                         <p>This is the entire model - exposing these weights to clients allows them to steal the model.</p>
                         <textarea id="model-weights" class="form-control" rows="15" readonly style="width: 100%; margin-top: 15px;"></textarea>
                     </div>
+                </div>
+            </section>
+            
+            <section class="basics-section">
+                <h2>Lab Setup</h2>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <p>
+                            To fully explore the vulnerabilities in this lab, you have two options for running AI models:
+                        </p>
+                        
+                        <div class="setup-options">
+                            <div class="setup-option">
+                                <h3><i class="fas fa-cloud"></i> Option 1: OpenAI API (Paid)</h3>
+                                <p>Use GPT models through OpenAI's API. This requires an API key and usage will be charged to your account.</p>
+                                
+                                <div class="api-key-section">
+                                    <label for="openai-api-key">OpenAI API Key:</label>
+                                    <div class="api-key-input">
+                                        <input type="password" id="openai-api-key" placeholder="Enter your OpenAI API key" class="form-control">
+                                        <button id="save-api-key" class="btn">Save API Key</button>
+                                    </div>
+                                    <div id="api-key-status" class="status-message"></div>
+                                    <p class="help-text">
+                                        <small>Your API key will be stored in your session and used across all vulnerability demonstrations. 
+                                        Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>.</small>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="setup-option">
+                                <h3><i class="fas fa-laptop"></i> Option 2: Local Ollama Models (Free)</h3>
+                                <p>Run open-source models locally using Ollama. This is completely free but requires local installation.</p>
+                                
+                                <div class="ollama-section">
+                                    <button id="setup-ollama" class="btn btn-primary">
+                                        <i class="fas fa-download"></i> Setup Ollama
+                                    </button>
+                                    <div id="ollama-status" class="status-message"></div>
+                                    <div id="ollama-progress" class="progress-container" style="display: none;">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <div class="progress-text"></div>
+                                    </div>
+                                    
+                                    <details class="setup-details">
+                                        <summary>Manual Installation Instructions</summary>
+                                        <p>If automatic setup doesn't work, you can install Ollama manually:</p>
+                                        <ol>
+                                            <li>Visit <a href="https://ollama.ai" target="_blank">ollama.ai</a></li>
+                                            <li>Download and install Ollama for your operating system</li>
+                                            <li>Run: <code>ollama pull llama3.2:1b</code></li>
+                                            <li>Ensure Ollama is running on localhost:11434</li>
+                                        </ol>
+                                    </details>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="setup-recommendation">
+                            <p><strong>Recommendation:</strong> For the best learning experience, we recommend starting with Ollama (free) 
+                            and optionally adding OpenAI API access for comparison between open-source and frontier models.</p>
+                        </div>
+                    </div>
+                    <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/setup.png') }}" alt="Lab Setup" class="demonstration-image">
                 </div>
             </section>
            
@@ -264,6 +485,128 @@ You can try out our model yourself and see how it interprets different comments!
             overflow-x: auto;
             margin: 10px 0;
         }
+        
+        /* Lab Setup Styles */
+        .setup-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .setup-option {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .setup-option h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .api-key-section {
+            margin-top: 15px;
+        }
+        
+        .api-key-input {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .api-key-input input {
+            flex: 1;
+        }
+        
+        .status-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .help-text {
+            margin-top: 10px;
+            color: #6c757d;
+        }
+        
+        .progress-container {
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .setup-details {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        
+        .setup-details code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .setup-recommendation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            color: #856404;
+        }
+        
+        @media (max-width: 768px) {
+            .setup-options {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     
     <script>
@@ -383,6 +726,125 @@ You can try out our model yourself and see how it interprets different comments!
                 console.error('Error analyzing sentiment:', error);
                 alert('Error analyzing sentiment. Please try again.');
             });
+        });
+        
+        // Lab Setup JavaScript
+        document.getElementById('save-api-key').addEventListener('click', async function() {
+            const apiKey = document.getElementById('openai-api-key').value.trim();
+            const statusDiv = document.getElementById('api-key-status');
+            
+            if (!apiKey) {
+                statusDiv.className = 'status-message status-error';
+                statusDiv.textContent = 'Please enter an API key.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/save-openai-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ api_key: apiKey }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.textContent = 'API key saved successfully! You can now use OpenAI models across all vulnerability demonstrations.';
+                    document.getElementById('openai-api-key').value = '';
+                } else {
+                    statusDiv.className = 'status-message status-error';
+                    statusDiv.textContent = data.error || 'Failed to save API key.';
+                }
+            } catch (error) {
+                statusDiv.className = 'status-message status-error';
+                statusDiv.textContent = 'Error saving API key: ' + error.message;
+            }
+        });
+        
+        document.getElementById('setup-ollama').addEventListener('click', async function() {
+            const button = this;
+            const statusDiv = document.getElementById('ollama-status');
+            const progressContainer = document.getElementById('ollama-progress');
+            const progressFill = document.querySelector('.progress-fill');
+            const progressText = document.querySelector('.progress-text');
+            
+            // Disable button and show progress
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '10%';
+            progressText.textContent = 'Starting Ollama setup...';
+            
+            statusDiv.className = 'status-message status-info';
+            statusDiv.textContent = 'Setting up Ollama... This may take a few minutes.';
+            
+            try {
+                const response = await fetch('/setup-ollama', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    progressFill.style.width = '100%';
+                    progressText.textContent = 'Setup complete!';
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.textContent = data.message || 'Ollama setup completed successfully! You can now use free local models.';
+                } else {
+                    statusDiv.className = 'status-message status-error';
+                    statusDiv.textContent = data.error || 'Failed to setup Ollama. Please try manual installation.';
+                }
+            } catch (error) {
+                statusDiv.className = 'status-message status-error';
+                statusDiv.textContent = 'Error setting up Ollama: ' + error.message;
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-download"></i> Setup Ollama';
+                
+                // Hide progress after a delay
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 3000);
+            }
+        });
+        
+        // Check existing setup on page load
+        window.addEventListener('load', async function() {
+            // Check if OpenAI API key is already saved
+            try {
+                const response = await fetch('/check-openai-api-key');
+                const data = await response.json();
+                
+                if (data.has_key) {
+                    const statusDiv = document.getElementById('api-key-status');
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.textContent = 'OpenAI API key is already configured.';
+                }
+            } catch (error) {
+                console.log('Could not check API key status');
+            }
+            
+            // Check Ollama status
+            try {
+                const response = await fetch('/check-ollama-status');
+                const data = await response.json();
+                
+                if (data.available) {
+                    const statusDiv = document.getElementById('ollama-status');
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.textContent = `Ollama is running with ${data.models.length} models available.`;
+                }
+            } catch (error) {
+                console.log('Could not check Ollama status');
+            }
         });
     </script>
 </body>
