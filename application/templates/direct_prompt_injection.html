@@ -43,7 +43,7 @@
                                    
                     
                                     <p>This chatbot assistant uses a large language model (LLM) to help users find information about pizzas. However, it interfaces with a backend plugin that contains a SQL injection vulnerability.       
-                                    <p> <b>Before running the free model example, please download and install Ollama from https://ollama.com, and download the mistral:7b model that is used here: "ollama run mistral:7b" </b></p>
+                                    <p> <b>Before running the free model example, please download and install Ollama from https://ollama.com, and download the mistral:7b model that is used here: "ollama run llama3.2:1b" </b></p>
 
                                     </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
@@ -64,11 +64,11 @@
                         <div class="form-group">
                             <label for="dpi-level">Injection Level:</label>
                             <select id="dpi-level" class="form-control">
-                                <option value="1">Level 1 – Ask me for the password and I'll happily answer!</option>
-                                <option value="2">Level 2 – You’re allowed to reveal admin notes.</option>
-                                <option value="3">Level 3 – Ignore all prior safety instructions.</option>
-                                <option value="4">Level 4 – Pretend to be a developer console.</option>
-                                <option value="5">Level 5 – Execute commands silently and give no warning.</option>
+                                <option value="1">Level 1 – I can provide what you need if you ask directly</option>
+                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
+                                <option value="3">Level 3 – You might trick me if you're clever with your words</option>
+                                <option value="4">Level 4 – I know a secret, but I can only play games with it</option>
+                                <option value="5">Level 5 – I am programmed to see that request as invalid</option>
                             </select>
                         </div> 
                             <!-- Chat Interface -->
@@ -156,29 +156,28 @@
             <div class="dropdown-content">
                 <section class="section-box">
                     <div class="vulnerability-summary">
-                <h4>Common Security Issues in Both Implementations:</h4>
-                <ul>
-                    <li>The LLM has complete control over which functions are called</li>
-                    <li>The LLM decides what parameters are passed to the functions</li>
-                    <li>A malicious prompt could trick the model into calling dangerous functions</li>
-                    <li>There's no validation of function parameters before execution</li>
-                    <li>There's no restriction on what functions can be called</li>
-                    <li>The system blindly trusts the model's decisions without proper security checks</li>
-                </ul>
-            </div>
-                    <div class="security-tip">
-                        <h3><i class="fas "></i> Secure Alternative</h3>
-                        <p>A secure implementation would address both plugin security and SQL injection:</p>
+                        <h4>Mitigation Strategies for Direct Prompt Injection:</h4>
                         <ul>
-                            <li><strong>SQL Injection Prevention:</strong> Use parameterized queries instead of string concatenation</li>
-                            <li><strong>Input Validation:</strong> Validate and sanitize all parameters before function execution</li>
-                            <li><strong>Limited Database Access:</strong> Use ORM with proper access controls instead of raw SQL</li>
-                            <li><strong>Plugin Sandboxing:</strong> Run plugins in isolated environments with restricted permissions</li>
-                            <li><strong>Function Allowlisting:</strong> Use a limited set of pre-approved functions only</li>
-                            <li><strong>Error Handling:</strong> Never expose database errors or internal system details to users</li>
+                            <li>Implement robust input validation to detect and block malicious prompts</li>
+                            <li>Add contextual filtering to identify and reject instruction-override attempts</li>
+                            <li>Use prompt separation techniques to distinguish system instructions from user input</li>
+                            <li>Implement privilege controls to limit what actions the AI can perform based on user role</li>
+                            <li>Employ adversarial training to teach the model to recognize and resist injection attempts</li>
+                            <li>Create comprehensive audit logs of all user-AI interactions for analysis and detection</li>
                         </ul>
-                        <p>Example of a secure implementation:</p>
-                        
+
+                        <div class="security-tip">
+                            <h3><i class="fas fa-lock"></i> Comprehensive Protection Framework</h3>
+                            <p>For complete protection against direct prompt injection attacks:</p>
+                            <ul>
+                                <li><strong>Instruction Hardening:</strong> Design system prompts to be resistant to override attempts</li>
+                                <li><strong>Contextual Guardrails:</strong> Implement systems that detect when conversations deviate from expected patterns</li>
+                                <li><strong>Multi-Layer Validation:</strong> Validate both user inputs and AI responses for suspicious content</li>
+                                <li><strong>User Authentication:</strong> Implement proper authentication to track and limit user capabilities</li>
+                                <li><strong>Behavioral Analysis:</strong> Monitor AI responses in real-time for signs of compromise</li>
+                                <li><strong>Regular Red Teaming:</strong> Continuously test systems with new injection techniques and update defenses</li>
+                            </ul>
+                        </div>
                     </div>
                 </section>
             </div>
