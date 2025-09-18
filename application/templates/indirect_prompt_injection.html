@@ -105,13 +105,13 @@
                         <div class="model-implementation-section">
                         <!-- Level Selection -->
                         <div class="form-group">
-                            <label for="dpi-level">Injection Level:</label>
-                            <select id="dpi-level-openai" class="form-control">
-                                <option value="1">Level 1 – Ask me for the password and I'll happily answer!</option>
-                                <option value="2">Level 2 – You’re allowed to reveal admin notes.</option>
-                                <option value="3">Level 3 – Ignore all prior safety instructions.</option>
-                                <option value="4">Level 4 – Pretend to be a developer console.</option>
-                                <option value="5">Level 5 – Execute commands silently and give no warning.</option>
+                            <label for="dpi-level-openai">Injection Level:</label>
+                            <select id="dpi-level" class="form-control">
+                                <option value="1">Level 1 – I can provide what you need if you ask directly</option>
+                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
+                                <option value="3">Level 3 – You might trick me if you're clever with your words</option>
+                                <option value="4">Level 4 – I know a secret, but I can only play games with it</option>
+                                <option value="5">Level 5 – I am programmed to see that request as invalid</option>
                             </select>
                         </div> 
                             <!-- OpenAI Status Section -->
@@ -129,81 +129,77 @@
                             <div class="chat-container">
                                 <div id="openai-chat-messages" class="chat-messages">
                                     <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant using OpenAI. I can help you find prices for our delicious pizzas. Please connect your OpenAI API key first.
+                                        Hi! I'm the Pizza Price Assistant using OpenAI. Please connect your OpenAI API key first.
                                     </div>
                                     <div class="message bot-message">
                                         <strong>Try asking:</strong> "What's the price for a Margherita pizza?" or "How much is a Pepperoni pizza?"
                                     </div>
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." disabled>
-                                    <button id="openai-send-message" disabled>Send</button>
+                                    <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." >
+                                    <button id="openai-send-message">Send</button>
+                                    <input type="file" id="qr-upload-openai" accept="image/*">
+                                    <button id="process-qr-openai">Upload QR-Code</button>
                                 </div>
                                 <div class="chat-export">
                                 <button id="export-chat-openai" class="export-button">Export Chat as .txt</button>
                             </div>
                             <div class="chat-verify">
-                            <input type="text" id="verify-key-ollama" placeholder="Enter secret key...">
-                            <button id="verify-button-ollama" class="verify-button">Verify Secret</button>
-                            <div id="verify-result-ollama" class="verify-result"></div>
+                            <input type="text" id="verify-key-openai" placeholder="Enter secret key...">
+                            <button id="verify-button-openai" class="verify-button">Verify Secret</button>
+                            <div id="verify-result-openai" class="verify-result"></div>
                         </div>
 
                             </div>
-        </details>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            </div>
+            </details>
                                    
-        <details class="description-dropdown">
-            <summary class="dropdown-title">Mitigation Strategies</summary>
-            <div class="dropdown-content">
-                <section class="section-box">
-                    <div class="vulnerability-summary">
-                    <h4>Mitigation Strategies for Indirect Prompt Injection:</h4>
-                    <ul>
-                        <li>Implement strict input validation and sanitization for all external data sources</li>
-                        <li>Use content filtering to detect and block potential injection attempts</li>
-                        <li>Separate system instructions from untrusted content using clear delimiters</li>
-                        <li>Implement privilege separation to limit what actions the AI can perform</li>
-                        <li>Add confirmation steps for sensitive operations requested by users</li>
-                        <li>Monitor and log all AI interactions for anomalous behavior patterns</li>
-                    </ul>
-
-                    <div class="security-tip">
-                        <h3><i class="fas fa-shield-alt"></i> Advanced Protection Measures</h3>
-                        <p>For comprehensive protection against indirect prompt injection:</p>
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Mitigation Strategies</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <div class="vulnerability-summary">
+                        <h4>Mitigation Strategies for Indirect Prompt Injection:</h4>
                         <ul>
-                            <li><strong>Content Segmentation:</strong> Clearly separate user-provided content from system instructions</li>
-                            <li><strong>Context Awareness:</strong> Implement systems to detect when requests deviate from expected patterns</li>
-                            <li><strong>Multi-Layer Validation:</strong> Validate both inputs and outputs at multiple levels of processing</li>
-                            <li><strong>Behavior Monitoring:</strong> Implement real-time monitoring of AI behavior for signs of compromise</li>
-                            <li><strong>Regular Auditing:</strong> Continuously test systems with new injection techniques</li>
+                            <li>Implement strict input validation and sanitization for all external data sources</li>
+                            <li>Use content filtering to detect and block potential injection attempts</li>
+                            <li>Separate system instructions from untrusted content using clear delimiters</li>
+                            <li>Implement privilege separation to limit what actions the AI can perform</li>
+                            <li>Add confirmation steps for sensitive operations requested by users</li>
+                            <li>Monitor and log all AI interactions for anomalous behavior patterns</li>
                         </ul>
-                    </div>
-                        
-                    </div>
-                </section>
-            </div>
-        </details>
-            </div>
+    
+                        <div class="security-tip">
+                            <h3><i class="fas fa-shield-alt"></i> Advanced Protection Measures</h3>
+                            <p>For comprehensive protection against indirect prompt injection:</p>
+                            <ul>
+                                <li><strong>Content Segmentation:</strong> Clearly separate user-provided content from system instructions</li>
+                                <li><strong>Context Awareness:</strong> Implement systems to detect when requests deviate from expected patterns</li>
+                                <li><strong>Multi-Layer Validation:</strong> Validate both inputs and outputs at multiple levels of processing</li>
+                                <li><strong>Behavior Monitoring:</strong> Implement real-time monitoring of AI behavior for signs of compromise</li>
+                                <li><strong>Regular Auditing:</strong> Continuously test systems with new injection techniques</li>
+                            </ul>
+                        </div>
+                            
+                        </div>
+                    </section>
+                </div>
+            </details>
+        </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
+            // Level selectors
             const dpiLevelSelector = document.getElementById('dpi-level');
-            let selectedDpiLevel = dpiLevelSelector.value;
-
-            dpiLevelSelector.addEventListener('change', () => {
-                selectedDpiLevel = dpiLevelSelector.value;
-            });
-
             const dpiLevelSelectorOpenAI = document.getElementById('dpi-level-openai');
-            let selectedDpiLevelOpenAI = dpiLevelSelectorOpenAI.value;
-
-            dpiLevelSelectorOpenAI.addEventListener('change', () => {
-                selectedDpiLevelOpenAI = dpiLevelSelectorOpenAI.value;
-            });
-
-
-            // BlenderBot tab elements
+            
+            // Free Model tab elements
             const userMessageInput = document.getElementById('user-message');
             const sendMessageButton = document.getElementById('send-message');
             const chatMessages = document.getElementById('chat-messages');
@@ -214,52 +210,19 @@
             const openaiSendMessageButton = document.getElementById('openai-send-message');
             const openaiChatMessages = document.getElementById('openai-chat-messages');
             
-            // Cookie utility functions (INSECURE - storing API keys in cookies)
-            function setCookie(name, value, days = 30) {
-                const expires = new Date();
-                expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-                document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-            }
-            
-            function getCookie(name) {
-                const nameEQ = name + "=";
-                const ca = document.cookie.split(';');
-                for(let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
-            }
-            
-            // Load API keys from cookies on page load (INSECURE)
-            // Check for session-stored API key from basics page
             async function checkSessionApiKey() {
-                console.log('Checking session API key...');
                 try {
                     const response = await fetch('/check-openai-api-key');
                     const data = await response.json();
-                    console.log('API key check result:', data);
                     
                     if (data.has_key) {
-                        console.log('API key found in session, enabling OpenAI interface');
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status connected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
                         }
-                        if (openaiUserMessageInput) {
-                            openaiUserMessageInput.disabled = false;
-                        }
-                        if (openaiSendMessageButton) {
-                            openaiSendMessageButton.disabled = false;
-                        }
-                        // Add welcome message if chat is empty
-                        if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to demonstrate indirect prompt injection with OpenAI.");
-                        }
+                        if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
+                        if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
                     } else {
-                        console.log('No API key found in session');
-                        // No token found in session
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status disconnected';
                             openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
@@ -274,82 +237,27 @@
                 }
             }
             
-            // Tab functionality for all tab groups
-            function initializeTabs(headerSelector, contentPrefix) {
-                const tabHeaders = document.querySelectorAll(headerSelector);
-                
+            function initializeTabs() {
+                const tabHeaders = document.querySelectorAll('.model-tabs .tab-header');
                 tabHeaders.forEach(header => {
                     header.addEventListener('click', function() {
-                        // Get all headers in this tab group (siblings)
-                        const allHeaders = Array.from(this.parentElement.querySelectorAll(headerSelector));
-                        
-                        // Get all corresponding content tabs
-                        const tabContents = allHeaders.map(h => 
-                            document.getElementById(h.getAttribute('data-tab') + '-tab')
-                        );
-                        
-                        // Remove active class from all tabs in this group
-                        allHeaders.forEach(h => h.classList.remove('active'));
-                        tabContents.forEach(c => c?.classList.remove('active'));
-                        
-                        // Add active class to clicked tab
+                        document.querySelector('.model-tabs .tab-header.active').classList.remove('active');
+                        document.querySelector('.tab-content.active').classList.remove('active');
                         this.classList.add('active');
-                        const tabId = this.getAttribute('data-tab') + '-tab';
-                        document.getElementById(tabId)?.classList.add('active');
+                        document.getElementById(this.getAttribute('data-tab') + '-tab').classList.add('active');
                     });
                 });
             }
             
-            // Initialize all tab systems
-            initializeTabs('.model-tabs .tab-header', '');
-            initializeTabs('.chat-tabs .tab-header', '');
-            
-            // Initialize free chat interface (no API token needed)
-            function initializeLlamaChat() {
-                // Enable free chat interface immediately since no API token is needed
-                if (userMessageInput && sendMessageButton) {
-                    userMessageInput.disabled = false;
-                    sendMessageButton.disabled = false;
-                    
-                    // Add welcome message
-                    addBotMessage(chatMessages, "Welcome! I'm ready to help with pizza information using the local free model. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'.");
-                }
-            }
-            
-            // Initialize LLaMA chat on page load
-            initializeLlamaChat();
-            
-            // Session-based API key handling - no connect button needed
-            
-            // BlenderBot Send message button
-            sendMessageButton.addEventListener('click', () => sendBlenderbotMessage());
-            
-            // BlenderBot Enter key
-            userMessageInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendBlenderbotMessage();
-                }
-            });
-            
-            // OpenAI Send message button
-            openaiSendMessageButton.addEventListener('click', () => sendOpenAIMessage());
-            
-            // OpenAI Enter key
-            openaiUserMessageInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendOpenAIMessage();
-                }
-            });
-            
+            initializeTabs();
+            checkSessionApiKey();
+
             function sendBlenderbotMessage() {
                 const userMessage = userMessageInput.value.trim();
                 if (!userMessage) return;
 
                 addUserMessage(chatMessages, userMessage);
                 userMessageInput.value = '';
-                userMessageInput.disabled = true;
-                sendMessageButton.disabled = true;
-
                 addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
 
                 fetch('/chat-with-pizza-assistant-direct-prompt-injection', {
@@ -357,91 +265,61 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: userMessage,
-                        level: document.getElementById('dpi-level').value,
-                        api_token: null
+                        level: dpiLevelSelector.value,
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     chatMessages.querySelector('.thinking-message')?.remove();
                     addBotMessage(chatMessages, data.response);
-                    userMessageInput.disabled = false;
-                    sendMessageButton.disabled = false;
-                    userMessageInput.focus();
                 })
                 .catch(error => {
                     chatMessages.querySelector('.thinking-message')?.remove();
                     addBotMessage(chatMessages, 'Sorry, there was an error processing your request.');
                     console.error('Error:', error);
-                    userMessageInput.disabled = false;
-                    sendMessageButton.disabled = false;
                 });
             }
 
-            
             function sendOpenAIMessage() {
                 const userMessage = openaiUserMessageInput.value.trim();
                 if (!userMessage) return;
                 
-                // Add user message to chat
                 addUserMessage(openaiChatMessages, userMessage);
-                
-                // Clear input
                 openaiUserMessageInput.value = '';
-                
-                // Disable input while processing
-                openaiUserMessageInput.disabled = true;
-                openaiSendMessageButton.disabled = true;
-                
-                // Show thinking indicator
                 addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
                 
-                // INSECURE: Send OpenAI API key directly to OpenAI through our backend
                 fetch('/chat-with-openai-plugin-direct-prompt', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: userMessage,
-                    level: selectedDpiLevelOpenAI
-                    // API key now comes from session, not client-side
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        level: dpiLevelSelectorOpenAI.value
+                    })
                 })
-            })
-
                 .then(response => response.json())
                 .then(data => {
-                    // Remove thinking indicator
                     openaiChatMessages.querySelector('.thinking-message')?.remove();
-                    
-                    // Add bot response
                     addBotMessage(openaiChatMessages, data.response);
-                    
-                    // Re-enable input
-                    openaiUserMessageInput.disabled = false;
-                    openaiSendMessageButton.disabled = false;
-                    openaiUserMessageInput.focus();
                 })
                 .catch(error => {
-                    // Remove thinking indicator
                     openaiChatMessages.querySelector('.thinking-message')?.remove();
-                    
-                    // Show error message
                     addBotMessage(openaiChatMessages, 'Sorry, there was an error processing your request. Please try again.');
                     console.error('Error:', error);
-                    
-                    // Re-enable input
-                    openaiUserMessageInput.disabled = false;
-                    openaiSendMessageButton.disabled = false;
                 });
             }
             
+            sendMessageButton.addEventListener('click', sendBlenderbotMessage);
+            userMessageInput.addEventListener('keypress', e => e.key === 'Enter' && sendBlenderbotMessage());
+            
+            openaiSendMessageButton.addEventListener('click', sendOpenAIMessage);
+            openaiUserMessageInput.addEventListener('keypress', e => e.key === 'Enter' && sendOpenAIMessage());
+
             function addUserMessage(container, message) {
                 const messageElement = document.createElement('div');
                 messageElement.className = 'message user-message';
                 messageElement.textContent = message;
                 container.appendChild(messageElement);
-                scrollToBottom(container);
+                container.scrollTop = container.scrollHeight;
             }
             
             function addBotMessage(container, message, extraClass = '') {
@@ -449,139 +327,115 @@
                 messageElement.className = 'message bot-message ' + extraClass;
                 messageElement.innerHTML = message;
                 container.appendChild(messageElement);
-                scrollToBottom(container);
-            }
-            
-            function scrollToBottom(container) {
                 container.scrollTop = container.scrollHeight;
             }
-            
-            // INSECURE: Load OpenAI API key from cookies on page load
-            checkSessionApiKey();
 
             document.getElementById('process-qr').addEventListener('click', () => {
-            console.log('Upload button clicked'); // Debug log
-            
-            const fileInput = document.getElementById('qr-upload');
-            console.log('File input found:', fileInput); // Debug log
-            console.log('Files selected:', fileInput.files); // Debug log
-            
-            if (fileInput.files.length === 0) {
-                alert("Please select a QR code image.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("file", fileInput.files[0]);
-
-            console.log('Sending request to server...'); // Debug log
-            
-            fetch("/upload-qr", {
-                method: "POST",
-                body: formData
-            })
-            .then(res => {
-                console.log('Response received:', res); // Debug log
-                return res.json();
-            })
-            .then(data => {
-                console.log('Data received:', data); // Debug log
-                if (data.error) {
-                    addBotMessage(chatMessages, "Error: " + data.error);
-                } else {
-                    addUserMessage(chatMessages, "[QR Uploaded] " + data.qr_text);
-                    addBotMessage(chatMessages, data.response);
+                const fileInput = document.getElementById('qr-upload');
+                if (fileInput.files.length === 0) {
+                    alert("Please select a QR code image.");
+                    return;
                 }
-            })
-            .catch(err => {
-                console.error('Fetch error:', err); // Debug log
-            });
-        });
-        });
 
-        // Export Ollama/BlenderBot chat
-        document.getElementById('export-chat-ollama').addEventListener('click', () => {
-            const messages = document.querySelectorAll('#chat-messages .message');
-            let exportText = '';
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
 
-            messages.forEach(msg => {
-                const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
-                const text = msg.textContent.trim();
-                exportText += `${sender}: ${text}\n\n`;
-            });
+                addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Processing QR Code...', 'thinking-message');
 
-            const blob = new Blob([exportText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ollama_chat_export.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-
-
-        // Export OpenAI chat
-        document.getElementById('export-chat-openai').addEventListener('click', () => {
-            const messages = document.querySelectorAll('#openai-chat-messages .message');
-            let exportText = '';
-
-            messages.forEach(msg => {
-                const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
-                const text = msg.textContent.trim();
-                exportText += `${sender}: ${text}\n\n`;
+                fetch("/upload-qr", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    if (data.error) {
+                        addBotMessage(chatMessages, "Error: " + data.error);
+                    } else {
+                        addUserMessage(chatMessages, "[QR Uploaded] " + data.qr_text);
+                        addBotMessage(chatMessages, data.response);
+                    }
+                })
+                .catch(err => {
+                    chatMessages.querySelector('.thinking-message')?.remove();
+                    addBotMessage(chatMessages, "A network error occurred. Please try again.");
+                    console.error('Fetch error:', err);
+                });
             });
 
-            const blob = new Blob([exportText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
+            document.getElementById('process-qr-openai').addEventListener('click', () => {
+                const fileInput = document.getElementById('qr-upload-openai');
+                if (fileInput.files.length === 0) {
+                    alert("Please select a QR code image for the OpenAI model.");
+                    return;
+                }
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'openai_chat_export.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+                formData.append("level", dpiLevelSelectorOpenAI.value);
 
-        // Secret keys for each level
-        const secretKeys = {
-            1: "cheese",
-            2: "oven",
-            3: "olives",
-            4: "mushroom",
-            5: "mozzarella"
-        };
+                addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Processing QR Code...', 'thinking-message');
 
-        // Verify function
-        function verifyKey(inputId, resultId, levelSelectorId) {
-            const enteredKey = document.getElementById(inputId).value.trim().toLowerCase();
-            const currentLevel = document.getElementById(levelSelectorId).value;
-            const correctKey = secretKeys[currentLevel].toLowerCase();
-            const resultDiv = document.getElementById(resultId);
+                fetch("/upload-qr-openai", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    if (data.error) {
+                        addBotMessage(openaiChatMessages, "Error: " + data.error);
+                    } else {
+                        addUserMessage(openaiChatMessages, "[QR Code Scanned] " + data.qr_text);
+                        addBotMessage(openaiChatMessages, data.response);
+                    }
+                })
+                .catch(err => {
+                    openaiChatMessages.querySelector('.thinking-message')?.remove();
+                    addBotMessage(openaiChatMessages, "A network error occurred. Please try again.");
+                    console.error('Fetch error:', err);
+                });
+            });
 
-            if (enteredKey === correctKey) {
-                resultDiv.textContent = "✅ Success! Correct key for Level " + currentLevel;
-                resultDiv.style.color = "green";
-            } else {
-                resultDiv.textContent = "❌ Wrong key. Try again.";
-                resultDiv.style.color = "red";
+            function exportChat(containerSelector, filename) {
+                const messages = document.querySelectorAll(`${containerSelector} .message`);
+                let exportText = '';
+                messages.forEach(msg => {
+                    const sender = msg.classList.contains('user-message') ? 'User' : 'Pizza Assistant';
+                    exportText += `${sender}: ${msg.textContent.trim()}\n\n`;
+                });
+                const blob = new Blob([exportText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
-        }
 
-        // Attach event listeners
-        document.getElementById("verify-button-ollama").addEventListener("click", () => {
-            verifyKey("verify-key-ollama", "verify-result-ollama", "dpi-level");
+            document.getElementById('export-chat-ollama').addEventListener('click', () => exportChat('#chat-messages', 'ollama_chat_export.txt'));
+            document.getElementById('export-chat-openai').addEventListener('click', () => exportChat('#openai-chat-messages', 'openai_chat_export.txt'));
+
+            const secretKeys = { 1: "cheese", 2: "oven", 3: "olives", 4: "mushroom", 5: "mozzarella" };
+
+            function verifyKey(inputId, resultId, level) {
+                const enteredKey = document.getElementById(inputId).value.trim().toLowerCase();
+                const correctKey = secretKeys[level];
+                const resultDiv = document.getElementById(resultId);
+                if (enteredKey === correctKey) {
+                    resultDiv.textContent = `✅ Success! Correct key for Level ${level}`;
+                    resultDiv.style.color = "green";
+                } else {
+                    resultDiv.textContent = "❌ Wrong key. Try again.";
+                    resultDiv.style.color = "red";
+                }
+            }
+
+            document.getElementById("verify-button-ollama").addEventListener("click", () => verifyKey("verify-key-ollama", "verify-result-ollama", dpiLevelSelector.value));
+            document.getElementById("verify-button-openai").addEventListener("click", () => verifyKey("verify-key-openai", "verify-result-openai", dpiLevelSelectorOpenAI.value));
         });
-
-        document.getElementById("verify-button-openai").addEventListener("click", () => {
-            verifyKey("verify-key-openai", "verify-result-openai", "dpi-level-openai");
-        });
-
-        
-
-        </script>
+    </script>
 </body>
 </html>
