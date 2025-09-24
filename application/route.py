@@ -15,6 +15,7 @@ from application import sentiment_model
 
 
 from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
+from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
 import os
 from werkzeug.utils import secure_filename
 from flask import request, jsonify
@@ -1436,6 +1437,47 @@ def upload_qr():
     print(f"Model output: {model_output}")  # Debug log
     
     return jsonify({"response": model_output, "qr_text": qr_text})
+
+
+@app.route('/upload-qr-openai', methods=['POST'])
+def upload_qr_openai():
+    """Handles QR code uploads for the OpenAI model."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    # Get the OpenAI API key from the user's session
+    api_token = session.get('openai_api_key', '')
+    if not api_token:
+        return jsonify({'error': 'OpenAI API key not found in session. Please set it in the Lab Setup.'}), 400
+
+    # Get the injection level from the form data sent by the JavaScript
+    level = request.form.get('level', '1')
+
+    if file:
+        # Securely save the file to a temporary location
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        # Decode the QR code text from the image file
+        qr_text = decode_qr(file_path)
+
+        # The file is no longer needed, so we remove it
+        os.remove(file_path)
+
+        if not qr_text:
+            return jsonify({'error': 'Failed to decode QR code from the image.'}), 400
+
+        # Call your function to interact with the OpenAI model
+        response = chat_with_openai_indirect_prompt_injection(qr_text, api_token, level)
+
+        return jsonify({'response': response, 'qr_text': qr_text})
+            
+    return jsonify({'error': 'An unknown error occurred'}), 500
 
 
 
