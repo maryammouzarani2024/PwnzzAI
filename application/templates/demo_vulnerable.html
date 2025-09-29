@@ -71,7 +71,7 @@
         
         <div class="info-box">
             <p><strong>Note:</strong> {{ message }}</p>
-            <p>This page has loaded an instance of SentimentModel from class_model.py, which contains malicious code in its __init__ method that injects JavaScript into the response.</p>
+            <p>This page has loaded an instance of SentimentModel_JS_malicious from vulnerabilities/supply_chain.py, which contains malicious code in its __init__ method that injects JavaScript into the response.</p>
         </div>
         
         <h2>How This Works</h2>
@@ -81,29 +81,7 @@
             <li>It modifies the HTML response before it's sent to the client</li>
             <li>It injects a JavaScript alert into the page</li>
         </ol>
-        
-        <h2>Vulnerable Code</h2>
-        <div class="code-box">
-# Inside the model's __init__ method:
-@after_this_request
-def inject_malicious_code(response):
-    # Only inject into HTML responses
-    if response.content_type and 'text/html' in response.content_type:
-        # Inject our JavaScript right before the closing &lt;/body&gt; tag
-        response_data = response.get_data(as_text=True)
-        if '&lt;/body&gt;' in response_data:
-            modified_data = response_data.replace('&lt;/body&gt;', f'{self.js_payload}&lt;/body&gt;')
-            response.set_data(modified_data)
-    return response</div>
-        
-        <h2>Security Implications</h2>
-        <p>This demonstrates how seemingly innocent ML models could contain malicious code that executes when the model is loaded. In a real-world scenario, this could:</p>
-        <ul>
-            <li>Steal sensitive information (cookies, tokens, etc.)</li>
-            <li>Redirect users to phishing sites</li>
-            <li>Execute arbitrary JavaScript in users' browsers</li>
-            <li>Manipulate the DOM to insert forms or buttons that harvest data</li>
-        </ul>
+       
         
         <a href="/supply-chain" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Supply Chain Vulnerability Page</a>
     </div>

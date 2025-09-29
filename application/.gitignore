@@ -20,7 +20,7 @@ instance/
 .DS_Store
 
 fine-tuned-model/
-
+downloads/
 gpt2-finetuned/
 
 
