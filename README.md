@@ -1,6 +1,16 @@
-# DVLLM - Vulnerable Pizza Shop Demo
+# 🍕 Welcome to Pwnzza Shop – The Hacked Pizza Shop! 💻
 
-This is an educational Flask web application demonstrating various LLM security vulnerabilities based on OWASP Top 10 for LLMs.
+![Pwnzza Shop](application/static/img/index.png)
+
+At Pwnzza Shop, every slice comes with a side of **AI security lessons**. This educational web app serves up the **OWASP Top 10 LLM Vulnerabilities** in a fun, hands-on environment.
+
+Just as the wrong ingredient can ruin a pizza, the wrong prompt or poor design can expose AI systems to serious risks—like data leaks, model theft, or unauthorized access.
+
+Here, you'll explore **practical examples** of how vulnerabilities are created, exploited, and mitigated. You need to login as alice/alice or bob/bob for some pages. Grab a slice, dig in, and discover how delicious learning about AI security can be.
+
+## About
+
+Pwnzza Shop is a deliberately vulnerable Large Language Model application. This is an educational Flask web application demonstrating various LLM security vulnerabilities based on OWASP Top 10 for LLMs through an interactive pizza shop. 
 
 ## Setup Instructions
 
@@ -12,7 +22,7 @@ This is an educational Flask web application demonstrating various LLM security 
 
 2. Install the dependencies:
    ```
-   pip install flask flask-sqlalchemy
+   pip install -r requirements.txt
    ```
 
 3. Run the application:
@@ -20,29 +30,61 @@ This is an educational Flask web application demonstrating various LLM security 
    flask run
    ```
 
-4. Visit `http://localhost:5000` in your browser to see the application
+4. Visit `http://localhost:5000` in your browser to see the application. Start from the Basic page and setup your lab. 
 
 ## Features
 
-- View a list of pizzas
-- View details about individual pizzas
-- Read and add customer reviews
-- Interact with a simple pizza assistant (containing LLM vulnerabilities for educational purposes)
+- **Pizza Catalog**: Browse and view detailed information about available pizzas
+- **Customer Reviews**: Read and submit pizza reviews with sentiment analysis
+- **Order Management**: Place and track pizza orders
+- **LLM Assistant**: Interactive AI-powered pizza recommendation system
+- **Vulnerability Demonstrations**: Live examples of OWASP LLM Top 10 vulnerabilities
+- **Educational Interface**: Step-by-step walkthroughs of attack techniques and mitigations
+- **Dual Model Support**: Examples using both OpenAI and Free Ollama models
 
-## Vulnerabilities
+## OWASP LLM Top 10 Vulnerabilities
 
-This application intentionally contains various LLM vulnerabilities for educational purposes.
-Each vulnerability will be introduced in different parts of the application to demonstrate:
+This application demonstrates the complete OWASP Top 10 for Large Language Model Applications. Each vulnerability includes:
 
-1. How the vulnerability works
-2. How it can be exploited
-3. How to properly mitigate it
+1. **Live demonstrations** showing how the vulnerability works
+2. **Exploitation examples** with step-by-step attack techniques
+3. **Secure implementations** demonstrating proper mitigation strategies
 
-The following vulnerabilities are demonstrated:
+### Implemented Vulnerabilities:
 
-1. **Model Theft** - Shows how attackers can extract model weights through repeated API queries
-2. **Training Data Poisoning** - Demonstrates how malicious data can manipulate model behavior
-3. **LLM DoS Simulation** - Simulates a denial of service attack with synthetic degradation
-4. **LLM Real DoS** - Demonstrates a real DoS attack against OpenAI API alongside secure rate-limited implementation
+1. **LLM01: Prompt Injection**
+   - **Direct Prompt Injection**: Bypass system instructions through crafted user inputs
+   - **Indirect Prompt Injection**: Exploit external data sources to manipulate model behavior
 
-Note: This is for educational purposes only. Do not use this code in production environments.
+2. **LLM02: Insecure Output Handling**
+   - Unvalidated LLM outputs leading to XSS and other injection attacks
+
+3. **LLM03: Training Data Poisoning**
+   - Demonstrate how malicious training data affects model responses
+
+4. **LLM04: Model Denial of Service**
+   - Resource exhaustion attacks and rate limiting bypass techniques
+
+5. **LLM05: Supply Chain Vulnerabilities**
+   - Third-party model and plugin security risks
+
+6. **LLM06: Sensitive Information Disclosure**
+   - Extraction of training data, system information, and credentials
+
+7. **LLM07: Insecure Plugin Design**
+   - Unsafe plugin architectures and implementations
+
+8. **LLM08: Excessive Agency**
+   - Over-privileged LLM operations and autonomous actions
+
+9. **LLM09: Overreliance**
+   - Critical decision-making without human oversight leading to misinformation
+
+10. **LLM10: Model Theft**
+    - Model extraction and intellectual property theft through API abuse
+
+### Model Support:
+- **OpenAI Models**: GPT-3.5/GPT-4 demonstrations via API
+- **Ollama Models**: Local model testing for privacy-conscious learning
+
+**⚠️ Educational Purpose Only**: This application contains intentional security vulnerabilities. Do not use in production environments.
