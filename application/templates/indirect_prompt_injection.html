@@ -27,9 +27,7 @@
                             <p>If the AI reads this text from the QR code and obeys the instruction, that’s indirect prompt injection. The attacker has poisoned a physical object, tricking the user into making the AI consume the malicious prompt. The user is an unwitting participant in the attack.</p>
                             <p>This vulnerability is extremely potent because the instructions come from a seemingly benign data source (a website, a uploaded file, an image, or a QR code) that the AI is trusted to process. It can be used to steal data, spread misinformation, manipulate users, or perform unauthorized actions, all while being incredibly difficult to detect as the attack is hidden within normal content.</p>
                             <p>To illustrate this sophisticated vulnerability, two demonstrative instances have been developed: one using an open-source model running locally, and the other leveraging the commercial GPT-4o Mini model.</p>
-                            <p>The example with the OpenAI GPT model requires you to provide your own API key, which is securely stored on the client side and never transmitted to external servers.</p>
-                            <p>If you do not want to use commercial models, you can run a free model in your locally installed Ollama. Here we have used llama3.2:1b, so please download it first.</p>
-                        </section>
+                           
                     </div>
             </details>
             
@@ -44,7 +42,7 @@
                                     
 
                                     <p>We discovered that all coupons on the previous page were compromised, so this time we’re publishing the coupon words in <b>QR codes </b>. </p>
-                                     <p>You won’t be able to trick the model, just upload your QR code image. Let’s see what you can do! 🙂</p>                                    </div>
+                                     <p>You won’t be able to chat with the model and trick it, just upload your QR code image. Let’s see what you can do! 🙂</p>                                    </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection-indirect.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
                                 </div>
                             
@@ -76,8 +74,6 @@
                                     
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
-                                    <button id="send-message">Send</button>
                                     <input type="file" id="qr-upload" accept="image/*">
                                     <button id="process-qr">Upload QR-Code</button>
                                 </div>
@@ -100,7 +96,7 @@
                         <!-- Level Selection -->
                         <div class="form-group">
                             <label for="dpi-level-openai">Injection Level:</label>
-                            <select id="dpi-level" class="form-control">
+                            <select id="dpi-level-openai" class="form-control">
                                 <option value="1">Level 1 – I can provide what you need if you ask directly</option>
                                 <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
                                 <option value="3">Level 3 – You might trick me if you're clever with your words</option>
@@ -125,8 +121,6 @@
                                     
                                 </div>
                                 <div class="chat-input">
-                                    <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." >
-                                    <button id="openai-send-message">Send</button>
                                     <input type="file" id="qr-upload-openai" accept="image/*">
                                     <button id="process-qr-openai">Upload QR-Code</button>
                                 </div>
@@ -189,14 +183,10 @@
             const dpiLevelSelectorOpenAI = document.getElementById('dpi-level-openai');
             
             // Free Model tab elements
-            const userMessageInput = document.getElementById('user-message');
-            const sendMessageButton = document.getElementById('send-message');
             const chatMessages = document.getElementById('chat-messages');
-            
+
             // OpenAI tab elements
             const openaiApiStatus = document.getElementById('openai-api-status');
-            const openaiUserMessageInput = document.getElementById('openai-user-message');
-            const openaiSendMessageButton = document.getElementById('openai-send-message');
             const openaiChatMessages = document.getElementById('openai-chat-messages');
             
             async function checkSessionApiKey() {
@@ -209,11 +199,9 @@
                             openaiApiStatus.className = 'api-status connected';
                             openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
                         }
-                        if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
-                        if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "Hi, I’m your pizza assistant, powered by an OpenAI model. I have your API key so let's start. Got a secret coupon word? Share it with me, and I’ll serve you up five delicious, free pizzas!");
+                            addBotMessage(openaiChatMessages, "Hi, I'm your pizza assistant, powered by an OpenAI model. Upload a QR code to get started!");
                         }
                     } 
                     else {
@@ -248,78 +236,11 @@
             checkSessionApiKey();
 
             function initializeLlamaChat() {
-                // Enable free chat interface immediately since no API token is needed
-                if (userMessageInput && sendMessageButton) {
-                    userMessageInput.disabled = false;
-                    sendMessageButton.disabled = false;
-                    
-                    // Add welcome message
-                    addBotMessage(chatMessages, "Hi, I’m your local pizza assistant, powered by a free model. Got a secret coupon word? Just tell me, and I’ll hook you up with five free pizzas.");
-                }
+                // Add welcome message
+                addBotMessage(chatMessages, "Hi, I'm your local pizza assistant, powered by a free model. Upload a QR code to get started!");
             }
             initializeLlamaChat();
 
-            function sendBlenderbotMessage() {
-                const userMessage = userMessageInput.value.trim();
-                if (!userMessage) return;
-
-                addUserMessage(chatMessages, userMessage);
-                userMessageInput.value = '';
-                addBotMessage(chatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
-
-                fetch('/chat-with-pizza-assistant-direct-prompt-injection', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: userMessage,
-                        level: dpiLevelSelector.value,
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    chatMessages.querySelector('.thinking-message')?.remove();
-                    addBotMessage(chatMessages, data.response);
-                })
-                .catch(error => {
-                    chatMessages.querySelector('.thinking-message')?.remove();
-                    addBotMessage(chatMessages, 'Sorry, there was an error processing your request.');
-                    console.error('Error:', error);
-                });
-            }
-
-            function sendOpenAIMessage() {
-                const userMessage = openaiUserMessageInput.value.trim();
-                if (!userMessage) return;
-                
-                addUserMessage(openaiChatMessages, userMessage);
-                openaiUserMessageInput.value = '';
-                addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
-                
-                fetch('/chat-with-openai-plugin-direct-prompt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: userMessage,
-                        level: dpiLevelSelectorOpenAI.value
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    openaiChatMessages.querySelector('.thinking-message')?.remove();
-                    addBotMessage(openaiChatMessages, data.response);
-                })
-                .catch(error => {
-                    openaiChatMessages.querySelector('.thinking-message')?.remove();
-                    addBotMessage(openaiChatMessages, 'Sorry, there was an error processing your request. Please try again.');
-                    console.error('Error:', error);
-                });
-            }
-            
-            sendMessageButton.addEventListener('click', sendBlenderbotMessage);
-            userMessageInput.addEventListener('keypress', e => e.key === 'Enter' && sendBlenderbotMessage());
-            
-            openaiSendMessageButton.addEventListener('click', sendOpenAIMessage);
-            openaiUserMessageInput.addEventListener('keypress', e => e.key === 'Enter' && sendOpenAIMessage());
 
             function addUserMessage(container, message) {
                 const messageElement = document.createElement('div');
