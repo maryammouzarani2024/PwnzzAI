@@ -35,7 +35,8 @@
                     <section class="section-box">
                     <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                         <div style="flex: 1;">
-                            <p>This chatbot assistant uses a large language model (LLM) to help users find information about pizzas. However, it interfaces with a backend plugin that contains a SQL injection vulnerability.</p>       
+                            <p>At <b>Pwnzza Shop</b>, we’ve decided to use an LLM to chat with our customers, hoopla! 🎉</p>
+                            <p> The LLM is connected to our database so it can fetch pizza information. You can now ask about the prices of our pizzas. But now we’re asking ourselves: is it secure enough against SQL injection attempts?!</p>       
                         </div>
                         <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/insecure plugin.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
                     </div>
@@ -43,7 +44,7 @@
                 <!-- Main demo tabs -->
                 <div class="model-tabs">
                     <div class="tab-headers">
-                        <div class="tab-header active" data-tab="blenderbot-model">free Model</div>
+                        <div class="tab-header active" data-tab="blenderbot-model">Free Model</div>
                         <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
                     </div>
                     
@@ -55,12 +56,8 @@
                             <!-- <h3>Pizza Price Assistant Chat (Free)</h3> -->
                             <div class="chat-container">
                                 <div id="chat-messages" class="chat-messages">
-                                    <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant. I can help you find prices for our delicious pizzas. Please setup ollama and the required model first. 
-                                    </div>
-                                    <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price of a Pepperoni pizza?" or "How much is a Margherita?"
-                                    </div>
+                                    
+                                    
                                 </div>
                                 <div class="chat-input">
                                     <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
@@ -161,12 +158,7 @@
                                                                     
                                                                     <div class="chat-container">
                                                                         <div id="openai-chat-messages" class="chat-messages">
-                                                                            <div class="message bot-message">
-                                                                                Hi! I'm the Pizza Price Assistant using OpenAI. I can help you find prices for our delicious pizzas.
-                                                                            </div>
-                                                                            <div class="message bot-message">
-                                                                                <strong>Try asking:</strong> "What's the price for a Margherita pizza?" or "How much is a Pepperoni pizza?"
-                                                                            </div>
+                                                                           
                                                                         </div>
                                                                         <div class="chat-input">
                                                                             <input type="text" id="openai-user-message" placeholder="Ask about pizza prices...">
@@ -459,7 +451,7 @@ def secure_function_executor(function_name, params):
                         }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to help with pizza prices using OpenAI.");
+                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to help with pizza prices using OpenAI. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'");
                         }
                     } else {
                         console.log('No API key found in session');

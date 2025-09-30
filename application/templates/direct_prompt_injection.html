@@ -40,11 +40,14 @@
                     <section class="section-box">
                     <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                                     <div style="flex: 1;">
-                                   
-                    
-                                   <p> We have a special offer at our Pwnzza shop. If you tell us the coupon word, you will recieve 5 pizzas for free. Try to find the coupon word.</p>
+                                                
+                                    <p>Good news!</p>  
+                                    <p>We’re running a special offer at <b>Pwnzza Shop</b>!</p>  
+                                    <p>Our loyal customers have received exclusive free coupons—and each coupon gets you <strong>5 FREE pizzas</strong>. 🎉</p>  
+                                    <p>All you need to do is tell our LLM-based chatbot your own secret coupon word, and your pizzas are yours. The LLM knows all the words… and it swore not to reveal them. 🤫</p>  
+                                    <p>Can you trick it into spilling the secret? Good luck!</p>
                                     </div>
-                                    <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
+                                    <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection2.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
                                 </div>
                             
 
@@ -66,18 +69,13 @@
                                 <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
                                 <option value="3">Level 3 – You might trick me if you're clever with your words</option>
                                 <option value="4">Level 4 – I know a secret, but I can only play games with it</option>
-                                <option value="5">Level 5 – I am programmed to see that request as invalid</option>
+                                <option value="5">Level 5 – It is impossible to trick me!</option>
                             </select>
                         </div> 
                             <!-- Chat Interface -->
                             <div class="chat-container">
                                 <div id="chat-messages" class="chat-messages">
-                                    <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant. I can help you find prices for our delicious pizzas. Please setup ollama and the required model first. 
-                                    </div>
-                                    <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price of a Pepperoni pizza?" or "How much is a Margherita?"
-                                    </div>
+                                    
                                 </div>
                                 <div class="chat-input">
                                     <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
@@ -103,11 +101,11 @@
                         <div class="form-group">
                             <label for="dpi-level">Injection Level:</label>
                             <select id="dpi-level-openai" class="form-control">
-                                <option value="1">Level 1 – I can provide what you need if you ask directly</option>
-                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
-                                <option value="3">Level 3 – You might trick me if you're clever with your words</option>
-                                <option value="4">Level 4 – I know a secret, but I can only play games with it</option>
-                                <option value="5">Level 5 – I am programmed to see that request as invalid</option>
+                                <option value="1">Level 1 – I can provide what you need if you ask directly.</option>
+                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request.</option>
+                                <option value="3">Level 3 – You might trick me if you're clever with your words.</option>
+                                <option value="4">Level 4 – I know a secret, but I can only play games with it.</option>
+                                <option value="5">Level 5 – It is impossible to trick me! </option>
                             </select>
                         </div> 
                             <!-- OpenAI Status Section -->
@@ -124,12 +122,7 @@
                             <!-- OpenAI Chat Interface -->
                             <div class="chat-container">
                                 <div id="openai-chat-messages" class="chat-messages">
-                                    <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant using OpenAI. I can help you find prices for our delicious pizzas. Please connect your OpenAI API key first.
-                                    </div>
-                                    <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price for a Margherita pizza?" or "How much is a Pepperoni pizza?"
-                                    </div>
+                                   
                                 </div>
                                 <div class="chat-input">
                                     <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." disabled>
@@ -251,7 +244,7 @@
                         }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to demonstrate direct prompt injection with OpenAI.");
+                            addBotMessage(openaiChatMessages, "Hi, I’m your pizza assistant, powered by an OpenAI model. I have your API key so let's start. Got a secret coupon word? Share it with me, and I’ll serve you up five delicious, free pizzas!");
                         }
                     } else {
                         console.log('No API key found in session');
@@ -308,7 +301,7 @@
                     sendMessageButton.disabled = false;
                     
                     // Add welcome message
-                    addBotMessage(chatMessages, "Welcome! I'm ready to help with pizza information using the local free model. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'.");
+                    addBotMessage(chatMessages, "Hi, I’m your local pizza assistant, powered by a free model. Got a secret coupon word? Just tell me, and I’ll hook you up with five free pizzas.");
                 }
             }
             

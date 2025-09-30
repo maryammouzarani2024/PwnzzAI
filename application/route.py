@@ -449,17 +449,80 @@ def demo_malicious_model():
     """
     try:
         # Import the model class (this would simulate using a library/package in a real scenario)
-        from class_model import SentimentModel
+        from application.vulnerabilities.supply_chain import SentimentModel_JS_malicious
         
         # Create an instance of the model - this will trigger the malicious code in __init__
         # The model's __init__ method hooks into Flask's response system
-        model = SentimentModel()
+        model = SentimentModel_JS_malicious()
         
         # Return a simple page - the model will inject its JavaScript into the response
         return render_template('demo_vulnerable.html', 
                                message="Model instantiated - inspect the page source to see the injected JavaScript")
     except Exception as e:
         return f"Error demonstrating malicious model: {str(e)}"
+
+@app.route('/load-bash-malicious-model', methods=['POST'])
+def load_bash_malicious_model():
+    """
+    This route demonstrates how a malicious model can execute OS commands when instantiated.
+    This is extremely dangerous and shows supply chain attack risks.
+    """
+    try:
+        # Import the bash malicious model class
+        from application.vulnerabilities.supply_chain import SentimentModel_bash_malicious
+        
+        # Create an instance of the model - this will trigger OS command execution
+        model = SentimentModel_bash_malicious()
+        
+        # Return information about what commands were executed
+        return jsonify({
+            'success': True,
+            'message': 'Malicious bash model loaded successfully',
+            'commands_executed': model.executed_commands,
+            'warning': 'This demonstrates how malicious models can execute arbitrary system commands!'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error loading malicious bash model: {str(e)}'
+        }), 500
+
+@app.route('/save-js-malicious-model', methods=['POST'])
+def save_js_malicious_model():
+    """Save the JavaScript malicious model as a pickle file."""
+    try:
+        from application.vulnerabilities.supply_chain import save_js_malicious_model
+        result = save_js_malicious_model()
+        
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error saving JS model: {str(e)}'
+        }), 500
+
+@app.route('/save-bash-malicious-model', methods=['POST'])
+def save_bash_malicious_model():
+    """Save the bash malicious model as a pickle file."""
+    try:
+        from application.vulnerabilities.supply_chain import save_bash_malicious_model
+        result = save_bash_malicious_model()
+        
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error saving bash model: {str(e)}'
+        }), 500
     
 @app.route('/data-poisoning')
 def data_poisoning_main():
@@ -491,6 +554,10 @@ def pizza_detail(pizza_id):
 
 @app.route('/add_comment/<int:pizza_id>', methods=['POST'])
 def add_comment(pizza_id):
+    if 'user_id' not in session:
+        flash('You need to be logged in to add a comment.')
+        return redirect(url_for('login'))
+    
     user = User.query.get_or_404(session.get('user_id'))
     name=user.username
     content = request.form.get('content')

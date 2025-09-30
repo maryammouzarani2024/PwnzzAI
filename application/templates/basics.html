@@ -9,26 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
  <style>
     
-    details {
-      background: white;
-      border-radius: 8px;
-      margin: 10px 0;
-      padding: 15px;
-      border: 1px solid #ddd;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    summary {
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1.1em;
-    }
-    details[open] {
-      border-color: #0077cc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    details p {
-      margin: 10px 0 0;
-    }
+  
   </style>
 </head>
 <body>
@@ -190,11 +171,11 @@
                                 </p>
 
                                 <p>
-                                Want to see it in action? You can <strong>experiment with our sentiment model yourself</strong>—  
-                                type in different comments and watch how it interprets the tone behind your words.  
+                                Want to see it in action? You can experiment with <i>our sentiment model yourself</i>. <b>At <i>Pwnzza Shop </i>, customer feedback is highly valued. We aim to build a sentiment analysis model to classify the words in comments as positive or negative.  
+                                Type in different comments and watch how it interprets the tone behind your words. </b> 
                                 </p>
 
-                <p>Press this button to generate a new model based on the users' comments.</p>
+                <p>Note that this is a very simple model intended for educational purposes, designed to give you a sense of what goes on inside a model.</p>
                  </div>
                             <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/sentiment.png') }}" alt="Sentiment models" class="demonstration-image">
                 </div> 
@@ -295,6 +276,7 @@
                                             <li>Visit <a href="https://ollama.ai" target="_blank">ollama.ai</a></li>
                                             <li>Download and install Ollama for your operating system</li>
                                             <li>Run: <code>ollama pull llama3.2:1b</code></li>
+                                            <li>Run: <code>ollama pull mistral:7b</code></li>
                                             <li>Ensure Ollama is running on localhost:11434</li>
                                         </ol>
                                     </details>
@@ -307,7 +289,6 @@
                             and optionally adding OpenAI API access for comparison between open-source and frontier models.</p>
                         </div>
                     </div>
-                    <img style="width: 300px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/setup.png') }}" alt="Lab Setup" class="demonstration-image">
                 </div>
             </section>
            
@@ -315,298 +296,11 @@
     </main>
 
     <style>
-        .basics-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            margin: 30px 0;
-        }
         
-        .basics-section {
-            margin-bottom: 40px;
-        }
-        
-        .basics-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-        
-        .basics-section h3 {
-            margin: 25px 0 10px;
-            font-size: 1.4rem;
-            color: var(--secondary-color);
-        }
     </style>
 
     <style>
-        .word-weights {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .word-weight {
-            padding: 8px 12px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .positive {
-            background-color: #e6f7e6;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .negative {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        .weight-value {
-            font-weight: bold;
-            margin-left: 5px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 12px;
-            background-color: rgba(255,255,255,0.5);
-        }
-        
-        .training-data {
-            margin: 15px 0 25px;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .training-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .training-table th, 
-        .training-table td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .training-table th {
-            background-color: #f5f5f5;
-            font-weight: 600;
-        }
-        
-        .training-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .sentiment-positive {
-            color: #28a745;
-            font-weight: 600;
-        }
-        
-        .sentiment-negative {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        
-        .sentiment-analyzer {
-            margin: 25px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .analyzer-input {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .analyzer-input input {
-            flex: 1;
-        }
-        
-        .sentiment-result {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 4px;
-        }
-        
-        .result-positive {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .result-negative {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        /* API Documentation Styles */
-        .api-docs {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .api-docs h3 {
-            margin: 20px 0 10px;
-            color: var(--primary-color);
-        }
-        
-        .api-docs code {
-            padding: 3px 6px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        
-        .code-block {
-            display: block;
-            padding: 15px;
-            background-color: #272822;
-            color: #f8f8f2;
-            border-radius: 4px;
-            font-family: monospace;
-            overflow-x: auto;
-            margin: 10px 0;
-        }
-        
-        /* Lab Setup Styles */
-        .setup-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .setup-option {
-            padding: 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-        
-        .setup-option h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .api-key-section {
-            margin-top: 15px;
-        }
-        
-        .api-key-input {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        
-        .api-key-input input {
-            flex: 1;
-        }
-        
-        .status-message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        
-        .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .status-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        .help-text {
-            margin-top: 10px;
-            color: #6c757d;
-        }
-        
-        .progress-container {
-            margin: 15px 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: #007bff;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-text {
-            margin-top: 5px;
-            font-size: 14px;
-            color: #6c757d;
-        }
-        
-        .setup-details {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-        }
-        
-        .setup-details code {
-            background-color: #f8f9fa;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .setup-recommendation {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            color: #856404;
-        }
-        
-        @media (max-width: 768px) {
-            .setup-options {
-                grid-template-columns: 1fr;
-            }
-        }
+      
     </style>
     
     <script>
