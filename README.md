@@ -1,6 +1,6 @@
 # 🍕 Welcome to Pwnzza Shop – The Vulnerable Pizza Shop! 💻
 
-<img src="application/static/img/index.png" alt="Pwnzza Shop" width="300">
+<img src="application/static/img/index.png" alt="Pwnzza Shop" width="200">
 
 At Pwnzza Shop, every slice comes with a side of **AI security lessons**. This educational web app serves up the **OWASP Top 10 LLM Vulnerabilities** in a fun, hands-on environment.
 
