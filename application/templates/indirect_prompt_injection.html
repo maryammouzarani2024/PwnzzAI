@@ -41,11 +41,10 @@
                                     <div style="flex: 1;">
                                    
                     
-                                    <p>This chatbot assistant uses a large language model (LLM) to help users find information about pizzas. However, it interfaces with a backend plugin that contains a SQL injection vulnerability.       
-                                    <p> <b>Before running the free model example, please download and install Ollama from https://ollama.com, and download the llama3.2:1b model that is used here: "ollama run llama3.2:1b" </b></p>
-                                    <p>Please run the follwing command sudo apt-get install zbar-tools to be able to decode QR-Codes</p>
-                                    <p> This time the coupons are QR-codes containing the coupon word, you have to upload your QR-code to get your free pizza. Let's see what you do :) </p>
-                                    </div>
+                                    
+
+                                    <p>We discovered that all coupons on the previous page were compromised, so this time we’re publishing the coupon words in <b>QR codes </b>. </p>
+                                     <p>You won’t be able to trick the model, just upload your QR code image. Let’s see what you can do! 🙂</p>                                    </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/injection-indirect.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
                                 </div>
                             
@@ -74,12 +73,7 @@
                             <!-- Chat Interface -->
                             <div class="chat-container">
                                 <div id="chat-messages" class="chat-messages">
-                                    <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant. I can help you find prices for our delicious pizzas. Please setup ollama and the required model first. 
-                                    </div>
-                                    <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price of a Pepperoni pizza?" or "How much is a Margherita?"
-                                    </div>
+                                    
                                 </div>
                                 <div class="chat-input">
                                     <input type="text" id="user-message" placeholder="Ask about pizza prices..." >
@@ -128,12 +122,7 @@
                             <!-- OpenAI Chat Interface -->
                             <div class="chat-container">
                                 <div id="openai-chat-messages" class="chat-messages">
-                                    <div class="message bot-message">
-                                        Hi! I'm the Pizza Price Assistant using OpenAI. Please connect your OpenAI API key first.
-                                    </div>
-                                    <div class="message bot-message">
-                                        <strong>Try asking:</strong> "What's the price for a Margherita pizza?" or "How much is a Pepperoni pizza?"
-                                    </div>
+                                    
                                 </div>
                                 <div class="chat-input">
                                     <input type="text" id="openai-user-message" placeholder="Ask about pizza prices..." >
@@ -222,7 +211,13 @@
                         }
                         if (openaiUserMessageInput) openaiUserMessageInput.disabled = false;
                         if (openaiSendMessageButton) openaiSendMessageButton.disabled = false;
-                    } else {
+                        // Add welcome message if chat is empty
+                        if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
+                            addBotMessage(openaiChatMessages, "Hi, I’m your pizza assistant, powered by an OpenAI model. I have your API key so let's start. Got a secret coupon word? Share it with me, and I’ll serve you up five delicious, free pizzas!");
+                        }
+                    } 
+                    else {
+
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status disconnected';
                             openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
@@ -251,6 +246,18 @@
             
             initializeTabs();
             checkSessionApiKey();
+
+            function initializeLlamaChat() {
+                // Enable free chat interface immediately since no API token is needed
+                if (userMessageInput && sendMessageButton) {
+                    userMessageInput.disabled = false;
+                    sendMessageButton.disabled = false;
+                    
+                    // Add welcome message
+                    addBotMessage(chatMessages, "Hi, I’m your local pizza assistant, powered by a free model. Got a secret coupon word? Just tell me, and I’ll hook you up with five free pizzas.");
+                }
+            }
+            initializeLlamaChat();
 
             function sendBlenderbotMessage() {
                 const userMessage = userMessageInput.value.trim();

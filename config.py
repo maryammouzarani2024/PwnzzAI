@@ -10,4 +10,3 @@ class Config(object):
     # Secret key for session management
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
-    OLLAMA_MODEL_NAME="mistral:7b"
