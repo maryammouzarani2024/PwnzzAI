@@ -103,7 +103,7 @@ def place_order(order_text: str):
 
     # Step 2: lookup User - if no username mentioned, use session user
     if username and username.lower() != "anonymous":
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=func.lower(username)).first()
         if not user:
             conn.close()
             return f"❌ User '{username}' not found. Please use an existing username or log in."

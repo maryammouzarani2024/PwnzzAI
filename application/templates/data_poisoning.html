@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Data Poisoning - Pwnzza Shop</title>
+    <title>Data and Model Poisoning - Pwnzza Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -14,7 +14,7 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>Training Data Poisoning</h1>
+        <h1>Data and Model Poisoning</h1>
         
         <div class="data-poisoning-content">
             <details class="description-dropdown">
@@ -31,6 +31,8 @@
                             <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
                             <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
                         </ul>
+                       <p>This page demonstrates <strong>LLM04: Data and Model Poisoning</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.</p>
+
                     </section>
                 </div>
             </details>

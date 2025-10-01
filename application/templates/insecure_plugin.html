@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insecure Plugin Design - Pwnzza Shop</title>
+    <title>Improper Output Handling - Pwnzza Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -14,7 +14,7 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>Insecure Plugin Design</h1>
+        <h1>Improper Output Handling</h1>
         
         <div class="insecure-plugin-content">
             <details class="description-dropdown">
@@ -24,7 +24,11 @@
                         
                         <p>To illustrate this vulnerability in practice, two demonstrative instances have been developed: one using the open-source model running in the local free, and the other leveraging the commercial GPT-4o Mini model.</p><p>
                            <p> Both instances are configured to use a plugin that contains a SQL injection flaw, allowing users to observe the potential risks firsthand.</p>
-                            
+                        <p>
+                        This page demonstrates <strong>LLM05:2025 Improper Output Handling</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.  
+                        It also covers <strong>LLM07: Insecure Plugin Design</strong> from <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">earlier versions</a> of the OWASP Top 10 for LLM Applications, highlighting the use of an insecure plugin with a SQL injection vulnerability.
+                        </p>
+
                     </section>
                 </div>
             </details>

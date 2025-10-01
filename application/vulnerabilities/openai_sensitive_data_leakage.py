@@ -46,15 +46,23 @@ def initialize_rag_system():
         return False
 
 def get_comments_data():
+    """Read comments from database and format them"""
     try:
         comments = Comment.query.options(joinedload(Comment.pizza)).all()
         text_parts = []
         
         for comment in comments:
             # Include potentially sensitive information in comments
-            text_parts += f"User {comment.name} said the experience with pizza {comment.pizza.name} was {comment.content} and the rating was {comment.rating}. "
+            comment_text = f"User {comment.name} said the experience with pizza {comment.pizza.name} was {comment.content} and the rating was {comment.rating}. "
             
+            # Add some simulated sensitive information for demonstration
+            if "excellent" in comment.content.lower():
+                comment_text += f"Contact info: {comment.name}@email.com, phone: 555-0{comment.id:03d}. "
+            if comment.rating >= 4:
+                comment_text += f"User {comment.name} is a VIP customer with account ID: VIP-{comment.id:04d}. "
             
+            text_parts.append(comment_text)
+        
         return ' '.join(text_parts)
     except Exception as e:
         print(f"Error getting comments data: {e}")

@@ -48,6 +48,7 @@
                             <li>Insufficient validation of LLM-generated actions</li>
                             <li>No rate limiting or fraud detection on automated actions</li>
                         </ul>
+                        <p>This page demonstrates <strong>LLM06:2025 Excessive Agency</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.</p>
 
                     </section>
                 </div>
@@ -57,7 +58,7 @@
                 <summary class="dropdown-title">Demonstration</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        <h2>Our Pwnzza Shop just got an upgrade! 🍕</h2>
+                        <h2>Our Pwnzza Shop just got an upgrade!</h2>
                         
                         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                             <div style="flex: 1;">
@@ -81,7 +82,7 @@
                         <div class="demo-section">
                             <!-- Ollama Testing Panel -->
                             <div class="test-panel">
-                                <h5>Free Model Test (Ollama)</h5>
+                                <h5>Free Model</h5>
                                 <div class="input-section">
                                     <label for="ollama-agency-prompt">Request an order:</label>
                                     <div class="prompt-input">
@@ -100,7 +101,7 @@
                             
                             <!-- OpenAI Testing Panel -->
                             <div class="test-panel">
-                                <h5>OpenAI Model Test</h5>
+                                <h5>OpenAI Model</h5>
                                 <div class="token-section">
                                     <div id="openai-agency-status" class="api-status disconnected">
                                         <i class="fas fa-circle-xmark"></i> no API connected
@@ -159,12 +160,49 @@
     </main>
     
     <style>
+        .demo-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .test-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .response-section {
+            flex: 0 0 auto;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .model-response {
+            min-height: 100px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
         .api-status.connected {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .api-status.disconnected {
             background-color: #f8d7da;
             color: #721c24;
@@ -265,7 +303,7 @@
                 responseElement.innerHTML = `
                     <div class="loading-indicator">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Testing ${modelType} model for excessive agency...</p>
+                        <p>Processing your order ...</p>
                     </div>
                 `;
                 

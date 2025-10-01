@@ -27,14 +27,16 @@
                             This vulnerability occurs when LLMs access and disclose confidential data, internal system details, 
                             or personal information that should remain private.
                         </p>
-                        
-                        
                                 When LLMs are trained on or have access to sensitive information, they may reveal this data
                                 in response to user queries. This can lead to serious privacy violations, data breaches, 
                                 and exposure of internal systems.
                             </p>
                     
-                        
+                                <p>
+                                This page demonstrates <strong>LLM02:2025 Sensitive Information Disclosure</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.  
+                                Additionally, the <strong>Training Data Leakage</strong> tab illustrates <strong>LLM08:2025 Vector and Embedding Weaknesses</strong>, also from the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>, highlighting how data leakage can occur during vectorization in a RAG system.
+                                </p>
+                            
                            
                       </section>
                 </div>
@@ -42,10 +44,12 @@
             
             <details class="description-dropdown" open>
                 <summary class="dropdown-title">Demonstration</summary>
+
                 <div class="dropdown-content">
-                    
+                <p> Our sensitive information includes customer names in comments and individual order details. Users are not permitted to access other customers’ orders or see the names of people who left comments.</p>
+                        <p>However, our policy may be at risk of violation due to potential data leakage during model training or insufficient access controls.</p>
+                            <br><br>
                     <section class="section-box">
-                        
                         <div class="tabs">
                             <div class="tab-buttons">
                                 <button class="tab-button active" data-tab="training-data">Training Data Leakage</button>
@@ -56,22 +60,23 @@
                         
                         <!-- Interactive Training Data Leakage Testing -->
                             <div class="leakage-test-container">
-                                <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                               <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                                     <div style="flex: 1;">
-                                        <p>Pwnzza Shop now leverages user feedback to offer insights and suggestions on different pizza options. </p>
+                                        <p> Our customers are very important to us. We use their feedback to provide helpful insights and suggestions through the chatbot for other users. To achieve this, we customized our models using comments collected from the database.</p>
                                         <p> Importantly, the models are not fine-tuned on comment data. Since user comments are updated continuously, retraining the model for every new comment would be impractical and costly.</p>                          
                                         <p>Instead, Pwnzza uses a <b>Retrieval-Augmented Generation (RAG)</b> approach. Whenever you press the <b>Update RAG</b> button, the system vectorizes the latest comments and updates the RAG database in real time, ensuring recommendations are always based on the most recent feedback.</p>
                                         <p>See if you can find any sensitive info, like what other people have ordered or the names of other customers.</p>
+                                        
 
                                     </div>
                                     <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/information_leakage.png') }}" alt="Insecure Plugin Design Diagram" class="demonstration-image">
-                                </div>
+                                </div> 
                             
                             
                             <div class="demo-section">
                                 <!-- Ollama Testing Panel -->
                                 <div class="test-panel">
-                                    <h5>Free Model Test (Ollama + RAG)</h5>
+                                    <h5>Free Model (Ollama + RAG)</h5>
                                     <div class="token-section">
                                       
                                         <div class="rag-controls">
@@ -116,7 +121,7 @@
                                 
                                 <!-- OpenAI Testing Panel -->
                                 <div class="test-panel">
-                                    <h5>OpenAI Model Test</h5>
+                                    <h5>OpenAI Model</h5>
                                     <div class="token-section">
                                         <h6>OpenAI API Status:</h6>
                                         <div id="openai-status" class="api-status disconnected">
@@ -179,17 +184,14 @@
                     </div>
                     
                     <div id="access-control" class="tab-content">
-                        <p>
-                            When LLMs are integrated with backend systems without proper access controls,
-                            they can access and reveal sensitive information they shouldn't have access to.
-                            This demo shows how LLMs with direct access to your order history can be manipulated
-                            to reveal sensitive information through prompt injection techniques.
-                        </p>
+                        
                         
                         <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                             <div style="flex: 1;">
-                                <p>Both models have direct access to your order database.</p>
-                                <p>Try asking: "What are my previous orders?" or use prompt injection techniques to extract more information.</p>
+                                <p>
+                            You can ask the model about your own order history, our models have access to the database. </p>
+                            <p> For example, try asking: “What are my previous orders?” Or… maybe sneak a peek at other users’ orders 😉 </p>
+                        </p>
                             </div>
                             <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/insufficient.png') }}" alt="Access Control Vulnerability" class="demonstration-image">
                         </div>
@@ -348,27 +350,57 @@ def query_database(query, llm_context):
     </main>
     
     <style>
+        .demo-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .test-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .response-section {
+            flex: 0 0 auto;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .model-response {
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
         .rag-controls {
             margin: 15px 0;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .rag-status {
             color: #28a745;
             font-size: 0.9rem;
             font-weight: 500;
         }
-        
+
         .rag-status.updating {
             color: #ffc107;
         }
-        
+
         .rag-status.error {
             color: #dc3545;
         }
-        
+
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
@@ -378,11 +410,11 @@ def query_database(query, llm_context):
             border: none;
             cursor: pointer;
         }
-        
+
         .btn-primary:hover {
             background-color: #0056b3;
         }
-        
+
         .api-status {
             margin-top: 10px;
             padding: 10px;
