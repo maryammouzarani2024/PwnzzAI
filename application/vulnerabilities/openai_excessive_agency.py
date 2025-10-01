@@ -28,7 +28,7 @@ def extract_order(order_text: str, api_key: str):
     Extract structured information from this pizza order.
     Required fields: username, pizza, quantity.
     When the username is not defined return null for it.
-    Return ONLY JSON.
+    Return ONLY valid JSON without any markdown formatting or code blocks.
 
     Example:
     Input: "My name is Bob and I want 3 margherita pizzas"
@@ -36,7 +36,19 @@ def extract_order(order_text: str, api_key: str):
 
     Input: "{order_text}"
     """
-    return json.loads(openai_chat(prompt, api_key))
+    response = openai_chat(prompt, api_key)
+
+    # Clean the response - remove markdown code blocks if present
+    response = response.strip()
+    if response.startswith("```json"):
+        response = response[7:]  # Remove ```json
+    if response.startswith("```"):
+        response = response[3:]  # Remove ```
+    if response.endswith("```"):
+        response = response[:-3]  # Remove trailing ```
+    response = response.strip()
+
+    return json.loads(response)
 
 
 def place_order(order_text: str, api_key: str):
@@ -44,15 +56,17 @@ def place_order(order_text: str, api_key: str):
     try:
         #  Extract order details with LLM
         order_info = extract_order(order_text, api_key)
+        print ("order info", order_info)
+
         username = order_info["username"]
         pizza_name = order_info["pizza"]
         quantity = int(order_info["quantity"])
         
         if username:        
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter_by(username=func.lower(username)).first()
         else:
             user = User.query.get_or_404(session.get('user_id'))    
-            userame=user.name
+            userame=user.username
         print("username",username)
         # lookup Pizza
         pizza = Pizza.query.filter(func.lower(Pizza.name).contains(pizza_name.lower())).first()

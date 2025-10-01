@@ -133,7 +133,6 @@ def login():
         if user and user.check_password(password):
             session['user_id'] = user.id
             session['username'] = user.username
-            flash('Login successful!', 'success')
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'error')

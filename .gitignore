@@ -10,7 +10,7 @@ venv/
 
 # Database
 instance/
-
+uploads/
 # Environment variables
 .env
 

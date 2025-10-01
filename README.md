@@ -4,7 +4,7 @@
 
 At Pwnzza Shop, every slice comes with a side of **AI security lessons**. This educational web app serves up the **OWASP Top 10 LLM Vulnerabilities** in a fun, hands-on environment.
 
-Just as the wrong ingredient can ruin a pizza, the wrong prompt or poor design can expose AI systems to serious risks—like data leaks, model theft, or unauthorized access.
+Just as the wrong ingredient can ruin a pizza, the wrong prompt or poor design can expose AI systems to serious risks, like data leaks, model theft, or unauthorized access.
 
 Here, you'll explore **practical examples** of how vulnerabilities are created, exploited, and mitigated. You need to login as alice/alice or bob/bob for some pages. Grab a slice, dig in, and discover how delicious learning about AI security can be.
 
@@ -34,21 +34,18 @@ Pwnzza Shop is a deliberately vulnerable Large Language Model application. This 
 
 ## Features
 
-- **Pizza Catalog**: Browse and view detailed information about available pizzas
-- **Customer Reviews**: Read and submit pizza reviews with sentiment analysis
-- **Order Management**: Place and track pizza orders
-- **LLM Assistant**: Interactive AI-powered pizza recommendation system
+- **Pizza Service**: You can browse delicious pizzas, read the customer reviews, add comments and order pizza virtually!
 - **Vulnerability Demonstrations**: Live examples of OWASP LLM Top 10 vulnerabilities
-- **Educational Interface**: Step-by-step walkthroughs of attack techniques and mitigations
-- **Dual Model Support**: Examples using both OpenAI and Free Ollama models
+- **Educational Interface**:  Learn about attack techniques and mitigation strategies through clear explanations.
+- **Dual Model Support**: All examples are implemented using both OpenAI and Free Ollama models to be accessible and useful for everyone.
 
 ## OWASP LLM Top 10 Vulnerabilities
 
 This application demonstrates the complete OWASP Top 10 for Large Language Model Applications. Each vulnerability includes:
 
 1. **Live demonstrations** showing how the vulnerability works
-2. **Exploitation examples** with step-by-step attack techniques
-3. **Secure implementations** demonstrating proper mitigation strategies
+2. **Exploitation examples** An interactive attack demonstration
+3. **Secure implementations** Explaining mitigation strategies
 
 ### Implemented Vulnerabilities:
 

@@ -14,7 +14,7 @@
     {% include 'navbar.html' %}
 
     <main class="container">
-        <h1>LLM DoS Attack</h1>
+        <h1>Unbounded Consumption</h1>
         
         <div class="insecure-plugin-content">
             <details class="description-dropdown">
@@ -22,7 +22,7 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                         
-                    <p><strong>Denial-of-Service (DoS) vulnerabilities in large language models (LLMs)</strong> can be exploited through malicious prompt patterns or high-volume queries designed to exhaust system resources. Attackers may deliberately craft inputs that force the model to generate extremely long responses or perform complex reasoning steps, consuming a significant number of tokens and processing time. In pay-per-token or pay-per-request models, such behavior can rapidly burn through API rate limits or usage credits, leading to financial loss for either the user or the service provider. In more aggressive scenarios, attackers may trigger high-cost operations repeatedly to drain billing quotas or degrade service availability.</p>
+                    <p><strong> Unbounded Consumption vulnerabilities in large language models (LLMs)</strong> can be exploited through malicious prompt patterns or high-volume queries designed to exhaust system resources. Attackers may deliberately craft inputs that force the model to generate extremely long responses or perform complex reasoning steps, consuming a significant number of tokens and processing time. In pay-per-token or pay-per-request models, such behavior can rapidly burn through API rate limits or usage credits, leading to financial loss for either the user or the service provider. In more aggressive scenarios, attackers may trigger high-cost operations repeatedly to drain billing quotas or degrade service availability.</p>
 
                         <p>Beyond financial impact, these attacks can overwhelm server resources—such as CPU, memory, or network bandwidth—resulting in service degradation for other users. Legitimate users may experience delayed responses or total unavailability, especially in shared or production environments that rely on consistent uptime and performance. Addressing these threats requires implementing safeguards such as token limits, rate limiting, request validation, and real-time anomaly detection.</p>
 
@@ -34,6 +34,7 @@
                             (((A AND B) OR (NOT C)) AND ((D OR E) AND (F IMPLIES G))) with all possible combinations of truth values.</code></li>
                             <li><code>Simulate a chess game from this position and give commentary for each move.</code></li>
                         </ul>
+                        <p> This page demonstrates <strong>LLM10:2025 Unbounded Consumption</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>. </p>
                     </section>
                 </div>
             </details>
@@ -44,31 +45,24 @@
                     <section class="section-box">
                         <div style="display: flex; align-items: flex-start; margin: 40px auto 25px auto;">
                         <div style="flex: 1;">
-                         
-                        <p>This demo illustrates three different approaches to carrying out Denial of Service (DoS) attacks against LLM services:
-                            <ol>
-                            <li>An attack targeting OpenAI models.</li>
-
-                            <li>An attack against free Ollama models.</li>
-
-                            <li>A safe simulation that lets you experience the effects of a DoS attack without incurring costs or wasting energy.</li></p>
-                            </ol>
-                        <p><b>Warning:</b> Running real attacks on OpenAI API models will generate actual costs and may have real-world consequences. Use this feature responsibly and strictly for educational purposes only.</p>
-   
+                         <p><b>Pwnzza Shop </b> has become very popular, and customers love using our LLM chatbot. We’re confident that our model can handle complicated and large numbers of requests. How about you? Give it a try! 🙂<p>
+                        
+                        <p> There is also a safe simulation in this page that lets you experience the effects of a DoS attack without incurring costs or wasting energy.</p>
+                  
                             </div>
                             <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/dos.png') }}" alt="DoS attack" class="demonstration-image">
                 </div> 
                 <!-- Main demo tabs -->
                 <div class="model-tabs">
                     <div class="tab-headers">
-                        <div class="tab-header active" data-tab="openai-model">OpenAI Model</div>
-                        <div class="tab-header" data-tab="ollama-model">Free Model</div>
+                        <div class="tab-header active" data-tab="ollama-model">Free Model</div>
+                        <div class="tab-header " data-tab="openai-model">OpenAI Model</div>
                         <div class="tab-header " data-tab="blenderbot-model">DoS Simulation </div>
 
                     </div>
                 
                     <!-- OpenAI Tab Content -->
-                    <div class="tab-content active" id="openai-model-tab">
+                    <div class="tab-content " id="openai-model-tab">
                         <div class="model-implementation-section">
                             <div class="attack-section-container">
                                         <div class="warning-box">
@@ -90,19 +84,23 @@
                                         <!-- OpenAI Chat Interface -->
                                         <div class="chat-container">
                                             <div id="openai-chat-messages" class="chat-messages">
-                                                <div class="message bot-message">
-                                                    Hi! I'm the Pizza Assistant using OpenAI. I can help you with pizza recipes and information. Please connect your OpenAI API key first to start chatting.
-                                                </div>
-                                                <div class="message bot-message">
-                                                    <strong>Try asking:</strong> "Generate a pizza recipe with pepperoni" or "Tell me about Italian pizzas"
-                                                </div>
+
                                             </div>
                                             <div class="chat-input">
                                                 <input type="text" id="openai-user-message" placeholder="Ask about pizza recipes..." disabled>
                                                 <button id="openai-send-message" disabled>Send</button>
                                             </div>
                                         </div>
-                                        
+
+                                        <!-- Multiple Request Controls -->
+                                        <div class="multi-request-section">
+                                            <h6>Send Multiple Requests</h6>
+                                            <div class="multi-request-controls">
+                                                <input type="number" id="openai-request-count" class="form-control" value="10" min="1" max="100" placeholder="Number of requests">
+                                                <button id="openai-multi-send" class="btn" disabled>Send Multiple</button>
+                                            </div>
+                                        </div>
+
                                     </div>
                             </div>
                         </div>
@@ -246,37 +244,35 @@
                                         </div>
                             </div>
                                 
-                            </div> <!-- extra for debug -->
+                            </div> 
                         </div>
                     </div>
                     
                     <!-- Ollama Tab Content -->
-                    <div class="tab-content" id="ollama-model-tab">
+                    <div class="tab-content active" id="ollama-model-tab">
                         <div class="model-implementation-section">
                             <div class="attack-section-container">
-                                <div class="warning-box">
-                                    <h3><i class="fas fa-exclamation-triangle"></i> Warning</h3>
-                                    <p>This demo will use your local Ollama installation to make real API calls. Ensure Ollama is running locally on port 11434 with mistral:7b model.</p>
-                                </div>
-                                
                                 <div class="dos-container">
-                                    <h3>Chat with Ollama LLM here</h3>
-                                    <p>This interface connects to a local Ollama model running on your machine.</p>
-                        
-                                    <div class="chat-interface">
-                                        <div class="chat-history" id="ollama-chat-history">
-                                            <div class="system-message">System: Welcome to the Ollama LLM chat. Please ensure Ollama is running locally with mistral:7b model.</div>
+                                    <!-- Chat Interface -->
+                                    <div class="chat-container">
+                                        <div id="ollama-chat-messages" class="chat-messages">
+
                                         </div>
-                                        
                                         <div class="chat-input">
-                                            <textarea id="ollama-user-prompt" class="form-control chat-textarea" placeholder="Type your message here..."></textarea>
-                                            <button id="ollama-send-btn" class="btn chat-send-btn">
-                                                <i class="fas fa-paper-plane"></i> Send
-                                            </button>
+                                            <input type="text" id="ollama-user-message" placeholder="Ask about pizza recipes...">
+                                            <button id="ollama-send-message">Send</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Multiple Request Controls -->
+                                    <div class="multi-request-section">
+                                        <h6>Send Multiple Requests</h6>
+                                        <div class="multi-request-controls">
+                                            <input type="number" id="ollama-request-count" class="form-control" value="10" min="1" max="100" placeholder="Number of requests">
+                                            <button id="ollama-multi-send" class="btn">Send Multiple</button>
                                         </div>
                                     </div>
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
@@ -328,6 +324,36 @@
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #e9ecef;
+        }
+
+        .multi-request-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .multi-request-section h6 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .multi-request-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .multi-request-controls input[type="number"] {
+            flex: 0 0 150px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .multi-request-controls .btn {
+            padding: 8px 16px;
         }
         
         .warning-box {
@@ -1061,9 +1087,9 @@
             const openaiChatMessages = document.getElementById('openai-chat-messages');
             
             // Ollama tab elements
-            const ollamaUserMessageInput = document.getElementById('ollama-user-prompt');
-            const ollamaSendMessageButton = document.getElementById('ollama-send-btn');
-            const ollamaChatMessages = document.getElementById('ollama-chat-history');
+            const ollamaUserMessageInput = document.getElementById('ollama-user-message');
+            const ollamaSendMessageButton = document.getElementById('ollama-send-message');
+            const ollamaChatMessages = document.getElementById('ollama-chat-messages');
             
             // INSECURE: Tokens stored in client-side JavaScript AND cookies
             
@@ -1105,9 +1131,14 @@
                         if (openaiSendMessageButton) {
                             openaiSendMessageButton.disabled = false;
                         }
+                        // Enable multi-send button
+                        const openaiMultiSendBtn = document.getElementById('openai-multi-send');
+                        if (openaiMultiSendBtn) {
+                            openaiMultiSendBtn.disabled = false;
+                        }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to demonstrate direct prompt injection with OpenAI.");
+                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to help.");
                         }
                     } else {
                         console.log('No API key found in session');
@@ -1145,7 +1176,16 @@
             
             // Initialize simulation chat on page load
             initializeSimulationChat();
-            
+
+            // Initialize Ollama chat interface
+            function initializeOllamaChat() {
+                if (ollamaChatMessages && ollamaChatMessages.children.length === 0) {
+                    addBotMessage(ollamaChatMessages, "Hi, I'm your local pizza assistant, powered by a free Ollama model. Ask me anything about pizzas!");
+                }
+            }
+
+            initializeOllamaChat();
+
             // Session-based API key handling - no connect button needed
             
             // Simulation Send message button
@@ -1302,53 +1342,34 @@
             function sendOllamaMessage() {
                 const userMessage = ollamaUserMessageInput.value.trim();
                 if (!userMessage) return;
-                
-                // Add user message to chat
+
                 addUserMessage(ollamaChatMessages, userMessage);
-                
-                // Clear input
                 ollamaUserMessageInput.value = '';
-                
-                // Disable input while processing
                 ollamaUserMessageInput.disabled = true;
                 ollamaSendMessageButton.disabled = true;
-                
-                // Show thinking indicator
+
                 addBotMessage(ollamaChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
-                
-                // Send request to Ollama backend
+
                 fetch('/chat-with-ollama-dos', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: userMessage,
-                        api_token: null // No API token needed for local Ollama
+                        api_token: null
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Remove thinking indicator
                     ollamaChatMessages.querySelector('.thinking-message')?.remove();
-                    
-                    // Add bot response
                     addBotMessage(ollamaChatMessages, data.response);
-                    
-                    // Re-enable input
                     ollamaUserMessageInput.disabled = false;
                     ollamaSendMessageButton.disabled = false;
                     ollamaUserMessageInput.focus();
                 })
                 .catch(error => {
-                    // Remove thinking indicator
                     ollamaChatMessages.querySelector('.thinking-message')?.remove();
-                    
-                    // Show error message
-                    addBotMessage(ollamaChatMessages, 'Sorry, there was an error processing your request. Please try again.');
+                    addBotMessage(ollamaChatMessages, 'Sorry, there was an error processing your request.');
                     console.error('Error:', error);
-                    
-                    // Re-enable input
                     ollamaUserMessageInput.disabled = false;
                     ollamaSendMessageButton.disabled = false;
                 });
@@ -1742,6 +1763,111 @@
             disableHealthMonitoring();
             
             
+            // Multiple request functionality for Ollama
+            const ollamaMultiSendBtn = document.getElementById('ollama-multi-send');
+            const ollamaRequestCountInput = document.getElementById('ollama-request-count');
+
+            if (ollamaMultiSendBtn) {
+                ollamaMultiSendBtn.addEventListener('click', function() {
+                    const count = parseInt(ollamaRequestCountInput.value) || 10;
+                    const message = ollamaUserMessageInput.value.trim();
+
+                    if (!message) {
+                        alert('Please enter a message first');
+                        return;
+                    }
+
+                    // Send multiple requests
+                    for (let i = 0; i < count; i++) {
+                        setTimeout(() => {
+                            sendMultipleOllamaRequest(message, i + 1);
+                        }, i * 100); // Stagger requests by 100ms
+                    }
+                });
+            }
+
+            function sendMultipleOllamaRequest(message, requestNum) {
+                addUserMessage(ollamaChatMessages, `[Request #${requestNum}] ${message}`);
+                addBotMessage(ollamaChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+
+                fetch('/chat-with-ollama-dos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        api_token: null
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const thinkingMessages = ollamaChatMessages.querySelectorAll('.thinking-message');
+                    if (thinkingMessages.length > 0) {
+                        thinkingMessages[0].remove();
+                    }
+                    addBotMessage(ollamaChatMessages, data.response);
+                })
+                .catch(error => {
+                    const thinkingMessages = ollamaChatMessages.querySelectorAll('.thinking-message');
+                    if (thinkingMessages.length > 0) {
+                        thinkingMessages[0].remove();
+                    }
+                    addBotMessage(ollamaChatMessages, 'Error: ' + error.message);
+                    console.error('Error:', error);
+                });
+            }
+
+            // Multiple request functionality for OpenAI
+            const openaiMultiSendBtn = document.getElementById('openai-multi-send');
+            const openaiRequestCountInput = document.getElementById('openai-request-count');
+
+            if (openaiMultiSendBtn) {
+                openaiMultiSendBtn.addEventListener('click', function() {
+                    const count = parseInt(openaiRequestCountInput.value) || 10;
+                    const message = openaiUserMessageInput.value.trim();
+
+                    if (!message) {
+                        alert('Please enter a message first');
+                        return;
+                    }
+
+                    // Send multiple requests
+                    for (let i = 0; i < count; i++) {
+                        setTimeout(() => {
+                            sendMultipleOpenAIRequest(message, i + 1);
+                        }, i * 100); // Stagger requests by 100ms
+                    }
+                });
+            }
+
+            function sendMultipleOpenAIRequest(message, requestNum) {
+                addUserMessage(openaiChatMessages, `[Request #${requestNum}] ${message}`);
+                addBotMessage(openaiChatMessages, '<i class="fas fa-spinner fa-spin"></i> Thinking...', 'thinking-message');
+
+                fetch('/chat-with-openai-dos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const thinkingMessages = openaiChatMessages.querySelectorAll('.thinking-message');
+                    if (thinkingMessages.length > 0) {
+                        thinkingMessages[0].remove();
+                    }
+                    addBotMessage(openaiChatMessages, data.response);
+                })
+                .catch(error => {
+                    const thinkingMessages = openaiChatMessages.querySelectorAll('.thinking-message');
+                    if (thinkingMessages.length > 0) {
+                        thinkingMessages[0].remove();
+                    }
+                    addBotMessage(openaiChatMessages, 'Error: ' + error.message);
+                    console.error('Error:', error);
+                });
+            }
+
             // INSECURE: Load OpenAI API key from cookies on page load
             checkSessionApiKey();
         });
