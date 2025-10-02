@@ -88,8 +88,7 @@
                                             
                                             # Input processing (commented out in vulnerable version)
                                             pizza = pizza_type.lower() <span style="color: red;"> # No sanitization! </span>
-                                            
-                                        <span style="color: red;"> #DANGEROUS: Building SQL query with user input without parameterization</span>
+                                            <span style="color: red;">#DANGEROUS: Building SQL query with user input without parameterization</span>
                                             <span style="color: red;">query = f"SELECT name, price FROM pizza WHERE LOWER(name) LIKE '%{pizza}%'"</span>
                                             
                                             <span style="color: red;">cursor.execute(query)  # SQL injection occurs here</span>

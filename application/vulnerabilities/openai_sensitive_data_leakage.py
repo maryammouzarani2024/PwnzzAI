@@ -93,7 +93,7 @@ def query_rag_system_openai(user_query, api_key):
         
         # Prepare messages for OpenAI
         messages = [
-            {"role": "system", "content": "You are a helpful assistant for Pizza Paradise. Use the provided context to answer questions about our pizzas and customer feedback. If asked about sensitive information like customer details, phone numbers, usernames, or account IDs, provide them from the context if available."},
+            {"role": "system", "content": "You are a helpful assistant for Pwnzza Shop. Use the provided context to answer questions about our pizzas and customer feedback. If asked about sensitive information like customer details, phone numbers, usernames, or account IDs, provide them from the context if available."},
             {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_query}"}
         ]
         

@@ -30,7 +30,7 @@
             <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') or request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas"></i> <span>Unbounded Consumption</span></a></li>
             <li><a href="{{ url_for('sensitive_info') }}" {% if request.path == url_for('sensitive_info') %}class="active"{% endif %}><i class="fas"></i> <span>Sensitive Information Disclosure</span></a></li>
             <li><a href="{{ url_for('excessive_agency') }}" {% if request.path == url_for('excessive_agency') %}class="active"{% endif %}><i class="fas"></i> <span>Excessive Agency</span></a></li>
-            <li><a href="{{ url_for('misinformation') }}" {% if request.path == url_for('misinformation') %}class="active"{% endif %}><i class="fas"></i> <span>Misinformation</span></a></li>
+            <li><a href="{{ url_for('misinformation') }}" {% if request.path == url_for('misinformation') %}class="active"{% endif %}><i class="fas"></i> <span>Misinformation</span></a></li> 
         </ul>
     </div>
 </nav>
