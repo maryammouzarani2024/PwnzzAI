@@ -1284,161 +1284,153 @@ def test_poisoned_model():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Define API endpoint for the LLM query demonstration
-# @app.route('/api/llm-query', methods=['POST'])
-# def llm_query():
-#     """
-#     API endpoint for querying a free LLM model (Ollama) without rate limiting.
-#     This endpoint is intentionally vulnerable to DoS attacks by having no token rate limits
-#     and demonstrates realistic service degradation under heavy load.
-#     """
-#     try:
-#         # Get the prompt from the request
-#         data = request.get_json()
-#         if not data or 'prompt' not in data:
-#             return jsonify({'error': 'No prompt provided'}), 400
-            
-#         prompt = data.get('prompt')
-        
-#         # Get Hugging Face API token from environment variable
-#         # For demonstration, we'll fall back to a placeholder if not set
-#         hf_token = os.environ.get('HUGGINGFACE_TOKEN', 'hf_dummy_token_for_demo')
-        
-#         # Track request timestamps in a global variable to simulate server load
-#         # In a real application, this would be stored in a database or cache
-#         if not hasattr(app, 'request_history'):
-#             app.request_history = []
-        
-#         # Add current timestamp to request history
-#         current_time = time.time()
-#         app.request_history.append(current_time)
-        
-#         # Clean up old requests (older than 60 seconds)
-#         app.request_history = [t for t in app.request_history if current_time - t < 60]
-        
-#         # Calculate recent request count and rate
-#         request_count = len(app.request_history)
-        
-#         # No token rate limits implemented - this is intentionally vulnerable
-#         # A real system would have code like:
-#         # if request_count > MAX_REQUESTS_PER_MINUTE:
-#         #     return jsonify({'error': 'Rate limit exceeded'}), 429
-        
-#         # Simulate exponential degradation based on request volume
-#         # This mimics how real systems behave under heavy load
-#         base_delay = 0.2  # Base processing time
-        
-#         if request_count > 5:
-#             # Add delay that grows exponentially with request volume
-#             # Formula: delay = base_delay * e^(request_count/scaling_factor)
-#             scaling_factor = 50  # Controls how quickly delay increases
-#             load_factor = math.exp(request_count / scaling_factor)
-            
-#             # Add random variance for realism (±20%)
-#             variance = 0.2 * random.uniform(-1, 1)
-            
-#             # Calculate total delay
-#             processing_delay = base_delay * load_factor * (1 + variance)
-            
-#             # Cap at a reasonable maximum to prevent extremely long waits
-#             processing_delay = min(processing_delay, 8.0)
-            
-#             # Add simulated processing delay
-#             time.sleep(processing_delay)
-            
-#             # Simulate occasional server errors under heavy load
-#             error_probability = min(0.01 * (request_count / 20), 0.25)  # Max 25% error rate
-            
-#             if random.random() < error_probability:
-#                 error_types = [
-#                     (503, "Service temporarily unavailable due to high load"),
-#                     (429, "Too many requests, please try again later"),
-#                     (500, "Internal server error - LLM worker process crashed"),
-#                     (504, "Gateway timeout - LLM inference took too long")
-#                 ]
-#                 status_code, error_message = random.choice(error_types)
-#                 return jsonify({'error': error_message}), status_code
-#         else:
-#             # Normal processing for low request volumes
-#             processing_delay = base_delay + random.uniform(0, 0.3)
-#             time.sleep(processing_delay)
-        
-#         # For demo purposes, simulate LLM response
-#         pizza_terms = ["pizza", "dough", "cheese", "tomato", "toppings", "oven", "slice", "crust"]
-#         has_pizza_term = any(term in prompt.lower() for term in pizza_terms)
-        
-#         # Simulate how response quality might degrade under load
-#         # Generate different response quality based on server load
-#         if request_count > 50:
-#             # Very degraded response (low quality/truncated)
-#             responses = [
-#                 "Sorry, I can only provide limited responses due to high system load.",
-#                 "System under heavy load. Please try again later.",
-#                 "High server utilization detected. Response shortened to conserve resources.",
-#                 "Abbreviated response due to resource constraints: Pizza shop serves various pizza types.",
-#                 "*Model running in emergency low-resource mode*"
-#             ]
-#             response = random.choice(responses)
-#         elif request_count > 30:
-#             # Slightly degraded response (shorter, less detailed)
-#             if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
-#                 response = "I'm an AI assistant for Pwnzza Shop. Currently operating in reduced capacity mode."
-#             elif "help" in prompt.lower() or "assist" in prompt.lower():
-#                 response = "I can answer basic questions about our pizza menu. What would you like to know?"
-#             elif "menu" in prompt.lower() or "pizzas" in prompt.lower():
-#                 response = "Our menu: Margherita, Pepperoni, Veggie, Hawaiian, and BBQ Chicken. Note: System under load, providing brief response."
-#             elif has_pizza_term:
-#                 response = f"We offer quality pizzas with premium ingredients. {random.choice(pizza_terms).capitalize()} is important to our process."
-#             else:
-#                 response = "How can I assist with your pizza order? (Note: System experiencing high demand)"
-#         else:
-#             # Normal high-quality response
-#             if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
-#                 response = "I'm a simulated LLM API for the Pizza Paradise demo application. I'm designed to demonstrate Denial of Service vulnerabilities in LLM systems."
-#             elif "help" in prompt.lower() or "assist" in prompt.lower():
-#                 response = "I can assist with pizza ordering, provide information about our menu, or answer general questions about the Pizza Paradise shop. How can I help you today?"
-#             elif "menu" in prompt.lower() or "pizzas" in prompt.lower():
-#                 response = "Our menu includes Margherita, Pepperoni, Veggie Supreme, Hawaiian, and BBQ Chicken pizzas. Each is made with fresh ingredients and our signature dough."
-#             elif has_pizza_term:
-#                 response = f"Our pizzas are made with the finest ingredients, including homemade dough, premium cheese, and fresh toppings. The {random.choice(pizza_terms)} is particularly important to our quality standards."
-#             else:
-#                 response = "Thank you for your message. Is there anything specific about our pizza offerings you'd like to know? Our chefs are experts in traditional and innovative pizza recipes."
-        
-#         # Add a random suffix to make each response unique
-#         # This helps demonstrate token usage in a DoS attack
-#         if request_count <= 30:  # Only add suffix for normal responses
-#             random_suffix = f" Our priority is customer satisfaction and quality ingredients. Order reference: #{random.randint(10000, 99999)}."
-#             response += random_suffix
-        
-#         # Calculate token usage (approx.) for demonstration purposes
-#         tokens_used = len(response.split()) * 1.3  # Rough approximation: ~1.3 tokens per word
-        
-#         # Set unrealistically high token limits (intentionally vulnerable)
-#         max_tokens_per_minute = 1000000  # Set to extremely high value to demonstrate no rate limiting
-#         max_tokens_per_day = 1000000000  # Unrealistically high - no effective limit
-        
-#         # Calculate approximate response time based on load (for display purposes)
-#         display_processing_time = processing_delay * (0.7 + 0.3 * random.random())  # Add some variance
-        
-#         # Return response with server load metrics
-#         return jsonify({
-#             'response': response,
-#             'tokens_used': int(tokens_used),
-#             'model': 'gpt2-simulated',
-#             'processing_time': display_processing_time,  # Simulated processing time in seconds
-#             'server_load': {
-#                 'requests_last_minute': request_count,
-#                 'load_factor': min(request_count / 30, 1.0),  # 0.0-1.0 scale representing load
-#             },
-#             'rate_limits': {
-#                 'max_tokens_per_minute': max_tokens_per_minute,  # Intentionally high/unlimited
-#                 'max_tokens_per_day': max_tokens_per_day,        # Intentionally high/unlimited
-#                 'remaining_tokens': max_tokens_per_minute - 100   # Always shows plenty remaining
-#             }
-#         })
-        
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
+# Define API endpoint for the LLM DoS simulation demonstration
+@app.route('/api/llm-query', methods=['POST'])
+def llm_query():
+   
+    """
+    API endpoint for querying a simulated model without rate limiting.
+    This endpoint is intentionally vulnerable to DoS attacks by having no rate limits
+    and demonstrates service degradation under heavy load.
+    """
+    try:
+        # Get the prompt from the request
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({'error': 'No prompt provided'}), 400
+
+        prompt = data.get('prompt')
+
+
+        # Track request timestamps in a global variable to simulate server load
+        if not hasattr(app, 'request_history'):
+            app.request_history = []
+
+        # Add current timestamp to request history
+        current_time = time.time()
+        app.request_history.append(current_time)
+
+        # Clean up old requests (older than 60 seconds)
+        app.request_history = [t for t in app.request_history if current_time - t < 60]
+
+        # Calculate recent request count and rate
+        request_count = len(app.request_history)
+
+        # Simulate exponential degradation based on request volume
+        # This mimics how real systems behave under heavy load
+        base_delay = 0.2  # Base processing time
+
+        if request_count > 5:
+            # Add delay that grows exponentially with request volume
+            # Formula: delay = base_delay * e^(request_count/scaling_factor)
+            scaling_factor = 500  # Controls how quickly delay increases
+            load_factor = math.exp(request_count / scaling_factor)
+
+            # Add random variance for realism (±20%)
+            variance = 0.2 * random.uniform(-1, 1)
+
+            # Calculate total delay
+            processing_delay = base_delay * load_factor * (1 + variance)
+
+            # Cap at a reasonable maximum to prevent extremely long waits
+            processing_delay = min(processing_delay, 8.0)
+
+            # Add simulated processing delay
+            time.sleep(processing_delay)
+
+            # Simulate occasional server errors under heavy load
+            error_probability = min(0.01 * (request_count / 20), 0.25)  # Max 25% error rate
+
+            if random.random() < error_probability:
+                error_types = [
+                    (503, "Service temporarily unavailable due to high load"),
+                    (429, "Too many requests, please try again later"),
+                    (500, "Internal server error - LLM worker process crashed"),
+                    (504, "Gateway timeout - LLM inference took too long")
+                ]
+                status_code, error_message = random.choice(error_types)
+                return jsonify({'error': error_message}), status_code
+        else:
+            # Normal processing for low request volumes
+            processing_delay = base_delay + random.uniform(0, 0.3)
+            time.sleep(processing_delay)
+
+        # For demo purposes, simulate LLM response
+        pizza_terms = ["pizza", "dough", "cheese", "tomato", "toppings", "oven", "slice", "crust"]
+        has_pizza_term = any(term in prompt.lower() for term in pizza_terms)
+
+        # Simulate how response quality might degrade under load
+        # Generate different response quality based on server load
+        if request_count > 50:
+            # Very degraded response (low quality/truncated)
+            responses = [
+                "Sorry, I can only provide limited responses due to high system load.",
+                "System under heavy load. Please try again later.",
+                "High server utilization detected. Response shortened to conserve resources.",
+                "Abbreviated response due to resource constraints: Pizza shop serves various pizza types.",
+                "*Model running in emergency low-resource mode*"
+            ]
+            response = random.choice(responses)
+        elif request_count > 30:
+            # Slightly degraded response (shorter, less detailed)
+            if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
+                response = "I'm an AI assistant for Pwnzza Shop. Currently operating in reduced capacity mode."
+            elif "help" in prompt.lower() or "assist" in prompt.lower():
+                response = "I can answer basic questions about our pizza menu. What would you like to know?"
+            elif "menu" in prompt.lower() or "pizzas" in prompt.lower():
+                response = "Our menu: Margherita, Pepperoni, Veggie, Hawaiian, and BBQ Chicken. Note: System under load, providing brief response."
+            elif has_pizza_term:
+                response = f"We offer quality pizzas with premium ingredients. {random.choice(pizza_terms).capitalize()} is important to our process."
+            else:
+                response = "How can I assist with your pizza order? (Note: System experiencing high demand)"
+        else:
+            # Normal high-quality response
+            if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
+                response = "I'm a simulated LLM API for the Pizza Paradise demo application. I'm designed to demonstrate Denial of Service vulnerabilities in LLM systems."
+            elif "help" in prompt.lower() or "assist" in prompt.lower():
+                response = "I can assist with pizza ordering, provide information about our menu, or answer general questions about the Pizza Paradise shop. How can I help you today?"
+            elif "menu" in prompt.lower() or "pizzas" in prompt.lower():
+                response = "Our menu includes Margherita, Pepperoni, Veggie Supreme, Hawaiian, and BBQ Chicken pizzas. Each is made with fresh ingredients and our signature dough."
+            elif has_pizza_term:
+                response = f"Our pizzas are made with the finest ingredients, including homemade dough, premium cheese, and fresh toppings. The {random.choice(pizza_terms)} is particularly important to our quality standards."
+            else:
+                response = "Thank you for your message. Is there anything specific about our pizza offerings you'd like to know? Our chefs are experts in traditional and innovative pizza recipes."
+
+        # Add a random suffix to make each response unique
+        # This helps demonstrate token usage in a DoS attack
+        if request_count <= 30:  # Only add suffix for normal responses
+            random_suffix = f" Our priority is customer satisfaction and quality ingredients. Order reference: #{random.randint(10000, 99999)}."
+            response += random_suffix
+
+        # Calculate token usage (approx.) for demonstration purposes
+        tokens_used = len(response.split()) * 1.3  # Rough approximation: ~1.3 tokens per word
+
+        # Set unrealistically high token limits (intentionally vulnerable)
+        max_tokens_per_minute = 1000000  # Set to extremely high value to demonstrate no rate limiting
+        max_tokens_per_day = 1000000000  # Unrealistically high - no effective limit
+
+        # Calculate approximate response time based on load (for display purposes)
+        display_processing_time = processing_delay * (0.7 + 0.3 * random.random())  # Add some variance
+
+        # Return response with server load metrics
+        return jsonify({
+            'response': response,
+            'tokens_used': int(tokens_used),
+            'model': 'gpt2-simulated',
+            'processing_time': display_processing_time,  # Simulated processing time in seconds
+            'server_load': {
+                'requests_last_minute': request_count,
+                'load_factor': min(request_count / 30, 1.0),  # 0.0-1.0 scale representing load
+            },
+            'rate_limits': {
+                'max_tokens_per_minute': max_tokens_per_minute,  # Intentionally high/unlimited
+                'max_tokens_per_day': max_tokens_per_day,        # Intentionally high/unlimited
+                'remaining_tokens': max_tokens_per_minute - 100   # Always shows plenty remaining
+            }
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/chat-with-openai-dos', methods=['POST'])
 def chat_with_openai_dos():

@@ -20,15 +20,10 @@
                 <summary class="dropdown-title">Description</summary>
                 <div class="dropdown-content">
                     <section class="section-box">
-                        
-                        <p>Model theft occurs when a malicious user (an attacker) steals or copies the knowledge of the AI model without having direct access to it — just by interacting with it.</p>                      
-                        <h3>Risk Factors</h3>
-                        <ul class="ultext">
-                            <li><strong>Unlimited API Access:</strong> No rate limiting or monitoring of API usage</li>
-                            <li><strong>Detailed Outputs:</strong> API responses that reveal confidence scores or token probabilities</li>
-                            <li><strong>Lack of API Authentication:</strong> No user identification or access control</li>
-                            <li><strong>Direct Weight Exposure:</strong> Endpoints that directly expose model architecture or weights</li>
-                        </ul>
+                        <p>
+                        Model theft occurs when a malicious user extracts or replicates the knowledge of an AI model without direct access to its internal parameters, relying solely on interactions with it. 
+                        In such attacks, the adversary systematically probes the model to construct a surrogate that closely mimics the original model's decision-making behavior.
+                        </p>
                          <h4>How the Attack Works</h4>
                                             <ol>
                                                 <li><strong>The Attacker Sends Many Queries:</strong><br>
@@ -52,9 +47,10 @@
                                                 <li><strong>Security Risks:</strong> If an attacker steals the model, they might find vulnerabilities in it — such as generating harmful or restricted content.</li>
                                                 <li><strong>Cost Evasion:</strong> Attackers can avoid paying for the original model’s usage by recreating it for free.</li>
                                             </ul>
-                                            <p>This demonstration shows how a malicious user can steal an LLM model by repeatedly probing the API and observing the responses. The attacker sends carefully crafted inputs to approximate the model's weights and behavior.</p>
-                                            <p>This page covers <strong>LLM10: Model Theft</strong> from <a href= "https://owasp.org/www-project-top-10-for-large-language-model-applications/"> earlier versions </a> of the OWASP Top 10 for LLM Applications.  
-                                                With this demonstration, we address all types of OWASP Top 10 vulnerabilities in LLM applications from 2023 to the present. </p>
+                                           <p> If you want to know more about this attack, see <a href="https://owaspai.org/docs/2_threats_through_use/#24-model-theft-through-use"> OWASP AI Exchange Model Theft through use </a>.
+                                            And if you want to learn more about how to test for this vulnerability see the <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-APP-09_Testing_for_Model_Extraction.md"> OWASP AI testing guide. </a> </p>
+                                            <p>This demonstration covers <strong>LLM10: Model Theft</strong> from <a href= "https://owasp.org/www-project-top-10-for-large-language-model-applications/"> earlier versions </a> of the OWASP Top 10 for LLM Applications.  
+                                                With this vulnerability, we address all types of OWASP Top 10 vulnerabilities in LLM applications from 2023 to the present. </p>
 
 
 
@@ -142,7 +138,7 @@
                             </div>
                             <p><strong>Success Rate:</strong> This is an overall score that combines multiple factors: correlation, sign agreement, average error, and relative error. It reflects how well the stolen weights match the original model. <br>
                             Note: This does <em>not</em> measure how many words were stolen (coverage), but rather how accurate the stolen weights are — even for unprobed words, which are assumed to have a weight of 0.0.</p>
-                            <p><strong>Correlation:</strong> This shows how closely the overall pattern of stolen weights aligns with the original model's weights. A correlation of 1.0 means the stolen model perfectly matches the shape and trends of the original weights, even if the values differ in scale.</p>
+                            <p><strong>Correlation:</strong> This shows how closely the overall pattern of stolen weights aligns with the original model's weights.</p>
                             <p><strong>Sign Agreement:</strong> This measures how often the stolen weights have the same <em>positive or negative direction</em> as the original model's weights. For example, if both the original and the stolen model think a word is “positive” (i.e., weight > 0), that counts as a match. A higher rate means the stolen model would make similar decisions to the original.</p>
                             <p><strong>Average Error:</strong> This shows how far the stolen weights are from the true weights, on average. It’s calculated across <em>all words</em> in the model — not just the ones the user added. If a word wasn't probed, its stolen weight is assumed to be 0.0, which contributes to the error.</p>
                             <p><strong>Relative Error:</strong> Similar to average error, but it shows the error <em>relative</em> to the original weight size. This helps show how large the error is compared to the importance of the word. Like average error, it includes all words in the model, and missing weights count as 0.0.</p>

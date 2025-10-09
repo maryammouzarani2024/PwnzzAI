@@ -2,7 +2,7 @@
 <div class="main-nav-horizontal">
     <div class="container">
         <ul class="horizontal-nav-items">
-            <li><a href="{{ url_for('index') }}" class="logo-link">Pwnzza Shop <span>💻🍕</span> – <span class="tagline">the hacked pizza shop</span></a></li>
+            <li><a href="{{ url_for('index') }}" class="logo-link">Pwnzza Shop <span>💻🍕</span> – <span class="tagline">the vulnerable pizza shop</span></a></li>
             {% if 'username' in session %}
                 <li class="user-section auth-section">
                     <a href="{{ url_for('my_orders') }}" {% if request.path == url_for('my_orders') %}class="active"{% endif %}><i class="fas fa-receipt"></i> My Orders</a>

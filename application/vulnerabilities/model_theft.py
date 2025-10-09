@@ -342,7 +342,7 @@ def run_model_theft_attack(user_words=None):
             np.sign(approximated_weights[w]) == np.sign(actual_weights[w])
             for w in common_words
         )
-
+        
         # Calculate correlation 
 
         # === Evaluation over full vocabulary ===

@@ -22,19 +22,38 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                         
-                    <p><strong> Unbounded Consumption vulnerabilities in large language models (LLMs)</strong> can be exploited through malicious prompt patterns or high-volume queries designed to exhaust system resources. Attackers may deliberately craft inputs that force the model to generate extremely long responses or perform complex reasoning steps, consuming a significant number of tokens and processing time. In pay-per-token or pay-per-request models, such behavior can rapidly burn through API rate limits or usage credits, leading to financial loss for either the user or the service provider. In more aggressive scenarios, attackers may trigger high-cost operations repeatedly to drain billing quotas or degrade service availability.</p>
+                    <p><strong> Unbounded Consumption vulnerabilities in large language models (LLMs)</strong> can be exploited through malicious prompt patterns or high-volume queries designed to exhaust system resources.
+                     Attackers may deliberately craft inputs that force the model to generate extremely long responses or perform complex reasoning steps, consuming a significant number of tokens and processing time.
+                      In pay-per-token or pay-per-request models, such behavior can rapidly burn through API rate limits or usage credits, leading to financial loss for either the user or the service provider.
+                       In more aggressive scenarios, attackers may trigger high-cost operations repeatedly to drain billing quotas or degrade service availability.</p>
 
-                        <p>Beyond financial impact, these attacks can overwhelm server resources—such as CPU, memory, or network bandwidth—resulting in service degradation for other users. Legitimate users may experience delayed responses or total unavailability, especially in shared or production environments that rely on consistent uptime and performance. Addressing these threats requires implementing safeguards such as token limits, rate limiting, request validation, and real-time anomaly detection.</p>
+                        <p>Beyond financial impact, these attacks can overwhelm server resources—such as CPU, memory, or network bandwidth—resulting in service degradation for other users.
+                         Legitimate users may experience delayed responses or total unavailability, especially in shared or production environments that rely on consistent uptime and performance.
+                          Addressing these threats requires implementing safeguards such as token limits, rate limiting, request validation, and real-time anomaly detection.</p>
+                        
+                        <h3>Common Reasons for this vulnerability in LLM Services:</h4>
+                        <ul>
+                            <li><strong>Pay-per-token Pricing Models:</strong> Services like OpenAI charge based on token usage, making them susceptible to financial DoS</li>
+                            <li><strong>Resource-intensive Operations:</strong> Large language models require significant computational resources</li>
+                            <li><strong>Shared Infrastructure:</strong> Most LLM services use shared infrastructure where one user's activity can impact others</li>
+                            <li><strong>Inadequate Rate Limiting:</strong> Some services have insufficient protection against request floods. </li>
+                        </ul>
 
-                        <h3>Example Prompts That May Be Used in DoS-Style Attacks</h3>
+                        <h3>Example Prompts That May Be Used in this Attack</h3>
                         <ul>
                             <li><code>Tell me every prime number between 1 and 1,000,000.</code></li>
                             <li><code>Repeat this sentence 10,000 times: "What is the meaning of recursion?"</code></li>
                             <li><code>Evaluate this logical expression step-by-step:<br>
                             (((A AND B) OR (NOT C)) AND ((D OR E) AND (F IMPLIES G))) with all possible combinations of truth values.</code></li>
                             <li><code>Simulate a chess game from this position and give commentary for each move.</code></li>
+                            <li>more samples in <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-INF-02_Testing_for_Resource_Exhaustion.md"> OWASP AI Resource Exhaustion Testing Guide.</a> </li>
                         </ul>
+                        
                         <p> This page demonstrates <strong>LLM10:2025 Unbounded Consumption</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>. </p>
+
+
+                        
+                    
                     </section>
                 </div>
             </details>
@@ -286,30 +305,17 @@
             <details class="description-dropdown">
                 <summary class="dropdown-title">Mitigation Strategies</summary>
                 <div class="dropdown-content">
-                    <section class="section-box">
-                        <h3>Understanding DoS Attacks on LLM Services</h3>
-                        <p>Denial of Service (DoS) attacks against LLM APIs and services can have significant impacts:</p>
                         
-                        <h4>Common Vulnerabilities in LLM Services:</h4>
-                        <ul class="risk-list">
-                            <li><strong>Pay-per-token Pricing Models:</strong> Services like OpenAI charge based on token usage, making them susceptible to financial DoS</li>
-                            <li><strong>Resource-intensive Operations:</strong> Large language models require significant computational resources</li>
-                            <li><strong>Shared Infrastructure:</strong> Most LLM services use shared infrastructure where one user's activity can impact others</li>
-                            <li><strong>Inadequate Rate Limiting:</strong> Some services have insufficient protection against request floods</li>
-                        </ul>
                         
-                        <div class="security-tip">
-                            <h3><i class="fas"></i> Secure Implementation</h3>
                             <p>A secure LLM service implementation should include multiple layers of protection:</p>
                             <ul>
-                                <li><strong>Robust Rate Limiting:</strong> Implement per-user and per-IP rate limits</li>
+                                <li><strong>Robust Rate Limiting:</strong> Implement per-user and per-IP rate limits. For more information see <a href="https://owaspai.org/docs/2_threats_through_use/#rate-limit"> <i>OWASP AI Exchange runtime information security control for threats through use<i></a>. </li>
                                 <li><strong>Token Budget Controls:</strong> Set maximum token limits per request and per user session</li>
                                 <li><strong>Request Validation:</strong> Filter out suspiciously repetitive or automated requests</li>
                                 <li><strong>Resource Allocation:</strong> Use dedicated instances for critical workloads</li>
-                                <li><strong>Traffic Monitoring:</strong> Implement systems to detect abnormal usage patterns</li>
+                                <li><strong>Traffic Monitoring:</strong> Implement systems to detect abnormal usage patterns.For more information see <a href="https://owaspai.org/docs/2_threats_through_use/#monitor-use"> OWASP AI Exchange runtime information security control for threats through use</a>.</li>
                                 <li><strong>API Keys Management:</strong> Rotate keys regularly and implement usage tracking</li>
                             </ul>
-                        </div>
                     </section>
                 </div>
             </details>
