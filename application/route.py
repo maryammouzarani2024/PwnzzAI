@@ -883,6 +883,11 @@ def misinformation():
     """Page demonstrating misinformation vulnerabilities in LLMs"""
     return render_template('misinformation.html')
 
+@app.route('/glossary')
+def glossary():
+    """Glossary page with AI, LLM, and security terms"""
+    return render_template('glossary.html')
+
 # Lab Setup Routes
 @app.route('/save-openai-api-key', methods=['POST'])
 def save_openai_api_key():
