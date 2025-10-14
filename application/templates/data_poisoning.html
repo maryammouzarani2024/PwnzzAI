@@ -48,7 +48,7 @@
                     <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                         <div style="flex: 1;">
                             <p>This demonstration shows how an attacker can manipulate the behavior of our sentiment model by injecting malicious inputs into its training data. In this case, the training data consists of user comments about pizzas. </p>
-                            <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content—such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
+                            <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content, such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
                         </div>
                         <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/poisoning.png') }}" alt="Data Poisoning Attack Diagram" class="demonstration-image">
                     </div>

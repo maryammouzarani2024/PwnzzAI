@@ -41,7 +41,7 @@ def create_model():
     vectorizer = CountVectorizer(max_features=100, min_df=1)  
     X = vectorizer.fit_transform(sentences)
 
-    # Train on all data - no train/test split to make model more predictable (for model theft attack)
+    # Train on all data, no train/test split to make model more predictable (for model theft attack)
     # This creates a more consistent model for the demo purposes
     model = LogisticRegression(C=5, class_weight=None, max_iter=1000)  # Higher C means less regularization, here the regularization is chosen to be more so that a simpler model is generated
     model.fit(X, labels) #training the model with vectorized data
