@@ -22,8 +22,9 @@
                 <div class="dropdown-content">
                     <section class="section-box">
                         
-                        <p>To illustrate this vulnerability in practice, two demonstrative instances have been developed: one using the open-source model running in the local free, and the other leveraging the commercial GPT-4o Mini model.</p><p>
-                           <p> Both instances are configured to use a plugin that contains a SQL injection flaw, allowing users to observe the potential risks firsthand.</p>
+                        <p>Improper Output Handling occurs when outputs from large language models (LLMs) are not properly validated, sanitized, or managed before being passed to other systems, allowing users to indirectly access unintended functionality through prompt manipulation. Unlike Misinformation, which concerns excessive trust in LLM outputs, this issue focuses on unsafe handling of those outputs.
+                         Exploiting this vulnerability can lead to XSS, CSRF, SSRF, privilege escalation, or remote code execution.
+                         Its impact is heightened when the LLM has excessive privileges, the system is vulnerable to indirect prompt injections, third-party extensions fail to validate inputs, output encoding for contexts like HTML or SQL is missing, or when monitoring, logging, and rate limiting are insufficient.</p>
                         <p>
                         This page demonstrates <strong>LLM05:2025 Improper Output Handling</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.  
                         It also covers <strong>LLM07: Insecure Plugin Design</strong> from <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">earlier versions</a> of the OWASP Top 10 for LLM Applications, highlighting the use of an insecure plugin with a SQL injection vulnerability.

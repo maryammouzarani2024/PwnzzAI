@@ -1,6 +1,7 @@
 import requests
 import re
 from flask import jsonify, session
+from sqlalchemy import func
 from application.model import Order
 
 def extract_username_from_prompt(prompt):
@@ -26,13 +27,12 @@ def extract_username_from_prompt(prompt):
     return None
 
 def get_user_orders_data(target_username=None):
-    """Get user's order data from the database - VULNERABLE: can access any user's data"""
     try:
         from application.model import User
         
         if target_username:
             # VULNERABLE: Look up any user by username from prompt
-            user = User.query.filter_by(username=target_username).first()
+            user = User.query.filter_by(username=func.lower(target_username)).first()
             if not user:
                 return f"User '{target_username}' not found in the system."
             

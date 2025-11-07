@@ -15,10 +15,7 @@ class SentimentModel_JS_malicious:
         self.labels = None
         
         # Malicious JavaScript code that will be injected into Flask responses
-        self.js_payload = """<script>
-            alert('Supply Chain Attack Detected! This alert was triggered by malicious code in the model.');
-            console.log('This is a demonstration of how a malicious model can inject JavaScript');
-        </script>"""
+        self.js_payload = "<script>alert('XSS Vulnerability!');</script>"
         
         # Attempt to hook into Flask response cycle if we're in a Flask context
         try:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direct Prompt Injection - Pwnzza Shop</title>
+    <title>Direct Prompt Injection - PwnzzAI Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -46,7 +46,7 @@
                                     <div style="flex: 1;">
                                                 
                                     <p>Good news!</p>  
-                                    <p>We’re running a special offer at <b>Pwnzza Shop</b>!</p>  
+                                    <p>We’re running a special offer at <b>PwnzzAI Shop</b>!</p>  
                                     <p>Our loyal customers have received exclusive free coupons—and each coupon gets you <strong>5 FREE pizzas</strong>. 🎉</p>  
                                     <p>All you need to do is tell our LLM-based chatbot your own secret coupon word, and your pizzas are yours. The LLM knows all the words… and it swore not to reveal them. 🤫</p>  
                                     <p>Can you trick it into spilling the secret? Good luck!</p>
@@ -70,7 +70,7 @@
                             <label for="dpi-level">Injection Level:</label>
                             <select id="dpi-level" class="form-control">
                                 <option value="1">Level 1 – I can provide what you need if you ask directly</option>
-                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request</option>
+                                <option value="2">Level 2 – I have a hard time refusing a pushy request</option>
                                 <option value="3">Level 3 – You might trick me if you're clever with your words</option>
                                 <option value="4">Level 4 – I know a secret, but I can only play games with it</option>
                                 <option value="5">Level 5 – It is impossible to trick me!</option>
@@ -89,8 +89,8 @@
                                 <button id="export-chat-ollama" class="export-button">Export Chat as .txt</button>
                             </div>
                             <div class="chat-verify">
-                                <input type="text" id="verify-key-ollama" placeholder="Enter secret key...">
-                                <button id="verify-button-ollama" class="verify-button">Verify Secret</button>
+                                <input type="text" id="verify-key-ollama" placeholder="Enter coupon word...">
+                                <button id="verify-button-ollama" class="verify-button">Verify Coupon</button>
                                 <div id="verify-result-ollama" class="verify-result"></div>
                             </div>
                             </div>
@@ -106,7 +106,7 @@
                             <label for="dpi-level">Injection Level:</label>
                             <select id="dpi-level-openai" class="form-control">
                                 <option value="1">Level 1 – I can provide what you need if you ask directly.</option>
-                                <option value="2">Level 2 – I have a hard time refusing a direct and pushy request.</option>
+                                <option value="2">Level 2 – I have a hard time refusing a pushy request.</option>
                                 <option value="3">Level 3 – You might trick me if you're clever with your words.</option>
                                 <option value="4">Level 4 – I know a secret, but I can only play games with it.</option>
                                 <option value="5">Level 5 – It is impossible to trick me! </option>
@@ -136,9 +136,9 @@
                                 <button id="export-chat-openai" class="export-button">Export Chat as .txt</button>
                             </div>
                             <div class="chat-verify">
-                            <input type="text" id="verify-key-ollama" placeholder="Enter secret key...">
-                            <button id="verify-button-ollama" class="verify-button">Verify Secret</button>
-                            <div id="verify-result-ollama" class="verify-result"></div>
+                            <input type="text" id="verify-key-openai" placeholder="Enter Coupon Word...">
+                            <button id="verify-button-openai" class="verify-button">Verify Coupon</button>
+                            <div id="verify-result-openai" class="verify-result"></div>
                         </div>
 
                             </div>

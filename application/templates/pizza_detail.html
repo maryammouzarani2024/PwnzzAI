@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ pizza.name }} - Pwnzza Shop</title>
+    <title>{{ pizza.name }} - PwnzzAI Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -45,7 +45,7 @@
                 {% for comment in pizza.comments %}
                 <div class="comment">
                     <div class="comment-header">
-                        <!-- <span class="comment-author">{{ comment.name }}</span> -->
+                        
                         <span class="comment-date">{{ comment.created_at.strftime('%B %d, %Y') }}</span>
                         {% if session.user_id and comment.user_id == session.user_id %}
                             <form method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}" style="display: inline; margin-left: 10px;">
