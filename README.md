@@ -1,4 +1,4 @@
-# 🍕 Welcome to PwnzzAI Shop (pronounced /pəʊnzɑː/) – The Vulnerable Pizza Shop! 💻
+# 🍕 Welcome to PwnzzAI(/pəʊnzɑː/) Shop – The Vulnerable Pizza Shop! 💻
 
 <img src="application/static/img/index.png" alt="PwnzzAI Shop" width="200">
 
