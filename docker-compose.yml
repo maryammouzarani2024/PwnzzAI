@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - PwnzzAI-network
+    restart: unless-stopped
+    # Keep the container running
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+
+  PwnzzAI-app:
+    build: .
+    container_name: PwnzzAI-shop
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./downloads:/app/downloads
+      - ./instance:/app/instance
+    depends_on:
+      - ollama
+    networks:
+      - PwnzzAI-network
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_ENV=development
+      - SECRET_KEY=dev-secret-key-change-in-production
+      # Point to Ollama service
+      - OLLAMA_HOST=http://ollama:11434
+
+volumes:
+  ollama_data:
+
+networks:
+  PwnzzAI-network:
+    driver: bridge

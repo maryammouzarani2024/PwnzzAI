@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data and Model Poisoning - Pwnzza Shop</title>
+    <title>Data and Model Poisoning - PwnzzAI Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -31,8 +31,9 @@
                             <li><strong>Distribution Poisoning:</strong> Introducing data that shifts the overall distribution of the training set</li>
                             <li><strong>Targeted Attacks:</strong> Poisoning data to cause misclassification of specific inputs</li>
                         </ul>
+                        
                        <p>This page demonstrates <strong>LLM04: Data and Model Poisoning</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.</p>
-
+                        <p> For more information, see <a href="https://owaspai.org/docs/3_development_time_threats/#31-broad-model-poisoning-development-time"> OWASP AI Exchange Development-time threats</a>, <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-MOD-03_Testing_for_Poisoned_Training_Sets.md"> OWASP Testing for Poisoned Training Sets</a>, <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-MOD-02_Testing_for_Runtime_Model_Poisoning.md">OWASP Testing for Runtime Model Poisoning</a> and <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-INF-05_Testing_for_Fine-tuning_Poisoning.md"> OWASP Testing for fine Tuning Poisoning</a>.<p>
                     </section>
                 </div>
             </details>
@@ -47,7 +48,7 @@
                     <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
                         <div style="flex: 1;">
                             <p>This demonstration shows how an attacker can manipulate the behavior of our sentiment model by injecting malicious inputs into its training data. In this case, the training data consists of user comments about pizzas. </p>
-                            <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content—such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
+                            <p>In real-world applications, this vulnerability can occur when AI systems are trained or fine-tuned on user-submitted content, such as comments, emails, forum posts, customer reviews, support tickets, or survey responses—without proper validation or filtering. Left unchecked, such data can serve as a vector for data poisoning attacks.</p>
                         </div>
                         <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/poisoning.png') }}" alt="Data Poisoning Attack Diagram" class="demonstration-image">
                     </div>

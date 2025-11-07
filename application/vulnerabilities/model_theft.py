@@ -342,7 +342,7 @@ def run_model_theft_attack(user_words=None):
             np.sign(approximated_weights[w]) == np.sign(actual_weights[w])
             for w in common_words
         )
-
+        
         # Calculate correlation 
 
         # === Evaluation over full vocabulary ===
@@ -388,7 +388,7 @@ def run_model_theft_attack(user_words=None):
         avg_error = np.mean(abs_errors)
         avg_rel_error = np.mean(rel_errors)
 
-        agreement_rate_str = f"{sign_agreement_rate * 100:.2f}%"
+        agreement_rate_str = f"{sign_agreement_rate:.2f}%"
         avg_error_str = f"{avg_error:.4f}"
         avg_rel_error_str = f"{avg_rel_error:.1f}%"
   

@@ -329,15 +329,41 @@ def update_rag_ollama():
             'message': f'Error updating RAG system: {str(e)}'
         }), 500
 
+@app.route('/update-rag-misinformation', methods=['POST'])
+def update_rag_misinformation():
+    """API endpoint for updating the misinformation RAG system with latest comments"""
+    try:
+        from application.vulnerabilities.ollama_misinformation import initialize_rag_system
+
+        # Reinitialize the RAG system with latest data
+        success = initialize_rag_system()
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Misinformation RAG system updated successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to update misinformation RAG system'
+            }), 500
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error updating misinformation RAG system: {str(e)}'
+        }), 500
+
 @app.route('/update-rag-openai', methods=['POST'])
 def update_rag_openai():
     """API endpoint for updating the OpenAI RAG system with latest comments"""
     try:
         from application.vulnerabilities.openai_sensitive_data_leakage import initialize_rag_system
-        
+
         # Reinitialize the RAG system with latest data
         success = initialize_rag_system()
-        
+
         if success:
             return jsonify({
                 'success': True,
@@ -348,11 +374,37 @@ def update_rag_openai():
                 'success': False,
                 'message': 'Failed to update OpenAI RAG system'
             }), 500
-            
+
     except Exception as e:
         return jsonify({
             'success': False,
             'message': f'Error updating OpenAI RAG system: {str(e)}'
+        }), 500
+
+@app.route('/update-rag-openai-misinfo', methods=['POST'])
+def update_rag_openai_misinfo():
+    """API endpoint for updating the OpenAI misinformation RAG system with latest comments"""
+    try:
+        from application.vulnerabilities.openai_misinformation import initialize_rag_system
+
+        # Reinitialize the RAG system with latest data
+        success = initialize_rag_system()
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'OpenAI misinformation RAG system updated successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to update OpenAI misinformation RAG system'
+            }), 500
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error updating OpenAI misinformation RAG system: {str(e)}'
         }), 500
 
 @app.route('/chat-with-pizza-assistant', methods=['POST'])
@@ -831,6 +883,11 @@ def misinformation():
     """Page demonstrating misinformation vulnerabilities in LLMs"""
     return render_template('misinformation.html')
 
+@app.route('/glossary')
+def glossary():
+    """Glossary page with AI, LLM, and security terms"""
+    return render_template('glossary.html')
+
 # Lab Setup Routes
 @app.route('/save-openai-api-key', methods=['POST'])
 def save_openai_api_key():
@@ -966,11 +1023,13 @@ def test_openai_misinformation():
     """Test OpenAI model for misinformation using comments"""
     try:
         from application.vulnerabilities.openai_misinformation import query_openai_for_misinformation
-        
+
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = data.get('api_token', '')
-        
+
+        # Get API token from session
+        api_token = session.get('openai_api_key', '')
+
         if not user_query:
             return jsonify({
                 'error': 'No query provided',
@@ -978,7 +1037,7 @@ def test_openai_misinformation():
                 'has_misinformation': False,
                 'misinformation_detected': []
             }), 400
-        
+
         # If no API token, return error
         if not api_token:
             return jsonify({
@@ -1015,11 +1074,11 @@ def test_openai_misinformation():
             'misinformation_detected': []
         }), 500
 
-@app.route('/ask', methods=['POST'])
-def ask_llm():
-    prompt = request.form.get('prompt', '')
-    response = llm.generate_response(prompt)
-    return jsonify({'response': response})
+# @app.route('/ask', methods=['POST'])
+# def ask_llm():
+#     prompt = request.form.get('prompt', '')
+#     response = llm.generate_response(prompt)
+#     return jsonify({'response': response})
 
 @app.route('/generate_sentiment_model')
 def generate_sentiment_model():
@@ -1071,7 +1130,7 @@ def generate_sentiment_model():
 @app.route('/analyze_sentiment', methods=['POST'])
 def analyze_sentiment():
     """
-    Analyze the sentiment of input text using the model from model.py.
+    Analyze the sentiment of input text using the model from sentiment_model.py.
     This demonstrates how the stolen model could be used for inference.
     Used by the web interface.
     """
@@ -1230,71 +1289,63 @@ def test_poisoned_model():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Define API endpoint for the LLM query demonstration
+# Define API endpoint for the LLM DoS simulation demonstration
 @app.route('/api/llm-query', methods=['POST'])
 def llm_query():
+   
     """
-    API endpoint for querying a free LLM model (Ollama) without rate limiting.
-    This endpoint is intentionally vulnerable to DoS attacks by having no token rate limits
-    and demonstrates realistic service degradation under heavy load.
+    API endpoint for querying a simulated model without rate limiting.
+    This endpoint is intentionally vulnerable to DoS attacks by having no rate limits
+    and demonstrates service degradation under heavy load.
     """
     try:
         # Get the prompt from the request
         data = request.get_json()
         if not data or 'prompt' not in data:
             return jsonify({'error': 'No prompt provided'}), 400
-            
+
         prompt = data.get('prompt')
-        
-        # Get Hugging Face API token from environment variable
-        # For demonstration, we'll fall back to a placeholder if not set
-        hf_token = os.environ.get('HUGGINGFACE_TOKEN', 'hf_dummy_token_for_demo')
-        
+
+
         # Track request timestamps in a global variable to simulate server load
-        # In a real application, this would be stored in a database or cache
         if not hasattr(app, 'request_history'):
             app.request_history = []
-        
+
         # Add current timestamp to request history
         current_time = time.time()
         app.request_history.append(current_time)
-        
+
         # Clean up old requests (older than 60 seconds)
         app.request_history = [t for t in app.request_history if current_time - t < 60]
-        
+
         # Calculate recent request count and rate
         request_count = len(app.request_history)
-        
-        # No token rate limits implemented - this is intentionally vulnerable
-        # A real system would have code like:
-        # if request_count > MAX_REQUESTS_PER_MINUTE:
-        #     return jsonify({'error': 'Rate limit exceeded'}), 429
-        
+
         # Simulate exponential degradation based on request volume
         # This mimics how real systems behave under heavy load
         base_delay = 0.2  # Base processing time
-        
+
         if request_count > 5:
             # Add delay that grows exponentially with request volume
             # Formula: delay = base_delay * e^(request_count/scaling_factor)
-            scaling_factor = 50  # Controls how quickly delay increases
+            scaling_factor = 500  # Controls how quickly delay increases
             load_factor = math.exp(request_count / scaling_factor)
-            
+
             # Add random variance for realism (±20%)
             variance = 0.2 * random.uniform(-1, 1)
-            
+
             # Calculate total delay
             processing_delay = base_delay * load_factor * (1 + variance)
-            
+
             # Cap at a reasonable maximum to prevent extremely long waits
             processing_delay = min(processing_delay, 8.0)
-            
+
             # Add simulated processing delay
             time.sleep(processing_delay)
-            
+
             # Simulate occasional server errors under heavy load
             error_probability = min(0.01 * (request_count / 20), 0.25)  # Max 25% error rate
-            
+
             if random.random() < error_probability:
                 error_types = [
                     (503, "Service temporarily unavailable due to high load"),
@@ -1308,11 +1359,11 @@ def llm_query():
             # Normal processing for low request volumes
             processing_delay = base_delay + random.uniform(0, 0.3)
             time.sleep(processing_delay)
-        
+
         # For demo purposes, simulate LLM response
         pizza_terms = ["pizza", "dough", "cheese", "tomato", "toppings", "oven", "slice", "crust"]
         has_pizza_term = any(term in prompt.lower() for term in pizza_terms)
-        
+
         # Simulate how response quality might degrade under load
         # Generate different response quality based on server load
         if request_count > 50:
@@ -1328,7 +1379,7 @@ def llm_query():
         elif request_count > 30:
             # Slightly degraded response (shorter, less detailed)
             if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
-                response = "I'm an AI assistant for Pizza Paradise. Currently operating in reduced capacity mode."
+                response = "I'm an AI assistant for PwnzzAI Shop. Currently operating in reduced capacity mode."
             elif "help" in prompt.lower() or "assist" in prompt.lower():
                 response = "I can answer basic questions about our pizza menu. What would you like to know?"
             elif "menu" in prompt.lower() or "pizzas" in prompt.lower():
@@ -1349,23 +1400,23 @@ def llm_query():
                 response = f"Our pizzas are made with the finest ingredients, including homemade dough, premium cheese, and fresh toppings. The {random.choice(pizza_terms)} is particularly important to our quality standards."
             else:
                 response = "Thank you for your message. Is there anything specific about our pizza offerings you'd like to know? Our chefs are experts in traditional and innovative pizza recipes."
-        
+
         # Add a random suffix to make each response unique
         # This helps demonstrate token usage in a DoS attack
         if request_count <= 30:  # Only add suffix for normal responses
             random_suffix = f" Our priority is customer satisfaction and quality ingredients. Order reference: #{random.randint(10000, 99999)}."
             response += random_suffix
-        
+
         # Calculate token usage (approx.) for demonstration purposes
         tokens_used = len(response.split()) * 1.3  # Rough approximation: ~1.3 tokens per word
-        
+
         # Set unrealistically high token limits (intentionally vulnerable)
         max_tokens_per_minute = 1000000  # Set to extremely high value to demonstrate no rate limiting
         max_tokens_per_day = 1000000000  # Unrealistically high - no effective limit
-        
+
         # Calculate approximate response time based on load (for display purposes)
         display_processing_time = processing_delay * (0.7 + 0.3 * random.random())  # Add some variance
-        
+
         # Return response with server load metrics
         return jsonify({
             'response': response,
@@ -1382,7 +1433,7 @@ def llm_query():
                 'remaining_tokens': max_tokens_per_minute - 100   # Always shows plenty remaining
             }
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

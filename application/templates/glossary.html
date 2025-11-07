@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glossary - PwnzzAI Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>AI & LLM Security Glossary</h1>
+
+        <div class="glossary-content">
+            <section class="section-box">
+                <p class="intro-text">
+                    This glossary provides brief definitions of key technical terms related to AI, large language models (LLMs), and their associated security issues discussed in this application.
+                </p>
+            </section>
+
+            <div class="glossary-grid">
+                <!-- AI Terms -->
+                <div class="glossary-section">
+                    <h2><i class="fas "></i> Artificial Intelligence & Machine Learning</h2>
+
+                    <div class="term-card">
+                        <h3>Artificial Intelligence (AI)</h3>
+                        <p>Computer systems that can perform tasks typically requiring human intelligence, such as understanding language, recognizing patterns, and making decisions.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Large Language Model (LLM)</h3>
+                        <p>AI models trained on vast amounts of text data to understand and generate human-like text. Examples include GPT, Claude, and Llama.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Machine Learning (ML)</h3>
+                        <p>A subset of AI where systems learn patterns from data without explicit programming. Related to <a href="{{ url_for('model_theft_main') }}">Model Theft</a> and <a href="{{ url_for('data_poisoning_main') }}">Data Poisoning</a> vulnerabilities.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Training Data</h3>
+                        <p>The dataset used to teach an AI model. Can be exploited through <a href="{{ url_for('data_poisoning_main') }}">Data Poisoning</a> attacks.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Model Weights</h3>
+                        <p>Numerical parameters learned during training that define a model's behavior. Target of <a href="{{ url_for('model_theft_main') }}">Model Theft</a> attacks.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>RAG (Retrieval-Augmented Generation)</h3>
+                        <p>A technique that enhances LLM responses by retrieving relevant information from external sources before generating answers. Used in several demos including <a href="{{ url_for('misinformation') }}">Misinformation</a> and <a href="{{ url_for('sensitive_info') }}">Sensitive Information Disclosure</a>.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Prompt</h3>
+                        <p>The input text given to an LLM to generate a response. Can be manipulated through <a href="{{ url_for('direct_prompt_injection') }}">Direct Prompt Injection</a> or <a href="{{ url_for('indirect_prompt_injection') }}">Indirect Prompt Injection</a>.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Hallucination</h3>
+                        <p>When an LLM generates false or misleading information presented as fact. Related to <a href="{{ url_for('misinformation') }}">Misinformation</a> vulnerabilities.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Sentiment Model</h3>
+                        <p>A machine learning model that analyzes text to determine emotional tone (positive, negative, or neutral). Used in this app to demonstrate <a href="{{ url_for('model_theft_main') }}">Model Theft</a> and <a href="{{ url_for('data_poisoning_main') }}">Data Poisoning</a> attacks.</p>
+                    </div>
+                </div>
+
+                <!-- Technical Terms -->
+                <div class="glossary-section">
+                    <h2><i class="fas"></i> Technical Concepts</h2>
+
+                    <div class="term-card">
+                        <h3>API (Application Programming Interface)</h3>
+                        <p>A way for different software systems to communicate. LLM APIs allow applications to access AI models programmatically.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Tokens</h3>
+                        <p>Units of text that LLMs process (roughly 0.75 words per token). Important for understanding <a href="{{ url_for('dos_attack') }}">Unbounded Consumption</a> attacks.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Fine-tuning</h3>
+                        <p>Additional training of a pre-trained model on specific data. Can be exploited through <a href="{{ url_for('data_poisoning_main') }}">Data Poisoning</a>.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Context Window</h3>
+                        <p>The amount of text an LLM can process at once. Related to <a href="{{ url_for('dos_attack') }}">Unbounded Consumption</a> vulnerabilities.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Embeddings</h3>
+                        <p>Numerical representations of text used by LLMs. Often used in RAG systems for <a href="{{ url_for('sensitive_info') }}">information retrieval</a>.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Plugin / Function Calling</h3>
+                        <p>Allowing LLMs to execute external functions or tools. Can lead to <a href="{{ url_for('insecure_plugin') }}">Insecure Output Handling</a> and <a href="{{ url_for('excessive_agency') }}">Excessive Agency</a> issues.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>OWASP Top 10 for LLMs</h3>
+                        <p>A list of the most critical security risks for applications using Large Language Models, published by the Open Web Application Security Project.</p>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Rate Limiting</h3>
+                        <p>Restricting the number of requests to prevent abuse. Essential mitigation for <a href="{{ url_for('dos_attack') }}">Unbounded Consumption</a> attacks.</p>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section-box resources-section">
+                <h2><i class="fas "></i> Additional Resources</h2>
+                <ul>
+                    <li><a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/" target="_blank">OWASP Top 10 for LLM Applications</a></li>
+                    <li><a href="https://owaspai.org/" target="_blank">OWASP AI Exchange</a></li>
+                    <li><a href="{{ url_for('basics') }}">Lab Setup - Configure your testing environment</a></li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <style>
+        .glossary-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 1200px) {
+            .glossary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .glossary-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .glossary-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .glossary-section h2 i {
+            color: #e74c3c;
+        }
+
+        .term-card {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .term-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .term-card h3 {
+            color: #2c3e50;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .term-card p {
+            margin: 0;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .term-card a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .term-card a:hover {
+            color: #c0392b;
+            text-decoration: underline;
+        }
+
+        .resources-section {
+            margin-top: 2rem;
+        }
+
+        .resources-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resources-section h2 i {
+            color: #e74c3c;
+        }
+
+        .resources-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .resources-section li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .resources-section li:before {
+            content: "\f0c1";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: #e74c3c;
+        }
+
+        .resources-section a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .resources-section a:hover {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .glossary-section {
+                padding: 1rem;
+            }
+
+            .term-card {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+
+</body>
+</html>
