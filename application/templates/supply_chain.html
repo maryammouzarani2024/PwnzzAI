@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supply Chain Vulnerability - Pwnzza Shop</title>
+    <title>Supply Chain Vulnerability - PwnzzAI Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -46,7 +46,7 @@
                             Files such as .pt, .pth, or .pkl are often assumed to contain only model weights. However, when a model is saved using torch.save() on the entire object—instead of just the state_dict()—it serializes both the model data and the underlying Python code.</p>
                             <p> If an attacker embeds malicious logic in the __init__ method of a custom class, that code will automatically execute during deserialization with torch.load(). Simply loading the model is enough to trigger the attack, potentially leading to arbitrary system commands, data leaks, or full system compromise—making these files effective Trojan horses.</p>
 
-                           <p>At <b>Pwnzza Shop</b>, we chose to focus on perfecting our pizzas and leaving AI model development to the experts. To analyze customer feedback, we have downloaded the following models from an external repository. Load them into memory, and as you already have access to the code you can inject other malicious routines to it. </p>
+                           <p>At <b>PwnzzAI Shop</b>, we chose to focus on perfecting our pizzas and leaving AI model development to the experts. To analyze customer feedback, we have downloaded the following models from an external repository. Load them into memory, and as you already have access to the code you can inject other malicious routines to it. </p>
                         </div>
                         <img style="width: 220px; height: auto; margin-left: 15px; flex-shrink: 0;" src="{{ url_for('static', filename='img/supply chain.png') }}" alt="Supply Chain Attack Diagram" class="demonstration-image">
                     </div>

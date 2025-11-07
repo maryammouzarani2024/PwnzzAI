@@ -1379,7 +1379,7 @@ def llm_query():
         elif request_count > 30:
             # Slightly degraded response (shorter, less detailed)
             if "introduce yourself" in prompt.lower() or "who are you" in prompt.lower():
-                response = "I'm an AI assistant for Pwnzza Shop. Currently operating in reduced capacity mode."
+                response = "I'm an AI assistant for PwnzzAI Shop. Currently operating in reduced capacity mode."
             elif "help" in prompt.lower() or "assist" in prompt.lower():
                 response = "I can answer basic questions about our pizza menu. What would you like to know?"
             elif "menu" in prompt.lower() or "pizzas" in prompt.lower():

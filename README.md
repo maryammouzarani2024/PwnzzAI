@@ -1,8 +1,8 @@
-# 🍕 Welcome to Pwnzza Shop – The Vulnerable Pizza Shop! 💻
+# 🍕 Welcome to PwnzzAI Shop (pronounced /pəʊnzɑː/) – The Vulnerable Pizza Shop! 💻
 
-<img src="application/static/img/index.png" alt="Pwnzza Shop" width="200">
+<img src="application/static/img/index.png" alt="PwnzzAI Shop" width="200">
 
-At Pwnzza Shop, every slice comes with a side of **AI security lessons**. This educational web app serves up the **OWASP Top 10 LLM Vulnerabilities** in a fun, hands-on environment.
+At PwnzzAI Shop, every slice comes with a side of **AI security lessons**. This educational web app serves up the **OWASP Top 10 LLM Vulnerabilities** in a fun, hands-on environment.
 
 Just as the wrong ingredient can ruin a pizza, the wrong prompt or poor design can expose AI systems to serious risks, like data leaks, model theft, or unauthorized access.
 
@@ -10,7 +10,7 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
 
 ## About
 
-Pwnzza Shop is a deliberately vulnerable Large Language Model application. This is an educational Flask web application demonstrating various LLM security vulnerabilities based on OWASP Top 10 for LLMs through an interactive pizza shop. 
+PwnzzAI Shop is a deliberately vulnerable Large Language Model application. This is an educational Flask web application demonstrating various LLM security vulnerabilities based on OWASP Top 10 for LLMs through an interactive pizza shop. 
 
 ## Setup Instructions
 
@@ -82,6 +82,7 @@ This application demonstrates the complete OWASP Top 10 for Large Language Model
 
 ### Model Support:
 - **OpenAI Models**: GPT-3.5/GPT-4 demonstrations via API
-- **Ollama Models**: Local model testing for privacy-conscious learning
+- **Ollama Models**: Free models, such as Mistral 7B and LLaMA 3.2 1B, are accessible through Ollama.
 
+✅ Improvements: 
 **⚠️ Educational Purpose Only**: This application contains intentional security vulnerabilities. Do not use in production environments.
