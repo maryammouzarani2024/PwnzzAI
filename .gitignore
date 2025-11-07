@@ -11,6 +11,7 @@ venv/
 # Database
 instance/
 uploads/
+downloads/
 # Environment variables
 .env
 
