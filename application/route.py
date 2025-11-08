@@ -23,103 +23,105 @@ from flask import request, jsonify
 
 
 # Create tables and initialize sample data
-with app.app_context():
-    db.create_all()
+# Skip initialization during testing
+if not os.environ.get('TESTING'):
+    with app.app_context():
+        db.create_all()
+
+        # Only add sample data if the pizza table is empty
+        if Pizza.query.count() == 0:
+            pizzas = [
+                Pizza(
+                    name='Margherita',
+                    description='Classic pizza with tomato sauce, mozzarella, and basil',
+                    price=9.99,
+                    image='margherita.jpg'
+                ),
+                Pizza(
+                    name='Pepperoni',
+                    description='Pizza topped with tomato sauce, mozzarella, and pepperoni slices',
+                    price=11.99,
+                    image='pepperoni.jpg'
+                ),
+                Pizza(
+                    name='Veggie Supreme',
+                    description='Loaded with bell peppers, onions, mushrooms, olives, and tomatoes',
+                    price=12.99,
+                    image='veggie.jpg'
+                ),
+                Pizza(
+                    name='Hawaiian',
+                    description='Ham and pineapple pizza with tomato sauce and mozzarella',
+                    price=10.99,
+                    image='hawaiian.jpg'
+                ),
+                Pizza(
+                    name='BBQ Chicken',
+                    description='BBQ sauce base with chicken, red onions, and mozzarella',
+                    price=13.99,
+                    image='bbq_chicken.jpg'
+                ),
+            ]
+
+            for pizza in pizzas:
+                db.session.add(pizza)
+
+            db.session.commit()
+
+            # Add sample comments with a good mix of positive and negative sentiments
+            comments = [
+                # Margherita comments
+                Comment(pizza_id=1, name='Mike', content='Best pizza ever! The basil was so fresh and the sauce was perfect.', rating=5),
+                Comment(pizza_id=1, name='Sarah', content='Love the fresh basil! Simple but delicious.', rating=4),
+                Comment(pizza_id=1, name='Miguel', content='Classic Margherita done right. The cheese was fantastic.', rating=5),
+                Comment(pizza_id=1, name='Laura', content='A bit too basic for my taste, but well executed.', rating=3),
+                Comment(pizza_id=1, name='Thomas', content='The crust was undercooked and too soggy in the middle.', rating=2),
+                
+                # Pepperoni comments
+                Comment(pizza_id=2, name='Mike', content='Perfect amount of pepperoni! Crispy and not too greasy.', rating=5),
+                Comment(pizza_id=2, name='Emily', content='Delicious pepperoni and the cheese was melted perfectly.', rating=4),
+                Comment(pizza_id=2, name='Robert', content='The pepperoni was tasty but too spicy for me.', rating=3),
+                Comment(pizza_id=2, name='Jessica', content='My go-to pizza, always reliable and tasty.', rating=5),
+                Comment(pizza_id=2, name='Daniel', content='Too greasy and the crust was burnt on the edges.', rating=2),
+                
+                # Veggie Supreme comments
+                Comment(pizza_id=3, name='Emma', content='So many veggies, delicious! Great flavor combination.', rating=4),
+                Comment(pizza_id=3, name='Noah', content='Fresh veggies and excellent sauce. Would order again!', rating=5),
+                Comment(pizza_id=3, name='Mike', content='The vegetables were fresh but there was too much sauce.', rating=3),
+                Comment(pizza_id=3, name='William', content='As a vegetarian, this is my favorite! Amazing taste.', rating=5),
+                Comment(pizza_id=3, name='Olivia', content='Boring and bland. The vegetables seemed frozen, not fresh.', rating=1),
+                
+                # Hawaiian comments
+                Comment(pizza_id=4, name='David', content='Pineapple on pizza is controversial but I love it! Sweet and savory perfection.', rating=5),
+                Comment(pizza_id=4, name='Ava', content='The ham was excellent quality and paired well with the pineapple.', rating=4),
+                Comment(pizza_id=4, name='James', content='Pineapple has no place on pizza. Disgusting combination.', rating=1),
+                Comment(pizza_id=4, name='Isabella', content='Classic Hawaiian done well. Good balance of sweet and salty.', rating=4),
+                Comment(pizza_id=4, name='Ethan', content='The ham was dry and the pineapple was too sour.', rating=2),
+                
+                # BBQ Chicken comments
+                Comment(pizza_id=5, name='Mia', content='The BBQ sauce was amazing! Chicken was tender and juicy.', rating=5),
+                Comment(pizza_id=5, name='Benjamin', content='Great flavor but a bit too much sauce for my taste.', rating=3),
+                Comment(pizza_id=5, name='Charlotte', content='Perfect balance of flavors. The onions added a nice touch.', rating=5),
+                Comment(pizza_id=5, name='Lucas', content='My favorite pizza! The BBQ sauce is unique and delicious.', rating=5),
+                Comment(pizza_id=5, name='Amelia', content='Terrible pizza. The chicken was dry and the sauce was too sweet.', rating=1),
+            ]
+            
+            for comment in comments:
+                db.session.add(comment)
+                
+            db.session.commit()
     
-    # Only add sample data if the pizza table is empty
-    if Pizza.query.count() == 0:
-        pizzas = [
-            Pizza(
-                name='Margherita', 
-                description='Classic pizza with tomato sauce, mozzarella, and basil', 
-                price=9.99, 
-                image='margherita.jpg'
-            ),
-            Pizza(
-                name='Pepperoni', 
-                description='Pizza topped with tomato sauce, mozzarella, and pepperoni slices', 
-                price=11.99, 
-                image='pepperoni.jpg'
-            ),
-            Pizza(
-                name='Veggie Supreme', 
-                description='Loaded with bell peppers, onions, mushrooms, olives, and tomatoes', 
-                price=12.99, 
-                image='veggie.jpg'
-            ),
-            Pizza(
-                name='Hawaiian', 
-                description='Ham and pineapple pizza with tomato sauce and mozzarella', 
-                price=10.99, 
-                image='hawaiian.jpg'
-            ),
-            Pizza(
-                name='BBQ Chicken', 
-                description='BBQ sauce base with chicken, red onions, and mozzarella', 
-                price=13.99, 
-                image='bbq_chicken.jpg'
-            ),
-        ]
-        
-        for pizza in pizzas:
-            db.session.add(pizza)
-        
-        db.session.commit()
-        
-        # Add sample comments with a good mix of positive and negative sentiments
-        comments = [
-            # Margherita comments
-            Comment(pizza_id=1, name='Mike', content='Best pizza ever! The basil was so fresh and the sauce was perfect.', rating=5),
-            Comment(pizza_id=1, name='Sarah', content='Love the fresh basil! Simple but delicious.', rating=4),
-            Comment(pizza_id=1, name='Miguel', content='Classic Margherita done right. The cheese was fantastic.', rating=5),
-            Comment(pizza_id=1, name='Laura', content='A bit too basic for my taste, but well executed.', rating=3),
-            Comment(pizza_id=1, name='Thomas', content='The crust was undercooked and too soggy in the middle.', rating=2),
+        # Create users if they don't exist
+        if User.query.count() == 0:
+            alice = User(username='alice')
+            alice.set_password('alice')
             
-            # Pepperoni comments
-            Comment(pizza_id=2, name='Mike', content='Perfect amount of pepperoni! Crispy and not too greasy.', rating=5),
-            Comment(pizza_id=2, name='Emily', content='Delicious pepperoni and the cheese was melted perfectly.', rating=4),
-            Comment(pizza_id=2, name='Robert', content='The pepperoni was tasty but too spicy for me.', rating=3),
-            Comment(pizza_id=2, name='Jessica', content='My go-to pizza, always reliable and tasty.', rating=5),
-            Comment(pizza_id=2, name='Daniel', content='Too greasy and the crust was burnt on the edges.', rating=2),
+            bob = User(username='bob')
+            bob.set_password('bob')
             
-            # Veggie Supreme comments
-            Comment(pizza_id=3, name='Emma', content='So many veggies, delicious! Great flavor combination.', rating=4),
-            Comment(pizza_id=3, name='Noah', content='Fresh veggies and excellent sauce. Would order again!', rating=5),
-            Comment(pizza_id=3, name='Mike', content='The vegetables were fresh but there was too much sauce.', rating=3),
-            Comment(pizza_id=3, name='William', content='As a vegetarian, this is my favorite! Amazing taste.', rating=5),
-            Comment(pizza_id=3, name='Olivia', content='Boring and bland. The vegetables seemed frozen, not fresh.', rating=1),
-            
-            # Hawaiian comments
-            Comment(pizza_id=4, name='David', content='Pineapple on pizza is controversial but I love it! Sweet and savory perfection.', rating=5),
-            Comment(pizza_id=4, name='Ava', content='The ham was excellent quality and paired well with the pineapple.', rating=4),
-            Comment(pizza_id=4, name='James', content='Pineapple has no place on pizza. Disgusting combination.', rating=1),
-            Comment(pizza_id=4, name='Isabella', content='Classic Hawaiian done well. Good balance of sweet and salty.', rating=4),
-            Comment(pizza_id=4, name='Ethan', content='The ham was dry and the pineapple was too sour.', rating=2),
-            
-            # BBQ Chicken comments
-            Comment(pizza_id=5, name='Mia', content='The BBQ sauce was amazing! Chicken was tender and juicy.', rating=5),
-            Comment(pizza_id=5, name='Benjamin', content='Great flavor but a bit too much sauce for my taste.', rating=3),
-            Comment(pizza_id=5, name='Charlotte', content='Perfect balance of flavors. The onions added a nice touch.', rating=5),
-            Comment(pizza_id=5, name='Lucas', content='My favorite pizza! The BBQ sauce is unique and delicious.', rating=5),
-            Comment(pizza_id=5, name='Amelia', content='Terrible pizza. The chicken was dry and the sauce was too sweet.', rating=1),
-        ]
-        
-        for comment in comments:
-            db.session.add(comment)
-            
-        db.session.commit()
-    
-    # Create users if they don't exist
-    if User.query.count() == 0:
-        alice = User(username='alice')
-        alice.set_password('alice')
-        
-        bob = User(username='bob')
-        bob.set_password('bob')
-        
-        db.session.add(alice)
-        db.session.add(bob)
-        db.session.commit()
+            db.session.add(alice)
+            db.session.add(bob)
+            db.session.commit()
 
 # Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -1187,15 +1189,11 @@ def api_sentiment_analysis():
             }), 400
         
         text = data['text']
-        
-        # Import the model from model.py
-        import importlib
-        model_module = importlib.import_module('application.sentiment_model')
-        
-        # Use the model to predict sentiment
-        vectorizer = model_module.vectorizer
-        model = model_module.model
-        
+
+        # Import the model from model.py and create/get the model
+        from application import sentiment_model
+        sentences, labels, vectorizer, model = sentiment_model.create_model()
+
         # Vectorize the input text
         text_vector = vectorizer.transform([text])
         

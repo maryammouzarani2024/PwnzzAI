@@ -283,9 +283,19 @@ def run_model_theft_attack(user_words=None):
             # Detailed logging for each word
             logs.append(f"Word: '{word}' - Actual: {actual:.4f}, Approximated: {approx:.4f}, Error: {error:.4f} ({percent_error:.1f}%)")
     
+    # Initialize default values for metrics
+    correlation = 0.0
+    agreement_rate_str = "0.00%"
+    avg_error_str = "0.0000"
+    avg_rel_error_str = "0.0%"
+
     # Calculate comprehensive evaluation metrics
     common_words = [w for w in approximated_weights if w in model_weights]
-    if common_words:
+
+    if not approximated_weights:
+        logs.append("\nNo words were probed. Unable to calculate theft metrics.")
+        logs.append("Provide some words to probe the model.")
+    elif common_words:
         # 1. Absolute Error
         errors = [abs(approximated_weights[w] - model_weights[w]) for w in common_words]
         avg_error = sum(errors) / len(errors)
