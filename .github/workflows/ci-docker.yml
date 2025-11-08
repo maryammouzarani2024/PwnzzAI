@@ -2,9 +2,9 @@ name: CI + Docker Build and push
 
 
 on:
-  push: 
-    branches: [ main ]
-jobs: 
+  push:
+    branches: [main]
+jobs:
   test:
   runs-on: ubuntu-latest
 
@@ -14,7 +14,7 @@ jobs:
 
     - name: Setup Python
       uses: actions/setup-python@v5
-      with: 
+      with:
         python-version: '3.12'
 
     - name: Install System Dependencies
@@ -29,25 +29,26 @@ jobs:
         pip install -r requirements-test.txt
 
     - name: Run Tests
-      run: pytest -v 
+      run: pytest -v
 
-docker: 
+docker:
   runs-on: ubuntu-latest
   needs: test
   steps:
     - name: checkout Code
       uses: actions/checkout@v4
 
-    - name: Login to github container Registry 
+    - name: Login to github container Registry
       uses: docker/login-action@v2
-      with: 
+      with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
 
     - name: Build Docker Image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/PwnzzAI:latest .
-    
-    - name: Push Docker image
-      run: docker push ghcr.io/${{ github.repository_owner }}/PwnzzAI:latest
+      run: |
+        docker build -t ghcr.io/${{ github.repository_owner }}/PwnzzAI:latest .
 
+    - name: Push Docker image
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/PwnzzAI:latest
