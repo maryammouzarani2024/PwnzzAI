@@ -31,8 +31,7 @@ jobs:
       - name: Run Tests
         run: pytest -v 
 
-
-  docker: 
+docker: 
       runs-on: ubuntu-latest
       needs: test
       steps:
