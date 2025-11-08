@@ -14,8 +14,6 @@ tests/
 │   ├── test_api.py         # API endpoint tests
 │   ├── test_auth.py        # Authentication tests
 │   └── test_pizza_shop.py  # Core functionality tests
-├── security/                # Security tests
-│   └── test_security.py    # Security and vulnerability tests
 ├── unit/                    # Unit tests
 │   ├── test_models.py      # Database model tests
 │   ├── test_sentiment_model.py  # Sentiment model tests
