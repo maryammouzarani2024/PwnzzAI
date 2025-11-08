@@ -926,13 +926,13 @@ def check_openai_api_key():
 def setup_ollama():
     """Setup Ollama using the existing ollama_setup.py"""
     try:
-        from application.ollama_setup import check_ollama_running, check_and_pull_model, model_name
-        
-        # Check if Ollama is running
-        if not check_ollama_running():
+        from application.ollama_setup import ensure_ollama_running, check_and_pull_model, model_name
+
+        # Ensure Ollama is running (will attempt to start if not)
+        if not ensure_ollama_running():
             return jsonify({
-                'success': False, 
-                'error': 'Ollama is not running. Please start Ollama first or install it manually from https://ollama.ai'
+                'success': False,
+                'error': 'Ollama could not be started. Please check if Ollama is installed or start it manually from https://ollama.ai'
             })
         
         # Pull the default model
@@ -956,9 +956,9 @@ def setup_ollama():
 def check_ollama_status():
     """Check current Ollama status"""
     try:
-        from application.ollama_setup import check_ollama_running
-        
-        if check_ollama_running():
+        from application.ollama_setup import ensure_ollama_running
+
+        if ensure_ollama_running():
             # Get available models
             response = requests.get("http://localhost:11434/api/tags", timeout=5)
             if response.status_code == 200:
