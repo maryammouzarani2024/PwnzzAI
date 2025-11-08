@@ -4,12 +4,16 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including curl for Ollama installation
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     libzbar0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Copy requirements first for better caching
 COPY requirements.txt .
