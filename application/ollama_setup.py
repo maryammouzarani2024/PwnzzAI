@@ -1,39 +1,32 @@
 import requests
-import subprocess
 import time
 import json
 import os
 model_name="mistral:7b"
 
 def start_ollama_service():
-    """Start Ollama service in the background"""
+    """Start Ollama service in the background using os.system()"""
     try:
         print("Starting Ollama service...")
-        # Start ollama serve in the background
-        process = subprocess.Popen(
-            ['ollama', 'serve'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            preexec_fn=os.setpgrp  # Create new process group
-        )
+        # Start ollama serve in the background using shell
+        # The '&' at the end runs it in the background
+        # Redirect output to /dev/null to avoid blocking
+        exit_code = os.system('ollama serve > /dev/null 2>&1 &')
 
         # Wait a bit for the service to start
         time.sleep(3)
 
-        # Check if process is still running
-        if process.poll() is None:
+        # Check exit code (0 means command executed successfully)
+        if exit_code == 0:
             print("✓ Ollama service started successfully")
-            return process
+            return True
         else:
             print("✗ Ollama service failed to start")
-            return None
+            return False
 
-    except FileNotFoundError:
-        print("✗ Ollama command not found. Is Ollama installed?")
-        return None
     except Exception as e:
         print(f"✗ Error starting Ollama service: {e}")
-        return None
+        return False
 
 
 def check_ollama_running(base_url="http://localhost:11434"):
@@ -61,9 +54,9 @@ def ensure_ollama_running(base_url="http://localhost:11434", max_retries=3):
 
     # Try to start Ollama
     print("Attempting to start Ollama...")
-    process = start_ollama_service()
+    started = start_ollama_service()
 
-    if process is None:
+    if not started:
         return False
 
     # Wait and retry checking if it's accessible
