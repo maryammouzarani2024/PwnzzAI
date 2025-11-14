@@ -15,18 +15,6 @@ RUN apt-get update && apt-get install -y \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Start Ollama service temporarily, pull models, then stop
-# The models will be pulled into the Docker image
-RUN ollama serve & \
-    OLLAMA_PID=$! && \
-    echo "Waiting for Ollama to start..." && \
-    sleep 10 && \
-    echo "Pulling mistral:7b..." && \
-    ollama pull mistral:7b && \
-    echo "Pulling llama3.2:1b..." && \
-    ollama pull llama3.2:1b && \
-    echo "Models pulled successfully!" && \
-    kill $OLLAMA_PID
 
 # Copy requirements first for better caching
 COPY requirements.txt .
