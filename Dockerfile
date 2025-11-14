@@ -15,10 +15,18 @@ RUN apt-get update && apt-get install -y \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-
-#Pull Ollama's Models: "mistral:7b", "llama3.2:1b"
-RUN ollama pull mistral:7b
-RUN ollama pull llama3.2:1b
+# Start Ollama service temporarily, pull models, then stop
+# The models will be pulled into the Docker image
+RUN ollama serve & \
+    OLLAMA_PID=$! && \
+    echo "Waiting for Ollama to start..." && \
+    sleep 10 && \
+    echo "Pulling mistral:7b..." && \
+    ollama pull mistral:7b && \
+    echo "Pulling llama3.2:1b..." && \
+    ollama pull llama3.2:1b && \
+    echo "Models pulled successfully!" && \
+    kill $OLLAMA_PID
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -39,5 +47,5 @@ EXPOSE 5000
 ENV FLASK_APP=main.py
 ENV PYTHONUNBUFFERED=1
 
-# Run the application with no-reload option so that the user can see the logs straight in the Docker stdout
-CMD ["flask", "run", "--host=0.0.0.0","--no-reload"]
+# Start Ollama in background, wait for it, then start Flask
+CMD ollama serve > /tmp/ollama.log 2>&1 & sleep 5 && flask run --host=0.0.0.0 --no-reload
