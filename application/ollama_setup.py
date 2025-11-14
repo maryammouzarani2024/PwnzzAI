@@ -86,10 +86,11 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
     """Check if model exists locally, pull if not"""
     for model in model_name:
         
+        print("checking model: ", model)
         # First, check if model exists locally
         if is_model_available(model, base_url):
             print(f"✓ {model} is already available")
-            return True
+            continue
         
         # Model doesn't exist, pull it
         print(f"✗ {model} not found, pulling...")
@@ -97,7 +98,7 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
         try:
             pull_url = f"{base_url}/api/pull"
             payload = {
-                "name": model,
+                "model": model,
                 "stream": True  # Show progress
             }
             
@@ -131,7 +132,7 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
                         print(f"✗ Error: {data['error']}")
                         return False
             
-            return True
+            
             
         except requests.exceptions.Timeout:
             print(f"✗ Timeout while pulling {model}")
@@ -139,3 +140,4 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
         except Exception as e:
             print(f"✗ Error pulling {model}: {e}")
             return False
+    return True
