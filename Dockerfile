@@ -15,6 +15,11 @@ RUN apt-get update && apt-get install -y \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
+
+#Pull Ollama's Models: "mistral:7b", "llama3.2:1b"
+RUN ollama pull mistral:7b
+RUN ollama pull llama3.2:1b
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 
@@ -34,5 +39,5 @@ EXPOSE 5000
 ENV FLASK_APP=main.py
 ENV PYTHONUNBUFFERED=1
 
-# Run the application
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Run the application with no-reload option so that the user can see the logs straight in the Docker stdout
+CMD ["flask", "run", "--host=0.0.0.0","--no-reload"]
