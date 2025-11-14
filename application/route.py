@@ -937,16 +937,16 @@ def setup_ollama():
         
         # Pull the default model
         success = check_and_pull_model(model_name)
-        
+        model_list=" , ".join(model_name)
         if success:
             return jsonify({
                 'success': True, 
-                'message': f'Ollama setup completed! Model {model_name} is ready to use.'
+                'message': f'Ollama setup completed! Model {model_list} is ready to use.'
             })
         else:
             return jsonify({
                 'success': False, 
-                'error': f'Failed to pull model {model_name}. Please check your internet connection and try again.'
+                'error': f'Failed to pull model {model_list}. Please check your internet connection and try again.'
             })
             
     except Exception as e:

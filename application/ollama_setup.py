@@ -124,7 +124,7 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
                     # Check if complete
                     elif 'success' in status.lower() or data.get('status') == 'success':
                         print(f"✓ {model} pulled successfully!")
-                        return True
+                        
                     
                     # Handle errors
                     elif 'error' in data:
