@@ -1,6 +1,4 @@
 # CODEOWNERS file for PwnzzAI Shop
-# This file defines who gets automatically requested for review when PRs are opened
-# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for everything in the repo
 * @maryammouzarani2024
