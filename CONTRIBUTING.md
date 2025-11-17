@@ -362,6 +362,7 @@ You can contribute to PwnzzAI Shop in several ways:
 4. **Configure Environment**:
    - Copy `.flaskenv` if needed
 
+
 5. **Run the Application**:
    ```bash
    flask run
