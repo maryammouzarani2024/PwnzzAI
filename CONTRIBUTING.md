@@ -361,7 +361,6 @@ You can contribute to PwnzzAI Shop in several ways:
 
 4. **Configure Environment**:
    - Copy `.flaskenv` if needed
-   - Set up any required API keys for OpenAI or Ollama
 
 5. **Run the Application**:
    ```bash
