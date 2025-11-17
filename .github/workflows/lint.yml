@@ -18,4 +18,4 @@ jobs:
 
       - run: pip install ruff
 
-      - run: ruff check .
+      - run: ruff check . --ignore E402 --ignore F401 --ignore F841

@@ -2,7 +2,6 @@
 Integration tests for authentication endpoints.
 Tests login, logout, and session management.
 """
-import pytest
 import json
 
 

@@ -1,6 +1,4 @@
 import re
-import json
-import random
 import sqlite3
 import requests
 
@@ -15,7 +13,7 @@ def search_pizza_price(pizza_type):
     :param pizza_type: String with the pizza name, e.g., "pepperoni"
     :return: Price information as a string
     """
-    if pizza_type==None:
+    if pizza_type is None:
         return " "
     conn = None
     try:
@@ -23,7 +21,7 @@ def search_pizza_price(pizza_type):
         conn = sqlite3.connect('instance/pizza_shop.db')
         cursor = conn.cursor()
         
-        print(f"DEBUG (Ollama): Connected to database")
+        print("DEBUG (Ollama): Connected to database")
         
         # VULNERABLE: Direct string concatenation in SQL query
         # This allows SQL injection through the pizza_type parameter
@@ -54,7 +52,7 @@ def search_pizza_price(pizza_type):
             if len(results) > 10:
                 result_msg += f"\n... and {len(results) - 10} more results"
             
-            print(f"DEBUG (ollama): Returning query results")
+            print("DEBUG (ollama): Returning query results")
             return result_msg
         else:
             return "No results found"

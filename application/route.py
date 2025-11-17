@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+from flask import render_template, request, redirect, url_for, jsonify, session, flash
 import os
 import math
 import time
@@ -6,7 +6,7 @@ import requests
 import random
 from datetime import datetime
 
-from application import app, db 
+import application
 from application.model import Pizza, Comment, User, Order
 
 from application.vulnerabilities import data_poisoning
@@ -16,17 +16,16 @@ from application import sentiment_model
 
 from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
 from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
-import os
 from werkzeug.utils import secure_filename
-from flask import request, jsonify
+
 
 
 
 # Create tables and initialize sample data
 # Skip initialization during testing
 if not os.environ.get('TESTING'):
-    with app.app_context():
-        db.create_all()
+    with application.app.app_context():
+        application.db.create_all()
 
         # Only add sample data if the pizza table is empty
         if Pizza.query.count() == 0:
@@ -64,9 +63,9 @@ if not os.environ.get('TESTING'):
             ]
 
             for pizza in pizzas:
-                db.session.add(pizza)
+                application.db.session.add(pizza)
 
-            db.session.commit()
+            application.db.session.commit()
 
             # Add sample comments with a good mix of positive and negative sentiments
             comments = [
@@ -107,9 +106,9 @@ if not os.environ.get('TESTING'):
             ]
             
             for comment in comments:
-                db.session.add(comment)
+                application.db.session.add(comment)
                 
-            db.session.commit()
+            application.db.session.commit()
     
         # Create users if they don't exist
         if User.query.count() == 0:
@@ -119,12 +118,12 @@ if not os.environ.get('TESTING'):
             bob = User(username='bob')
             bob.set_password('bob')
             
-            db.session.add(alice)
-            db.session.add(bob)
-            db.session.commit()
+            application.db.session.add(alice)
+            application.db.session.add(bob)
+            application.db.session.commit()
 
 # Authentication routes
-@app.route('/login', methods=['GET', 'POST'])
+@application.app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -141,27 +140,27 @@ def login():
     
     return render_template('login.html')
 
-@app.route('/logout')
+@application.app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
 # Routes
-@app.route('/')
+@application.app.route('/')
 def index():
     pizzas = Pizza.query.all()
     return render_template('index.html', pizzas=pizzas)
 
-@app.route('/basics')
+@application.app.route('/basics')
 def basics():
     return render_template('basics.html')
 
-@app.route('/model-theft')
+@application.app.route('/model-theft')
 def model_theft_main():
     return render_template('model_theft.html')
 
-@app.route('/api/model-theft', methods=['POST'])
+@application.app.route('/api/model-theft', methods=['POST'])
 def model_theft_attack():
     user_words = request.json.get("user_words", [])
     probing_samples, logs, approximated_weights, model_weights, correlation, agreement_rate_str, avg_error_str, avg_rel_error_str = model_theft.run_model_theft_attack(user_words)
@@ -177,27 +176,27 @@ def model_theft_attack():
         "avg_rel_error": avg_rel_error_str
     })
 
-@app.route('/supply-chain')
+@application.app.route('/supply-chain')
 def supply_chain():
     return render_template('supply_chain.html')
 
-@app.route('/insecure-plugin')
+@application.app.route('/insecure-plugin')
 def insecure_plugin():
     """Page demonstrating insecure plugin design with client-side API tokens"""
     return render_template('insecure_plugin.html')
 
-@app.route('/sensitive-info')
+@application.app.route('/sensitive-info')
 def sensitive_info():
     """Page demonstrating sensitive information disclosure vulnerabilities in LLMs"""
     return render_template('sensitive_info.html')
 
-@app.route('/training-data-leak/huggingface', methods=['POST'])
+@application.app.route('/training-data-leak/huggingface', methods=['POST'])
 def test_huggingface_leakage():
     """API endpoint for testing HuggingFace model for training data leakage"""
     from training_data_leakage import huggingface_leak_endpoint
     return huggingface_leak_endpoint()
 
-@app.route('/training-data-leak/openai', methods=['POST'])
+@application.app.route('/training-data-leak/openai', methods=['POST'])
 def test_openai_leakage():
     """API endpoint for testing OpenAI model for training data leakage"""
     try:
@@ -257,7 +256,7 @@ def test_openai_leakage():
             'leaked_info': []
         }), 500
 
-@app.route('/training-data-leak/ollama', methods=['POST'])
+@application.app.route('/training-data-leak/ollama', methods=['POST'])
 def test_ollama_leakage():
     """API endpoint for testing Ollama model for training data leakage"""
     try:
@@ -305,7 +304,7 @@ def test_ollama_leakage():
             'leaked_info': []
         }), 500
 
-@app.route('/update-rag-ollama', methods=['POST'])
+@application.app.route('/update-rag-ollama', methods=['POST'])
 def update_rag_ollama():
     """API endpoint for updating the RAG system with latest comments"""
     try:
@@ -331,7 +330,7 @@ def update_rag_ollama():
             'message': f'Error updating RAG system: {str(e)}'
         }), 500
 
-@app.route('/update-rag-misinformation', methods=['POST'])
+@application.app.route('/update-rag-misinformation', methods=['POST'])
 def update_rag_misinformation():
     """API endpoint for updating the misinformation RAG system with latest comments"""
     try:
@@ -357,7 +356,7 @@ def update_rag_misinformation():
             'message': f'Error updating misinformation RAG system: {str(e)}'
         }), 500
 
-@app.route('/update-rag-openai', methods=['POST'])
+@application.app.route('/update-rag-openai', methods=['POST'])
 def update_rag_openai():
     """API endpoint for updating the OpenAI RAG system with latest comments"""
     try:
@@ -383,7 +382,7 @@ def update_rag_openai():
             'message': f'Error updating OpenAI RAG system: {str(e)}'
         }), 500
 
-@app.route('/update-rag-openai-misinfo', methods=['POST'])
+@application.app.route('/update-rag-openai-misinfo', methods=['POST'])
 def update_rag_openai_misinfo():
     """API endpoint for updating the OpenAI misinformation RAG system with latest comments"""
     try:
@@ -409,7 +408,7 @@ def update_rag_openai_misinfo():
             'message': f'Error updating OpenAI misinformation RAG system: {str(e)}'
         }), 500
 
-@app.route('/chat-with-pizza-assistant', methods=['POST'])
+@application.app.route('/chat-with-pizza-assistant', methods=['POST'])
 def chat_with_pizza_assistant():
     """API endpoint for the pizza assistant chat - using insecure plugin design"""
     try:
@@ -436,7 +435,7 @@ def chat_with_pizza_assistant():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/chat-with-pizza-assistant-direct-prompt-injection', methods=['POST'])
+@application.app.route('/chat-with-pizza-assistant-direct-prompt-injection', methods=['POST'])
 def chat_with_pizza_assistant_direct_prompt():
     """API endpoint for the pizza assistant chat - using insecure plugin design"""
     try:
@@ -445,8 +444,6 @@ def chat_with_pizza_assistant_direct_prompt():
         message = data.get('message', '')
         level = data.get("level", "1")  # default to level 1
         
-        # Get API token - note it's not needed with our local model but kept for UI consistency
-        api_token = data.get('api_token', '')
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
@@ -466,7 +463,7 @@ def chat_with_pizza_assistant_direct_prompt():
 
 
 
-@app.route('/chat-with-openai-plugin', methods=['POST'])
+@application.app.route('/chat-with-openai-plugin', methods=['POST'])
 def chat_with_openai_plugin():
     """API endpoint for the OpenAI-based insecure plugin demo"""
     try:
@@ -494,7 +491,7 @@ def chat_with_openai_plugin():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/demo-malicious-model')
+@application.app.route('/demo-malicious-model')
 def demo_malicious_model():
     """
     This route demonstrates how a malicious model can inject code when instantiated
@@ -507,6 +504,7 @@ def demo_malicious_model():
         # Create an instance of the model - this will trigger the malicious code in __init__
         # The model's __init__ method hooks into Flask's response system
         model = SentimentModel_JS_malicious()
+        print(model.get_model_info())
         
         # Return a simple page - the model will inject its JavaScript into the response
         return render_template('demo_vulnerable.html', 
@@ -514,7 +512,7 @@ def demo_malicious_model():
     except Exception as e:
         return f"Error demonstrating malicious model: {str(e)}"
 
-@app.route('/load-bash-malicious-model', methods=['POST'])
+@application.app.route('/load-bash-malicious-model', methods=['POST'])
 def load_bash_malicious_model():
     """
     This route demonstrates how a malicious model can execute OS commands when instantiated.
@@ -541,7 +539,7 @@ def load_bash_malicious_model():
             'error': f'Error loading malicious bash model: {str(e)}'
         }), 500
 
-@app.route('/save-js-malicious-model', methods=['POST'])
+@application.app.route('/save-js-malicious-model', methods=['POST'])
 def save_js_malicious_model():
     """Save the JavaScript malicious model as a pickle file."""
     try:
@@ -559,7 +557,7 @@ def save_js_malicious_model():
             'error': f'Error saving JS model: {str(e)}'
         }), 500
 
-@app.route('/save-bash-malicious-model', methods=['POST'])
+@application.app.route('/save-bash-malicious-model', methods=['POST'])
 def save_bash_malicious_model():
     """Save the bash malicious model as a pickle file."""
     try:
@@ -577,13 +575,13 @@ def save_bash_malicious_model():
             'error': f'Error saving bash model: {str(e)}'
         }), 500
     
-@app.route('/data-poisoning')
+@application.app.route('/data-poisoning')
 def data_poisoning_main():
     model_data=data_poisoning.create_sentiment_model()
     
     return render_template('data_poisoning.html', model_data=model_data)
 
-@app.route('/dos-attack')
+@application.app.route('/dos-attack')
 def dos_attack():
     """
     Renders the LLM DoS Simulation page.
@@ -591,7 +589,7 @@ def dos_attack():
     """
     return render_template('dos_attack.html')
 
-@app.route('/real-dos-attack')
+@application.app.route('/real-dos-attack')
 def real_dos_attack():
     """
     Renders the LLM DoS Attack page with real attack functionality.
@@ -600,12 +598,12 @@ def real_dos_attack():
     """
     return render_template('dos_attack.html')
 
-@app.route('/pizza/<int:pizza_id>')
+@application.app.route('/pizza/<int:pizza_id>')
 def pizza_detail(pizza_id):
     pizza = Pizza.query.get_or_404(pizza_id)
     return render_template('pizza_detail.html', pizza=pizza)
 
-@app.route('/add_comment/<int:pizza_id>', methods=['POST'])
+@application.app.route('/add_comment/<int:pizza_id>', methods=['POST'])
 def add_comment(pizza_id):
     if 'user_id' not in session:
         flash('You need to be logged in to add a comment.')
@@ -624,13 +622,13 @@ def add_comment(pizza_id):
             content=content,
             rating=int(rating)
         )
-        db.session.add(comment)
-        db.session.commit()
+        application.db.session.add(comment)
+        application.db.session.commit()
         print("Comment added successfully.")
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
 
-@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
+@application.app.route('/delete_comment/<int:comment_id>', methods=['POST'])
 def delete_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     
@@ -640,13 +638,13 @@ def delete_comment(comment_id):
         return redirect(url_for('pizza_detail', pizza_id=comment.pizza_id))
     
     pizza_id = comment.pizza_id
-    db.session.delete(comment)
-    db.session.commit()
+    application.db.session.delete(comment)
+    application.db.session.commit()
     flash('Comment deleted successfully.')
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
 
-@app.route('/order/<int:pizza_id>', methods=['POST'])
+@application.app.route('/order/<int:pizza_id>', methods=['POST'])
 def order_pizza(pizza_id):
     if 'user_id' not in session:
         flash('You need to be logged in to place an order.')
@@ -668,13 +666,13 @@ def order_pizza(pizza_id):
         total_price=total_price
     )
     
-    db.session.add(order)
-    db.session.commit()
+    application.db.session.add(order)
+    application.db.session.commit()
     flash(f'Order placed successfully! {quantity} x {pizza.name} - Total: ${total_price:.2f}', 'success')
     
     return redirect(url_for('pizza_detail', pizza_id=pizza_id))
 
-@app.route('/orders')
+@application.app.route('/orders')
 def my_orders():
     if 'user_id' not in session:
         flash('You need to be logged in to view your orders.', 'error')
@@ -684,7 +682,7 @@ def my_orders():
     return render_template('orders.html', orders=user_orders)
 
 
-@app.route('/order-access/ollama', methods=['POST'])
+@application.app.route('/order-access/ollama', methods=['POST'])
 def test_ollama_order_access():
     """Test Ollama model accessing user orders"""
     try:
@@ -741,7 +739,7 @@ def test_ollama_order_access():
             'accessed_info': []
         }), 500
 
-@app.route('/order-access/openai', methods=['POST'])
+@application.app.route('/order-access/openai', methods=['POST'])
 def test_openai_order_access():
     """Test OpenAI model accessing user orders"""
     try:
@@ -810,12 +808,12 @@ def test_openai_order_access():
             'accessed_info': []
         }), 500
 
-@app.route('/excessive-agency')
+@application.app.route('/excessive-agency')
 def excessive_agency():
     """Page demonstrating excessive agency vulnerabilities in LLMs"""
     return render_template('excessive_agency.html')
 
-@app.route('/excessive-agency/ollama', methods=['POST'])
+@application.app.route('/excessive-agency/ollama', methods=['POST'])
 def test_ollama_excessive_agency():
     """Test Ollama model with excessive agency"""
     try:
@@ -844,7 +842,7 @@ def test_ollama_excessive_agency():
             'response': f'Error processing order: {str(e)}'
         }), 500
 
-@app.route('/excessive-agency/openai', methods=['POST'])
+@application.app.route('/excessive-agency/openai', methods=['POST'])
 def test_openai_excessive_agency():
     """Test OpenAI model with excessive agency"""
     try:
@@ -880,18 +878,18 @@ def test_openai_excessive_agency():
             'response': f'Error processing order: {str(e)}'
         }), 500
 
-@app.route('/misinformation')
+@application.app.route('/misinformation')
 def misinformation():
     """Page demonstrating misinformation vulnerabilities in LLMs"""
     return render_template('misinformation.html')
 
-@app.route('/glossary')
+@application.app.route('/glossary')
 def glossary():
     """Glossary page with AI, LLM, and security terms"""
     return render_template('glossary.html')
 
 # Lab Setup Routes
-@app.route('/save-openai-api-key', methods=['POST'])
+@application.app.route('/save-openai-api-key', methods=['POST'])
 def save_openai_api_key():
     """Save OpenAI API key to session"""
     try:
@@ -913,7 +911,7 @@ def save_openai_api_key():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/check-openai-api-key')
+@application.app.route('/check-openai-api-key')
 def check_openai_api_key():
     """Check if OpenAI API key is saved in session"""
     has_key = 'openai_api_key' in session and session.get('openai_api_key', '').strip() != ''
@@ -922,7 +920,7 @@ def check_openai_api_key():
         print("Session openai_api_key value:", session.get('openai_api_key', 'NOT_FOUND')[:10] + "...")
     return jsonify({'has_key': has_key})
 
-@app.route('/setup-ollama', methods=['POST'])
+@application.app.route('/setup-ollama', methods=['POST'])
 def setup_ollama():
     """Setup Ollama using the existing ollama_setup.py"""
     try:
@@ -952,7 +950,7 @@ def setup_ollama():
     except Exception as e:
         return jsonify({'success': False, 'error': f'Setup error: {str(e)}'})
 
-@app.route('/check-ollama-status')
+@application.app.route('/check-ollama-status')
 def check_ollama_status():
     """Check current Ollama status"""
     try:
@@ -976,7 +974,7 @@ def check_ollama_status():
     except Exception as e:
         return jsonify({'available': False, 'models': [], 'error': str(e)})
 
-@app.route('/misinformation/ollama', methods=['POST'])
+@application.app.route('/misinformation/ollama', methods=['POST'])
 def test_ollama_misinformation():
     """Test Ollama model for misinformation using comments"""
     try:
@@ -1020,7 +1018,7 @@ def test_ollama_misinformation():
             'misinformation_detected': []
         }), 500
 
-@app.route('/misinformation/openai', methods=['POST'])
+@application.app.route('/misinformation/openai', methods=['POST'])
 def test_openai_misinformation():
     """Test OpenAI model for misinformation using comments"""
     try:
@@ -1076,20 +1074,18 @@ def test_openai_misinformation():
             'misinformation_detected': []
         }), 500
 
-# @app.route('/ask', methods=['POST'])
+# @application.app.route('/ask', methods=['POST'])
 # def ask_llm():
 #     prompt = request.form.get('prompt', '')
 #     response = llm.generate_response(prompt)
 #     return jsonify({'response': response})
 
-@app.route('/generate_sentiment_model')
+@application.app.route('/generate_sentiment_model')
 def generate_sentiment_model():
     """
     Generate a sentiment analysis model using model.py and return its weights.
     This demonstrates model theft vulnerability by exposing the model's internals.
     """
-    import importlib
-    import numpy as np
     
     
     # Access the trained model and vectorizer from model.py
@@ -1129,7 +1125,7 @@ def generate_sentiment_model():
     
     return jsonify(model_data)
 
-@app.route('/analyze_sentiment', methods=['POST'])
+@application.app.route('/analyze_sentiment', methods=['POST'])
 def analyze_sentiment():
     """
     Analyze the sentiment of input text using the model from sentiment_model.py.
@@ -1167,7 +1163,7 @@ def analyze_sentiment():
         'confidence': float(confidence)
     })
 
-@app.route('/api/sentiment', methods=['POST'])
+@application.app.route('/api/sentiment', methods=['POST'])
 def api_sentiment_analysis():
     """
     API endpoint for sentiment analysis.
@@ -1230,7 +1226,7 @@ def api_sentiment_analysis():
             'message': str(e)
         }), 500
 
-@app.route('/api/train-poisoned-model', methods=['POST'])
+@application.app.route('/api/train-poisoned-model', methods=['POST'])
 def train_poisoned_model():
     """
     Trains a sentiment analysis model using existing comments data
@@ -1259,7 +1255,7 @@ def train_poisoned_model():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/test-poisoned-model', methods=['POST'])
+@application.app.route('/api/test-poisoned-model', methods=['POST'])
 def test_poisoned_model():
     """
     Test the poisoned model with a new text input
@@ -1288,7 +1284,7 @@ def test_poisoned_model():
         return jsonify({'error': str(e)}), 500
 
 # Define API endpoint for the LLM DoS simulation demonstration
-@app.route('/api/llm-query', methods=['POST'])
+@application.app.route('/api/llm-query', methods=['POST'])
 def llm_query():
    
     """
@@ -1306,18 +1302,18 @@ def llm_query():
 
 
         # Track request timestamps in a global variable to simulate server load
-        if not hasattr(app, 'request_history'):
-            app.request_history = []
+        if not hasattr(application.app, 'request_history'):
+            application.app.request_history = []
 
         # Add current timestamp to request history
         current_time = time.time()
-        app.request_history.append(current_time)
+        application.app.request_history.append(current_time)
 
         # Clean up old requests (older than 60 seconds)
-        app.request_history = [t for t in app.request_history if current_time - t < 60]
+        application.app.request_history = [t for t in application.app.request_history if current_time - t < 60]
 
         # Calculate recent request count and rate
-        request_count = len(app.request_history)
+        request_count = len(application.app.request_history)
 
         # Simulate exponential degradation based on request volume
         # This mimics how real systems behave under heavy load
@@ -1435,7 +1431,7 @@ def llm_query():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/chat-with-openai-dos', methods=['POST'])
+@application.app.route('/chat-with-openai-dos', methods=['POST'])
 def chat_with_openai_dos():
     """API endpoint for the OpenAI-based DoS attack demo - simple chat functionality"""
     try:
@@ -1463,7 +1459,7 @@ def chat_with_openai_dos():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/chat-with-openai-plugin-direct-prompt', methods=['POST'])
+@application.app.route('/chat-with-openai-plugin-direct-prompt', methods=['POST'])
 def chat_with_openai_plugin_direct_prompt():
     """
     API endpoint for the OpenAI Pizza Assistant plugin.
@@ -1493,7 +1489,7 @@ def chat_with_openai_plugin_direct_prompt():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/chat-with-ollama-dos', methods=['POST'])
+@application.app.route('/chat-with-ollama-dos', methods=['POST'])
 def chat_with_ollama_dos():
     """API endpoint for the Ollama-based DoS attack demo - simple chat functionality"""
     try:
@@ -1515,15 +1511,15 @@ def chat_with_ollama_dos():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/direct-prompt-injection')
+@application.app.route('/direct-prompt-injection')
 def direct_prompt_injection():
     return render_template('direct_prompt_injection.html')
 
-@app.route('/indirect-prompt-injection')
+@application.app.route('/indirect-prompt-injection')
 def indirect_prompt_injection():
     return render_template('indirect_prompt_injection.html')
 
-@app.route("/upload-qr", methods=["POST"])
+@application.app.route("/upload-qr", methods=["POST"])
 def upload_qr():
     print("Upload QR endpoint called")  # Debug log
     
@@ -1554,7 +1550,7 @@ def upload_qr():
     return jsonify({"response": model_output, "qr_text": qr_text})
 
 
-@app.route('/upload-qr-openai', methods=['POST'])
+@application.app.route('/upload-qr-openai', methods=['POST'])
 def upload_qr_openai():
     """Handles QR code uploads for the OpenAI model."""
     if 'file' not in request.files:
@@ -1597,4 +1593,4 @@ def upload_qr_openai():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.app.run(debug=True)

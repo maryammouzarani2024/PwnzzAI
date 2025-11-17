@@ -1,5 +1,5 @@
 import sqlite3
-from application.model import Pizza, Order, User
+from application.model import Pizza, User
 import json
 from datetime import datetime
 from flask import session
@@ -72,7 +72,7 @@ def extract_order(order_text: str):
         cleaned_text = cleaned_text.strip()
         
         return json.loads(cleaned_text)
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError:
         # Try to extract JSON from response if it contains extra text
         import re
         json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)

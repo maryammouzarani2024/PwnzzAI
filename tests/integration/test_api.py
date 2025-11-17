@@ -2,7 +2,6 @@
 Integration tests for API endpoints.
 Tests the main API routes for sentiment analysis, model theft, data poisoning, and DoS simulation.
 """
-import pytest
 import json
 
 

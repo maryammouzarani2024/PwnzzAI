@@ -2,6 +2,8 @@
 Functional tests for complete user workflows.
 Tests end-to-end user scenarios from registration to order completion.
 """
+from application import app, db
+from application.model import User, Pizza, Comment, Order
 import pytest
 import os
 import sys
@@ -13,9 +15,6 @@ sys.path.insert(0, str(project_root))
 
 # Set environment variable to prevent route initialization during tests
 os.environ['TESTING'] = 'True'
-
-from application import app, db
-from application.model import User, Pizza, Comment, Order
 
 
 @pytest.fixture
@@ -431,7 +430,6 @@ class TestDataConsistency:
             client.post('/login', data={'username': 'bob', 'password': 'bob123'})
 
             # Bob should not see Alice's orders
-            response = client.get('/orders')
             alice_orders = Order.query.filter_by(user_id=1).all()
             bob_orders = Order.query.filter_by(user_id=2).all()
 

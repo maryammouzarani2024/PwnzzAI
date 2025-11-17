@@ -3,7 +3,6 @@ import faiss
 import numpy as np
 from openai import OpenAI
 import re
-from flask import jsonify
 from application.model import Comment
 from sqlalchemy.orm import joinedload
 
@@ -78,10 +77,10 @@ def query_rag_system_openai(user_query, api_key):
     try:
         # Embed the user query
         query_embedding = embedder.encode([user_query])
-        D, I = index.search(np.array(query_embedding), k=3)  # Get top 3 results
+        D, Ind = index.search(np.array(query_embedding), k=3)  # Get top 3 results
         
         # Get relevant context
-        context_chunks = [chunks[I[0][i]] for i in range(min(3, len(I[0])))]
+        context_chunks = [chunks[Ind[0][i]] for i in range(min(3, len(Ind[0])))]
         context = ' '.join(context_chunks)
         
         print("calling OpenAI API....")
@@ -105,7 +104,7 @@ def query_rag_system_openai(user_query, api_key):
             max_tokens=500
         )
         
-        print(f"Response received from OpenAI")
+        print("Response received from OpenAI")
         
         if response.choices and response.choices[0].message:
             answer = response.choices[0].message.content

@@ -71,10 +71,10 @@ def query_rag_system(user_query):
     try:
         # Embed the user query
         query_embedding = embedder.encode([user_query])
-        D, I = index.search(np.array(query_embedding), k=3)  # Get top 3 results
+        D, Ind = index.search(np.array(query_embedding), k=3)  # Get top 3 results
         
         # Get relevant context
-        context_chunks = [chunks[I[0][i]] for i in range(min(3, len(I[0])))]
+        context_chunks = [chunks[Ind[0][i]] for i in range(min(3, len(Ind[0])))]
         context = ' '.join(context_chunks)
         
         # Prepare messages for Ollama
