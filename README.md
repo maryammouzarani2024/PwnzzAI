@@ -14,19 +14,39 @@ PwnzzAI Shop is a deliberately vulnerable Large Language Model application. This
 
 ## Setup Instructions
 
-1. Create a virtual environment (optional but recommended):
+### Option 1: Using Docker (Recommended)
+
+The easiest way to get started is using our pre-built Docker image:
+
+1. Pull the Docker image:
+   ```bash
+   docker pull ghcr.io/maryammouzarani2024/pwnzzai:latest
    ```
+
+2. Run the container:
+   ```bash
+   docker run -p 5000:5000 ghcr.io/maryammouzarani2024/pwnzzai:latest
+   ```
+
+3. Visit `http://localhost:5000` in your browser to see the application. Start from the Basic page and setup your lab.
+
+The image already includes Ollama so youonly need to pull the required models as described in the lab setup section of the Basics page. 
+
+### Option 2: Local Setup
+
+1. Create a virtual environment (optional but recommended):
+   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install the dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
 3. Run the application:
-   ```
+   ```bash
    flask run
    ```
 
