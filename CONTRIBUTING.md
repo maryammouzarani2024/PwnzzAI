@@ -26,7 +26,7 @@ You can contribute to PwnzzAI Shop in several ways:
 - **New Vulnerabilities**: Add demonstrations of additional LLM vulnerabilities
 - **Documentation**: Improve explanations, tutorials, or documentation
 - **Test Coverage**: Add or improve test cases
-- **Security Mitigations**: Enhance secure implementation examples
+- **Security Mitigations**: Enhance security soutions in the mitigation strategies sections
 - **Model Support**: Add support for additional LLM models
 - **UI/UX Improvements**: Enhance the user interface or user experience
 - **Code Quality**: Refactor code for better maintainability
