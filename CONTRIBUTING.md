@@ -79,7 +79,7 @@ You can contribute to PwnzzAI Shop in several ways:
    ```bash
    sudo apt-get update
    sudo apt-get install -y libzbar0
-   ```
+   ```.
 
 4. **Configure Environment**:
    - Copy `.flaskenv` if needed
