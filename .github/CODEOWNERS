@@ -1,0 +1,25 @@
+# CODEOWNERS file for PwnzzAI Shop
+# This file defines who gets automatically requested for review when PRs are opened
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+* @maryammouzarani2024
+
+# Core application code
+/application/ @maryammouzarani2024
+
+# Configuration files
+/config.py @maryammouzarani2024
+/docker-compose.yml @maryammouzarani2024
+/Dockerfile @maryammouzarani2024
+
+# CI/CD workflows
+/.github/workflows/ @maryammouzarani2024
+
+# Tests
+/tests/ @maryammouzarani2024
+
+# Documentation
+/README.md @maryammouzarani2024
+/CONTRIBUTING.md @maryammouzarani2024
+/LICENSE @maryammouzarani2024
