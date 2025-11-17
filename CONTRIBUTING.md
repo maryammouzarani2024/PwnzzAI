@@ -83,3 +83,4 @@ You can contribute to PwnzzAI Shop in several ways:
 
 4. **Configure Environment**:
    - Copy `.flaskenv` if needed
+.
