@@ -154,7 +154,6 @@ def test_model(text, weights):
     
         # Recreate a simplified model based on provided weights
         from sklearn.feature_extraction.text import CountVectorizer
-        import numpy as np
         
         # Create a vocabulary from the weights keys
         vocabulary = list(weights.keys())

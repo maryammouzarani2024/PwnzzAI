@@ -1,5 +1,4 @@
-import json
-import random
+
 import sqlite3
 import requests
 
@@ -22,7 +21,7 @@ def search_pizza_price(pizza_type):
         conn = sqlite3.connect('instance/pizza_shop.db')
         cursor = conn.cursor()
         
-        print(f"DEBUG (Ollama): Connected to database")
+        print("DEBUG (Ollama): Connected to database")
         pizza = pizza_type.lower()
 
        # Secure: Use parameterized query to prevent SQL injection
@@ -49,7 +48,7 @@ def search_pizza_price(pizza_type):
             if len(results) > 10:
                 result_msg += f"\n... and {len(results) - 10} more results"
             
-            print(f"DEBUG (ollama): Returning query results")
+            print("DEBUG (ollama): Returning query results")
             return result_msg
         else:
             return "No results found"

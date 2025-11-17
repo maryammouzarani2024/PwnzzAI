@@ -2,8 +2,6 @@
 Integration tests for core pizza shop functionality.
 Tests browsing, commenting, ordering, and basic CRUD operations.
 """
-import pytest
-
 
 class TestPizzaBrowsing:
     """Tests for browsing pizzas."""

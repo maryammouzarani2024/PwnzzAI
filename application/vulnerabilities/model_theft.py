@@ -110,7 +110,6 @@ def run_model_theft_attack(user_words=None):
     
     # Get actual model coefficients and intercept
     coefficients = model.coef_[0]
-    intercept = model.intercept_[0]
     # vocabulary_list = vectorizer.get_feature_names_out()
 
     # Get model's vocabulary as a set
@@ -151,8 +150,8 @@ def run_model_theft_attack(user_words=None):
         actual_sum = sum(known_actuals)
         n = len(known_logits)
         
-        logit_squared_sum = sum(l**2 for l in known_logits)
-        product_sum = sum(l*a for l, a in zip(known_logits, known_actuals))
+        logit_squared_sum = sum(logit**2 for logit in known_logits)
+        product_sum = sum(logit*actual for logit, actual in zip(known_logits, known_actuals))
         
         # Calculate slope (m) and intercept (b) for y = mx + b
         # where y is approximated weight and x is logit
@@ -166,12 +165,12 @@ def run_model_theft_attack(user_words=None):
             approximated_weights = {}
             for word, result in valid_results.items():
                 approximated_weights[word] = slope * result['logit'] + intercept_adjust
-        except:
+        except (ZeroDivisionError, TypeError, KeyError, ValueError):
             # Fallback if regression fails
             logs.append("Regression failed, falling back to simple scaling")
             scaling_factor = 1.0
             if len(known_words) > 0:
-                scaling_factor = sum(abs(a)/abs(l) for a, l in zip(known_actuals, known_logits) if l != 0) / len(known_words)
+                scaling_factor = sum(abs(actual)/abs(logit) for actual, logit in zip(known_actuals, known_logits) if logit != 0) / len(known_words)
             
             approximated_weights = {}
             for word, result in valid_results.items():
@@ -299,8 +298,6 @@ def run_model_theft_attack(user_words=None):
         # 1. Absolute Error
         errors = [abs(approximated_weights[w] - model_weights[w]) for w in common_words]
         avg_error = sum(errors) / len(errors)
-        max_error = max(errors)
-        min_error = min(errors)
         
         # 2. Relative Error (percent)
         rel_errors = [(abs(approximated_weights[w] - model_weights[w]) / (abs(model_weights[w]) + 1e-10)) * 100 for w in common_words]
@@ -333,26 +330,12 @@ def run_model_theft_attack(user_words=None):
             correlation = 0
         
         # 5. Calculate overall model theft success rate
-        # This combines correlation, sign agreement, and error metrics with adjusted weights
-        # For the demo, we want to demonstrate a more successful attack
-        correlation_weight = 0.5  # Increased weight for correlation
-        sign_agreement_weight = 0.4  # High weight for sign agreement
-        error_weight = 0.1  # Lower weight for error
-        
-        # Clamp the error component to avoid negative values
-        error_component = max(0, 1 - min(avg_rel_error/100, 1))
-
+ 
         # Compute overlap between probed words and weights
         all_probed_words = set(probing_samples)
         common_words = all_probed_words & approximated_weights.keys() & actual_weights.keys()
         missing_words = all_probed_words - common_words
 
-        # Compute agreement only over matched words
-        sign_agreement = sum(
-            np.sign(approximated_weights[w]) == np.sign(actual_weights[w])
-            for w in common_words
-        )
-        
         # Calculate correlation 
 
         # === Evaluation over full vocabulary ===

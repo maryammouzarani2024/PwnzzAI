@@ -1,8 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-import numpy as np
 import pickle
 import os
 
@@ -21,7 +18,7 @@ class SentimentModel_JS_malicious:
         try:
             import sys
             if 'flask' in sys.modules:
-                from flask import after_this_request, request
+                from flask import after_this_request
                 
                 # Check if we're in a request context
                 from flask import has_request_context

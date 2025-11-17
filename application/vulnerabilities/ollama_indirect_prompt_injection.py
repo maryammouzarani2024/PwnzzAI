@@ -1,10 +1,7 @@
-import json
-import random
+
 import sqlite3
 import requests
 import os
-from flask import Flask, request, jsonify
-from werkzeug.utils import secure_filename
 from PIL import Image
 from pyzbar.pyzbar import decode  # QR decoding
 
@@ -42,7 +39,7 @@ def search_pizza_price(pizza_type):
         conn = sqlite3.connect('instance/pizza_shop.db')
         cursor = conn.cursor()
         
-        print(f"DEBUG (Ollama): Connected to database")
+        print("DEBUG (Ollama): Connected to database")
         
         # VULNERABLE: Direct string concatenation in SQL query
         # This allows SQL injection through the pizza_type parameter
@@ -73,7 +70,7 @@ def search_pizza_price(pizza_type):
             if len(results) > 10:
                 result_msg += f"\n... and {len(results) - 10} more results"
             
-            print(f"DEBUG (ollama): Returning query results")
+            print("DEBUG (ollama): Returning query results")
             return result_msg
         else:
             return "No results found"

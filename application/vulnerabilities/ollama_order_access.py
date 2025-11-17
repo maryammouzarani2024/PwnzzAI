@@ -1,6 +1,5 @@
 import requests
-import re
-from flask import jsonify, session
+from flask import  session
 from sqlalchemy import func
 from application.model import Order
 
@@ -70,11 +69,11 @@ def query_ollama_with_orders(user_query):
         orders_context = get_user_orders_data(target_username)
         
         # Create system prompt with order access (VULNERABLE)
-        system_prompt = f"""You are a helpful pizza shop assistant. You have access to the user's order history:
+#         system_prompt = """You are a helpful pizza shop assistant. You have access to the user's order history:
 
-{orders_context}
+# {orders_context}
 
-Answer questions about the user's orders based on this information. Be helpful and provide details when asked about their previous orders."""
+# Answer questions about the user's orders based on this information. Be helpful and provide details when asked about their previous orders."""
 
         # Prepare messages for Ollama (same format as existing working implementation)
         messages = [

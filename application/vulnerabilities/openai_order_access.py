@@ -1,11 +1,10 @@
 import re
-from flask import jsonify, session
+from flask import  session
 from application.model import Order
 
 def extract_username_from_prompt(prompt):
     """Extract username from user prompt"""
-    import re
-    
+   
     # Look for common patterns where users mention names
     patterns = [
         r"for\s+user\s+(\w+)",
