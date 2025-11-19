@@ -334,7 +334,7 @@ def check_and_pull_model_with_progress(model_names, base_url="http://localhost:1
                              last_progress = percent
                             # Scale progress to current model's portion
                              model_progress = base_progress + (progress_per_model * 0.1) + (percent / 100 * 
-            progress_per_model * 0.8)
+                                progress_per_model * 0.8)
                              yield {
                                  'status': f'Downloading {model}: {percent:.1f}%',
                                  'progress': model_progress
