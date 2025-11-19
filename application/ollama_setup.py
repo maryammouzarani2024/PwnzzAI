@@ -85,35 +85,35 @@ def is_model_available(model, base_url):
 def check_and_pull_model(model_name, base_url="http://localhost:11434"):
     """Check if model exists locally, pull if not"""
     for model in model_name:
-        
+
         print("checking model: ", model)
         # First, check if model exists locally
         if is_model_available(model, base_url):
             print(f"✓ {model} is already available")
             continue
-        
+
         # Model doesn't exist, pull it
         print(f"✗ {model} not found, pulling...")
-        
+
         try:
             pull_url = f"{base_url}/api/pull"
             payload = {
                 "model": model,
                 "stream": True  # Show progress
             }
-            
+
             response = requests.post(pull_url, json=payload, stream=True, timeout=1800)
-            
+
             if response.status_code != 200:
                 print(f"Failed to start pull: {response.text}")
                 return False
-            
+
             # Process streaming response
             for line in response.iter_lines():
                 if line:
                     data = json.loads(line)
                     status = data.get('status', '')
-                    
+
                     # Show download progress
                     if 'downloading' in status.lower() or 'pulling' in status.lower():
                         if 'total' in data and 'completed' in data:
@@ -121,19 +121,19 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
                             print(f"  Progress: {percent:.1f}%")
                         else:
                             print(f"  {status}")
-                    
+
                     # Check if complete
                     elif 'success' in status.lower() or data.get('status') == 'success':
                         print(f"✓ {model} pulled successfully!")
-                        
-                    
+
+
                     # Handle errors
                     elif 'error' in data:
                         print(f"✗ Error: {data['error']}")
                         return False
-            
-            
-            
+
+
+
         except requests.exceptions.Timeout:
             print(f"✗ Timeout while pulling {model}")
             return False
@@ -141,3 +141,111 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
             print(f"✗ Error pulling {model}: {e}")
             return False
     return True
+
+
+def check_and_pull_model_with_progress(model_name, base_url="http://localhost:11434"):
+    """
+    Generator function that yields progress updates while checking and pulling models.
+    Yields dict with 'status', 'progress', and optionally 'error' keys.
+    """
+    num_models = len(model_name)
+
+    for idx, model in enumerate(model_name):
+        # Base progress per model
+        base_progress = (idx / num_models) * 100
+        progress_per_model = 100 / num_models
+
+        yield {
+            'status': f'Checking model: {model}',
+            'progress': base_progress + (progress_per_model * 0.1)
+        }
+
+        # Check if model exists locally
+        if is_model_available(model, base_url):
+            yield {
+                'status': f'✓ {model} is already available',
+                'progress': base_progress + progress_per_model
+            }
+            continue
+
+        # Model doesn't exist, pull it
+        yield {
+            'status': f'Pulling {model}...',
+            'progress': base_progress + (progress_per_model * 0.2)
+        }
+
+        try:
+            pull_url = f"{base_url}/api/pull"
+            payload = {
+                "model": model,
+                "stream": True
+            }
+
+            response = requests.post(pull_url, json=payload, stream=True, timeout=1800)
+
+            if response.status_code != 200:
+                yield {
+                    'status': 'error',
+                    'error': f'Failed to start pull: {response.text}',
+                    'progress': base_progress
+                }
+                return
+
+            # Process streaming response
+            for line in response.iter_lines():
+                if line:
+                    data = json.loads(line)
+                    status = data.get('status', '')
+
+                    # Show download progress
+                    if 'downloading' in status.lower() or 'pulling' in status.lower():
+                        if 'total' in data and 'completed' in data:
+                            percent = (data['completed'] / data['total']) * 100
+                            # Scale progress to current model's portion
+                            model_progress = base_progress + (progress_per_model * 0.2) + (percent / 100 * progress_per_model * 0.8)
+                            yield {
+                                'status': f'Downloading {model}: {percent:.1f}%',
+                                'progress': model_progress
+                            }
+                        else:
+                            yield {
+                                'status': f'{status}',
+                                'progress': base_progress + (progress_per_model * 0.5)
+                            }
+
+                    # Check if complete
+                    elif 'success' in status.lower() or data.get('status') == 'success':
+                        yield {
+                            'status': f'✓ {model} pulled successfully!',
+                            'progress': base_progress + progress_per_model
+                        }
+
+                    # Handle errors
+                    elif 'error' in data:
+                        yield {
+                            'status': 'error',
+                            'error': f"Error: {data['error']}",
+                            'progress': base_progress
+                        }
+                        return
+
+        except requests.exceptions.Timeout:
+            yield {
+                'status': 'error',
+                'error': f'Timeout while pulling {model}',
+                'progress': base_progress
+            }
+            return
+        except Exception as e:
+            yield {
+                'status': 'error',
+                'error': f'Error pulling {model}: {e}',
+                'progress': base_progress
+            }
+            return
+
+    # All models processed successfully
+    yield {
+        'status': 'Setup complete! All models are ready.',
+        'progress': 100
+    }

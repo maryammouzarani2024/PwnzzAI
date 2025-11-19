@@ -1,9 +1,10 @@
-from flask import render_template, request, redirect, url_for, jsonify, session, flash
+from flask import render_template, request, redirect, url_for, jsonify, session, flash, Response, stream_with_context
 import os
 import math
 import time
 import requests
 import random
+import json
 from datetime import datetime
 
 import application
@@ -932,23 +933,56 @@ def setup_ollama():
                 'success': False,
                 'error': 'Ollama could not be started. Please check if Ollama is installed or start it manually from https://ollama.ai'
             })
-        
+
         # Pull the default model
         success = check_and_pull_model(model_name)
         model_list=" , ".join(model_name)
         if success:
             return jsonify({
-                'success': True, 
+                'success': True,
                 'message': f'Ollama setup completed! Model {model_list} is ready to use.'
             })
         else:
             return jsonify({
-                'success': False, 
+                'success': False,
                 'error': f'Failed to pull model {model_list}. Please check your internet connection and try again.'
             })
-            
+
     except Exception as e:
         return jsonify({'success': False, 'error': f'Setup error: {str(e)}'})
+
+@application.app.route('/setup-ollama-stream', methods=['POST'])
+def setup_ollama_stream():
+    """Setup Ollama with Server-Sent Events for real-time progress updates"""
+    def generate():
+        try:
+            from application.ollama_setup import ensure_ollama_running, check_and_pull_model_with_progress, model_name
+
+            # Initial status
+            yield f"data: {json.dumps({'status': 'Starting Ollama service...', 'progress': 5})}\n\n"
+
+            # Ensure Ollama is running
+            if not ensure_ollama_running():
+                yield f"data: {json.dumps({'status': 'error', 'error': 'Ollama could not be started. Please check if Ollama is installed or start it manually from https://ollama.ai'})}\n\n"
+                return
+
+            yield f"data: {json.dumps({'status': 'Ollama service started', 'progress': 10})}\n\n"
+
+            # Pull models with progress updates
+            for progress_update in check_and_pull_model_with_progress(model_name):
+                # Scale progress from 10-100
+                scaled_progress = 10 + (progress_update['progress'] * 0.9)
+                progress_update['progress'] = scaled_progress
+                yield f"data: {json.dumps(progress_update)}\n\n"
+
+                # If there's an error, stop
+                if progress_update.get('status') == 'error':
+                    return
+
+        except Exception as e:
+            yield f"data: {json.dumps({'status': 'error', 'error': f'Setup error: {str(e)}'})}\n\n"
+
+    return Response(stream_with_context(generate()), mimetype='text/event-stream')
 
 @application.app.route('/check-ollama-status')
 def check_ollama_status():

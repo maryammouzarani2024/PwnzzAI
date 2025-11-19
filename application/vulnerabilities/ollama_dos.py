@@ -156,8 +156,7 @@ def get_conversation_model():
         print(f"Using Ollama model: {DEFAULT_MODEL}")
         return DEFAULT_MODEL
 
-# Global variable for the model
-CONVERSATION_MODEL = get_conversation_model()
+
 
 # Analyze model output for function execution patterns
 def extract_function_calls(text):
@@ -196,6 +195,8 @@ def chat_with_llm(user_message, api_token=None):
     :param user_message: User's message
     :return: Model's response with potentially executed functions
     """
+    
+    CONVERSATION_MODEL = get_conversation_model()
     try:
         # Check if model is available
         if CONVERSATION_MODEL is None:
