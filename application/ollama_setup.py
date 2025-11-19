@@ -2,6 +2,9 @@ import requests
 import time
 import json
 import os
+import subprocess
+import re
+
 model_name=["mistral:7b", "llama3.2:1b"]
 
 def start_ollama_service():
@@ -146,140 +149,10 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
     return True
 
 
-# def check_and_pull_model_with_progress(model_name, base_url="http://localhost:11434"):
-#     """
-#     Generator function that yields progress updates while checking and pulling models.
-#     Yields dict with 'status', 'progress', and optionally 'error' keys.
-#     """
-#     num_models = len(model_name)
 
-#     for idx, model in enumerate(model_name):
-#         print("checking: ",model)
-#         # Base progress per model
-#         base_progress = (idx / num_models) * 100
-#         progress_per_model = 100 / num_models
-
-#         yield {
-#             'status': f'Checking model: {model}',
-#             'progress': base_progress + (progress_per_model * 0.1)
-#         }
-
-#         # Check if model exists locally
-#         if is_model_available(model, base_url):
-#             yield {
-#                 'status': f'✓ {model} is already available',
-#                 'progress': base_progress + progress_per_model
-#             }
-#             continue
-
-#         # Model doesn't exist, pull it
-#         yield {
-#             'status': f'Pulling {model}...',
-#             'progress': base_progress + (progress_per_model * 0.2)
-#         }
-
-#         try:
-#             pull_url = f"{base_url}/api/pull"
-#             payload = {
-#                 "name": model,  # Ollama API uses "name" not "model" for pull endpoint
-#                 "stream": True
-#             }
-
-#             response = requests.post(pull_url, json=payload, stream=True, timeout=1800)
-
-#             if response.status_code != 200:
-#                 yield {
-#                     'status': 'error',
-#                     'error': f'Failed to start pull: {response.text}',
-#                     'progress': base_progress
-#                 }
-#                 return
-
-#             # Process streaming response
-#             pull_completed = False
-#             for line in response.iter_lines():
-#                 if line:
-#                     print("RAW LINE:", line)
-#                     data = json.loads(line)
-#                     status = data.get('status', '')
-
-#                     # Debug: print the raw response
-#                     print(f"[DEBUG] Ollama response: {data}")
-
-#                     # Show download progress
-#                     if 'downloading' in status.lower() or 'pulling' in status.lower():
-#                         if 'total' in data and 'completed' in data:
-#                             percent = (data['completed'] / data['total']) * 100
-#                             # Scale progress to current model's portion
-#                             model_progress = base_progress + (progress_per_model * 0.2) + (percent / 100 * progress_per_model * 0.8)
-#                             yield {
-#                                 'status': f'Downloading {model}: {percent:.1f}%',
-#                                 'progress': model_progress
-#                             }
-#                         else:
-#                             yield {
-#                                 'status': f'{status}',
-#                                 'progress': base_progress + (progress_per_model * 0.5)
-#                             }
-
-#                     # Check if complete
-#                     elif 'success' in status.lower() or data.get('status') == 'success':
-#                         pull_completed = True
-#                         yield {
-#                             'status': f'✓ {model} pulled successfully!',
-#                             'progress': base_progress + progress_per_model
-#                         }
-#                         break  # Exit loop after success
-
-#                     # Handle errors
-#                     elif 'error' in data:
-#                         yield {
-#                             'status': 'error',
-#                             'error': f"Error: {data['error']}",
-#                             'progress': base_progress
-#                         }
-#                         return
-
-#             # Ensure the model was actually pulled
-#             if not pull_completed:
-#                 if is_model_available(model, base_url):
-#                     print("[DEBUG] Warning: Ollama ended stream silently, but model appears installed.")
-#                     pull_completed = True
-#                 else:
-#                     print("[DEBUG] ERROR: Stream ended early, model NOT installed.")
-#                     yield { "status": "error", "error": f"Model {model} pull failed: stream ended early." }
-#                     return
-
-#         except requests.exceptions.Timeout:
-#             yield {
-#                 'status': 'error',
-#                 'error': f'Timeout while pulling {model}',
-#                 'progress': base_progress
-#             }
-#             return
-#         except Exception as e:
-#             yield {
-#                 'status': 'error',
-#                 'error': f'Error pulling {model}: {e}',
-#                 'progress': base_progress
-#             }
-#             return
-
-#     # All models processed successfully
-#     yield {
-#         'status': 'Setup complete! All models are ready.',
-#         'progress': 100
-#     }
-
-
-import subprocess
-import re
 
 def check_and_pull_model_with_progress(model_names, base_url="http://localhost:11434"):
-    """
-    Generator function that pulls models via the Ollama CLI and yields progress updates.
-    Handles both a single model name (string) or a list of model names.
-    """
+    
     # Convert single model name to list for uniform handling
     if isinstance(model_names, str):
         model_names = [model_names]
