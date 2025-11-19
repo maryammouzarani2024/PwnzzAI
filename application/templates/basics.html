@@ -459,56 +459,87 @@
             }
         });
         
-        document.getElementById('setup-ollama').addEventListener('click', async function() {
+        document.getElementById('setup-ollama').addEventListener('click', function() {
             const button = this;
             const statusDiv = document.getElementById('ollama-status');
             const progressContainer = document.getElementById('ollama-progress');
             const progressFill = document.querySelector('.progress-fill');
             const progressText = document.querySelector('.progress-text');
-            
+
             // Disable button and show progress
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
             progressContainer.style.display = 'block';
-            progressFill.style.width = '10%';
-            progressText.textContent = 'Starting Ollama setup...';
-            
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Connecting...';
+
             statusDiv.className = 'status-message status-info';
             statusDiv.textContent = 'Setting up Ollama... This may take a few minutes.';
-            
-            try {
-                const response = await fetch('/setup-ollama', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    progressFill.style.width = '100%';
-                    progressText.textContent = 'Setup complete!';
-                    statusDiv.className = 'status-message status-success';
-                    statusDiv.textContent = data.message || 'Ollama setup completed successfully! You can now use free local models.';
-                } else {
+
+            // Create EventSource for Server-Sent Events
+            console.log('Creating EventSource connection to /setup-ollama-stream');
+            const eventSource = new EventSource('/setup-ollama-stream');
+
+            eventSource.onopen = function() {
+                console.log('EventSource connection established');
+                progressText.textContent = 'Connected, starting setup...';
+            };
+
+            eventSource.onmessage = function(event) {
+                console.log('Received message:', event.data);
+                const data = JSON.parse(event.data);
+
+                // Handle error status
+                if (data.status === 'error') {
+                    console.error('Setup error:', data.error);
                     statusDiv.className = 'status-message status-error';
                     statusDiv.textContent = data.error || 'Failed to setup Ollama. Please try manual installation.';
+                    eventSource.close();
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-download"></i> Setup Ollama';
+
+                    // Keep progress visible to show where it failed
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                    }, 5000);
+                    return;
                 }
-            } catch (error) {
+
+                // Update progress bar and text
+                progressFill.style.width = data.progress + '%';
+                progressText.textContent = data.status;
+                statusDiv.textContent = data.status;
+
+                // Check if setup is complete
+                if (data.progress >= 100) {
+                    console.log('Setup complete!');
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.textContent = 'Ollama setup completed successfully! You can now use free local models.';
+                    eventSource.close();
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-download"></i> Setup Ollama';
+
+                    // Hide progress after a delay
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        progressFill.style.width = '0%';
+                    }, 5000);
+                }
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('EventSource error:', error);
+                console.error('EventSource readyState:', eventSource.readyState);
                 statusDiv.className = 'status-message status-error';
-                statusDiv.textContent = 'Error setting up Ollama: ' + error.message;
-            } finally {
-                // Re-enable button
+                statusDiv.textContent = 'Connection error. Please check the browser console for details.';
+                eventSource.close();
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-download"></i> Setup Ollama';
-                
-                // Hide progress after a delay
+
                 setTimeout(() => {
                     progressContainer.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }, 3000);
-            }
+                }, 5000);
+            };
         });
         
         // Check existing setup on page load

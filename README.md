@@ -39,10 +39,13 @@ The image already includes Ollama so youonly need to pull the required models as
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-
-2. Install the dependencies:
+2. Install  the dependencies:
+   
+   (If you do not want to use Ollam, you can remove or comment the line "curl -fsSL https://ollama.com/install.sh | sh" from install.sh)
+   
+   
    ```bash
-   pip install -r requirements.txt
+   ./install.sh
    ```
 
 3. Run the application:
