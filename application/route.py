@@ -951,7 +951,7 @@ def setup_ollama():
     except Exception as e:
         return jsonify({'success': False, 'error': f'Setup error: {str(e)}'})
 
-@application.app.route('/setup-ollama-stream', methods=['POST'])
+@application.app.route('/setup-ollama-stream', methods=['GET'])
 def setup_ollama_stream():
     """Setup Ollama with Server-Sent Events for real-time progress updates"""
     def generate():
@@ -982,7 +982,10 @@ def setup_ollama_stream():
         except Exception as e:
             yield f"data: {json.dumps({'status': 'error', 'error': f'Setup error: {str(e)}'})}\n\n"
 
-    return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    return Response(stream_with_context(generate()), mimetype='text/event-stream', headers={
+        'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no'
+    })
 
 @application.app.route('/check-ollama-status')
 def check_ollama_status():

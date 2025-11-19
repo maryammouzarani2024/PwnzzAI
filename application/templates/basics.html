@@ -477,13 +477,21 @@
             statusDiv.textContent = 'Setting up Ollama... This may take a few minutes.';
 
             // Create EventSource for Server-Sent Events
+            console.log('Creating EventSource connection to /setup-ollama-stream');
             const eventSource = new EventSource('/setup-ollama-stream');
 
+            eventSource.onopen = function() {
+                console.log('EventSource connection established');
+                progressText.textContent = 'Connected, starting setup...';
+            };
+
             eventSource.onmessage = function(event) {
+                console.log('Received message:', event.data);
                 const data = JSON.parse(event.data);
 
                 // Handle error status
                 if (data.status === 'error') {
+                    console.error('Setup error:', data.error);
                     statusDiv.className = 'status-message status-error';
                     statusDiv.textContent = data.error || 'Failed to setup Ollama. Please try manual installation.';
                     eventSource.close();
@@ -504,6 +512,7 @@
 
                 // Check if setup is complete
                 if (data.progress >= 100) {
+                    console.log('Setup complete!');
                     statusDiv.className = 'status-message status-success';
                     statusDiv.textContent = 'Ollama setup completed successfully! You can now use free local models.';
                     eventSource.close();
@@ -520,8 +529,9 @@
 
             eventSource.onerror = function(error) {
                 console.error('EventSource error:', error);
+                console.error('EventSource readyState:', eventSource.readyState);
                 statusDiv.className = 'status-message status-error';
-                statusDiv.textContent = 'Connection error. Please try again or use manual installation.';
+                statusDiv.textContent = 'Connection error. Please check the browser console for details.';
                 eventSource.close();
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-download"></i> Setup Ollama';
