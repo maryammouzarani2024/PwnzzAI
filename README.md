@@ -55,6 +55,9 @@ The image already includes Ollama so youonly need to pull the required models as
 
 4. Visit `http://localhost:5000` in your browser to see the application. Start from the Basic page and setup your lab. 
 
+
+If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6xbS3A&t=26s"> this walkthrough </a>, that shows, step-by-step, how to set up the app using either options. 
+
 ## Features
 
 - **Pizza Service**: You can browse delicious pizzas, read the customer reviews, add comments and order pizza virtually!
