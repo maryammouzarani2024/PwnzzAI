@@ -107,7 +107,8 @@ According to <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-appl
 10. **LLM10: Unbounded Consumption**
    - Resource exhaustion attacks and rate limiting bypass techniques
 
-and 
+and, 
+
 11. **LLM10: Model Theft (in earlier versions OWASP Top 10 for LLM)**
     - Model extraction and intellectual property theft through API abuse
 
