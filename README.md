@@ -81,7 +81,7 @@ If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6x
 
 ## AI Security Coverage
 
-This platform showcases an extensive spectrum of AI protection challenges, aligned with the **[OWASP AI Exchange comprehensive threat taxonomy](https://owaspai.org/docs/ai_security_overview/)**. The implementation begins with the **OWASP Top 10 for Large Language Model Applications** and is designed to progressively expand toward **comprehensive AI Exchange threat categories**.
+This platform showcases an extensive spectrum of AI protection challenges, aligned with the **[OWASP AI Exchange comprehensive threat taxonomy](https://owaspai.org/docs/ai_security_overview/)**. Current implementation covers the OWASP Top 10 for LLM Applications and core AI Exchange threat categories, with an extensible architecture built for future AI risk coverage.
 
 ### Learning Framework
 
