@@ -2,7 +2,7 @@
 
 <img src="application/static/img/index.png" alt="PwnzzAI Shop" width="200">
 
-At PwnzzAI Shop, every slice serves up a helping of **holistic AI security instruction**. This hands-on learning platform prepares professionals to understand the protection of **AI technologies broadly**—encompassing far more than just Generative AI—delivered through an engaging, practical pizza shop scenario.
+At PwnzzAI Shop, every slice serves up a helping of **holistic AI security instruction**. This hands-on learning platform prepares professionals to understand the protection of **AI technologies broadly** delivered through an engaging, practical pizza shop scenario.
 
 Just as an incorrect ingredient can spoil a pizza, a flawed prompt or inadequate architecture can leave AI technologies vulnerable to severe threats, including information breaches, intellectual property theft, or illegitimate access.
 
@@ -10,7 +10,7 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
 
 ## About
 
-PwnzzAI Shop represents a **hands-on learning platform** purposefully built for instruction on AI technology protection across all domains—reaching far beyond Generative AI alone. This intentionally insecure Flask-based web application showcases an extensive array of AI safety weaknesses via an immersive pizza shop experience.
+PwnzzAI Shop represents a **hands-on learning platform** purposefully built for instruction on AI technology protection. This intentionally insecure Flask-based web application showcases an extensive array of AI security weaknesses via an immersive pizza shop experience.
 
 ### Scope and Learning Goals
 
@@ -24,6 +24,7 @@ The project currently incorporates the OWASP Top 10 for LLMs, with an architectu
 - Team-based learning initiatives for security engineers and practitioners
 
 - End-to-end AI security education, spanning design, development, deployment, and operations
+  
 ## Setup Instructions
 
 ### Option 1: Using Docker (Recommended)
