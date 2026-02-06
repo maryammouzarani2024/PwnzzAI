@@ -135,12 +135,13 @@ According to <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-appl
    - Resource exhaustion attacks and rate limiting bypass techniques causing denial of service
    - *AI Exchange Context*: Model availability threats through resource depletion via excessive or crafted inputs
 
+  
 and, 
 
-and, 
+11. **Model Theft** (in earlier OWASP Top 10 for LLM versions) ([AI Exchange: Model Theft Through Use](https://owaspai.org/goto/modeltheftuse/), [Runtime Model Theft](https://owaspai.org/goto/runtimemodeltheft/))
+    - Model extraction and intellectual property theft through API abuse and input-output harvesting
+    - *AI Exchange Context*: Model confidentiality threats including model parameter extraction, model replication, and intellectual property theft through various attack vectors
 
-11. **LLM10: Model Theft (in earlier versions OWASP Top 10 for LLM)**
-    - Model extraction and intellectual property theft through API abuse
 
 ### Model Support:
 - **OpenAI Models**: GPT-3.5/GPT-4 demonstrations via API
