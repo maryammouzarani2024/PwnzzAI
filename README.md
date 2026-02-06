@@ -42,7 +42,7 @@ The easiest way to get started is using our pre-built Docker image:
 
 3. Visit `http://localhost:5000` in your browser to see the application. Start from the Basic page and setup your lab.
 
-The image already includes Ollama so youonly need to pull the required models as described in the lab setup section of the Basics page. 
+The image already includes Ollama so you only need to pull the required models as described in the lab setup section of the Basics page. 
 
 ### Option 2: Local Setup
 
