@@ -8,6 +8,18 @@ Just as an incorrect ingredient can spoil a pizza, a flawed prompt or inadequate
 
 Here, you'll explore **practical examples** of how vulnerabilities are created, exploited, and mitigated. You need to login as alice/alice or bob/bob for some pages. Grab a slice, dig in, and discover how delicious learning about AI security can be.
 
+**Table of Content**
+- [About](#about)
+  - [Scope and Learning Goals](#scope-and-learning-goals)
+- [Setup Instructions](#setup-instructions)
+  - [Option 1: Using Docker (Recommended)](#option-1-using-docker-recommended)
+  - [Option 2: Local Setup](#option-2-local-setup)
+- [Features](#features)
+- [AI Security Coverage](#ai-security-coverage)
+  - [Learning Framework](#learning-framework)
+  - [Implemented Vulnerabilities](#implemented-vulnerabilities)
+  - [Model Support](#model-support)
+
 ## About
 
 PwnzzAI Shop represents a **hands-on learning platform** purposefully built for instruction on AI technology protection. This intentionally insecure Flask-based web application showcases an extensive array of AI security weaknesses via an immersive pizza shop experience.
