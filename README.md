@@ -78,7 +78,7 @@ If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6x
 - **Learning-Focused Design**: Discover exploitation methods and defensive approaches via transparent descriptions, crafted for organized instruction programs and aligned with [AI Exchange threat taxonomy](https://owaspai.org/docs/ai_security_overview/).
 - **Multi-Provider Implementation**: Every demonstration operates with both commercial OpenAI and complimentary free Ollama frameworks, ensuring accessibility for all participants.
 - **Standards-Based Content**: Educational materials synchronized with [OWASP AI Exchange](https://owaspai.org/), which serves as the foundational basis for emerging AI security standards such as ISO/IEC 27090 and prEN 18282.
-- **Holistic Risk View**: Emphasis on enterprise-grade AI infrastructure threats beyond isolated weakness types, covering AI, just GenAI. 
+
 
 ## AI Security Coverage
 
@@ -136,7 +136,6 @@ According to <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-appl
    - Resource exhaustion attacks and rate limiting bypass techniques causing denial of service.
    - *AI Exchange Context*: Model availability threats through resource depletion via excessive or crafted inputs.
 
-  
 and, 
 
 11. **Model Theft** (in earlier OWASP Top 10 for LLM versions) ([AI Exchange: Model Theft Through Use](https://owaspai.org/goto/modeltheftuse/), [Runtime Model Theft](https://owaspai.org/goto/runtimemodeltheft/))
