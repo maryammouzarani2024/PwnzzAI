@@ -73,11 +73,11 @@ If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6x
 ## Features
 
 - **Pizza Service**: Browse appetizing pizzas, explore customer feedback, contribute comments, and place virtual orders!
-- **Extensive Weakness Showcases**: Active demonstrations spanning OWASP LLM Top 10 and AI Exchange threat categories including model input threats, development-time threats, runtime security threats, and system-level AI risks
-- **Learning-Focused Design**: Discover exploitation methods and defensive approaches via transparent descriptions, crafted for organized instruction programs and aligned with [AI Exchange threat taxonomy](https://owaspai.org/docs/ai_security_overview/)
-- **Multi-Provider Implementation**: Every demonstration operates with both OpenAI and complimentary Ollama frameworks, ensuring accessibility for all participants
-- **Standards-Based Content**: Educational materials synchronized with [OWASP AI Exchange](https://owaspai.org/)
-- **Holistic Risk View**: Emphasis on enterprise-grade AI infrastructure threats beyond isolated weakness types, covering AI—not just GenAI
+- **Extensive Weakness Showcases**: Active demonstrations spanning OWASP LLM Top 10 and AI Exchange threat categories including model input threats, development-time threats, runtime security threats, and system-level AI risks.
+- **Learning-Focused Design**: Discover exploitation methods and defensive approaches via transparent descriptions, crafted for organized instruction programs and aligned with [AI Exchange threat taxonomy](https://owaspai.org/docs/ai_security_overview/).
+- **Multi-Provider Implementation**: Every demonstration operates with both commercial OpenAI and complimentary free Ollama frameworks, ensuring accessibility for all participants.
+- **Standards-Based Content**: Educational materials synchronized with [OWASP AI Exchange](https://owaspai.org/), which serves as the foundational basis for emerging AI security standards such as ISO/IEC 27090 and prEN 18282.
+- **Holistic Risk View**: Emphasis on enterprise-grade AI infrastructure threats beyond isolated weakness types, covering AI, just GenAI. 
 
 ## AI Security Coverage
 
@@ -95,56 +95,56 @@ Every weakness demonstrated in PwnzzAI features:
 According to <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/" > OWASP Top 10 for LLM Applications 2025</a> and [OWASP AI Exchange threats](https://owaspai.org/docs/ai_security_overview/):
 
 1. **LLM01: Prompt Injection** ([AI Exchange: Direct Prompt Injection](https://owaspai.org/goto/directpromptinjection/), [Indirect Prompt Injection](https://owaspai.org/goto/indirectpromptinjection/))
-   - **Direct Prompt Injection**: Bypass system instructions through crafted user inputs to manipulate model behavior
-   - **Indirect Prompt Injection**: Exploit external data sources to inject malicious instructions and manipulate model responses
-   - *AI Exchange Context*: Model input threats where attackers craft instructions to deceive the model
+   - **Direct Prompt Injection**: Bypass system instructions through crafted user inputs to manipulate model behavior.
+   - **Indirect Prompt Injection**: Exploit external data sources to inject malicious instructions and manipulate model responses.
+   - *AI Exchange Context*: Model input threats where attackers craft instructions to deceive the model.
 
 2.  **LLM02: Sensitive Information Disclosure** ([AI Exchange: Data Disclosure](https://owaspai.org/goto/disclosureuse/), [Training Data Leaks](https://owaspai.org/goto/devdataleak/))
-   - Extraction of training data, system information, and credentials through model outputs
-   - *AI Exchange Context*: Training data confidentiality threats including model inversion, membership inference, and sensitive data output from model
+   - Extraction of training data, system information, and credentials through model outputs.
+   - *AI Exchange Context*: Training data confidentiality threats including model inversion, membership inference, and sensitive data output from model.
 
 3.  **LLM03: Supply Chain Vulnerabilities** ([AI Exchange: Supply Chain Model Poisoning](https://owaspai.org/goto/supplymodelpoison/))
-   - Third-party model and plugin security risks from compromised suppliers
-   - *AI Exchange Context*: Development-time supply chain threats including poisoned pre-trained models, corrupted data sources, and compromised model hosting
+   - Third-party model and plugin security risks from compromised suppliers.
+   - *AI Exchange Context*: Development-time supply chain threats including poisoned pre-trained models, corrupted data sources, and compromised model hosting.
 
 4. **LLM04: Data and Model Poisoning** ([AI Exchange: Data Poisoning](https://owaspai.org/goto/datapoison/), [Model Poisoning](https://owaspai.org/goto/modelpoison/))
-   - Demonstrate how malicious training data affects model responses and behavior
-   - *AI Exchange Context*: Development-time threats where training data manipulation or direct model parameter tampering leads to unwanted model behavior
+   - Demonstrate how malicious training data affects model responses and behavior.
+   - *AI Exchange Context*: Development-time threats where training data manipulation or direct model parameter tampering leads to unwanted model behavior.
 
 5. **LLM05: Improper Output Handling** ([AI Exchange: Insecure Output](https://owaspai.org/goto/insecureoutput/))
-   - Unvalidated LLM outputs leading to XSS and other injection attacks in downstream systems
-   - *AI Exchange Context*: Runtime application security threats where model output contains malicious code or injection attacks
+   - Unvalidated LLM outputs leading to XSS and other injection attacks in downstream systems.
+   - *AI Exchange Context*: Runtime application security threats where model output contains malicious code or injection attacks.
 
 6. **LLM06: Excessive Agency** ([AI Exchange: Least Model Privilege](https://owaspai.org/goto/leastmodelprivilege/), [Oversight](https://owaspai.org/goto/oversight/))
-   - Over-privileged LLM operations and autonomous actions without appropriate constraints
-   - *AI Exchange Context*: Impact limitation controls to restrict unwanted model behavior through privilege management and human oversight, particularly critical for agentic AI systems
+   - Over-privileged LLM operations and autonomous actions without appropriate constraints.
+   - *AI Exchange Context*: Impact limitation controls to restrict unwanted model behavior through privilege management and human oversight, particularly critical for agentic AI systems.
 
 7. **LLM07: System Prompt Leakage** ([AI Exchange: Sensitive Information Disclosure](https://owaspai.org/goto/disclosureuse/))
-   - Extraction of secret information embedded in system prompts through manipulation techniques
-   - *AI Exchange Context*: Model use threats where attackers extract confidential instructions or configuration data through crafted inputs
+   - Extraction of secret information embedded in system prompts through manipulation techniques.
+   - *AI Exchange Context*: Model use threats where attackers extract confidential instructions or configuration data through crafted inputs.
 
 8. **LLM08: Vector and Embedding Weakness** ([AI Exchange: Data Confidentiality](https://owaspai.org/goto/devdataleak/))
-   - Unauthorized access to embeddings containing sensitive information in RAG systems or vector databases
-   - *AI Exchange Context*: Augmentation data threats where retrieval repositories or embedding stores leak confidential information
+   - Unauthorized access to embeddings containing sensitive information in RAG systems or vector databases.
+   - *AI Exchange Context*: Augmentation data threats where retrieval repositories or embedding stores leak confidential information.
 
 9. **LLM09: Misinformation** ([AI Exchange: Model Alignment](https://owaspai.org/goto/modelalignment/), [Continuous Validation](https://owaspai.org/goto/continuousvalidation/))
-   - Critical decision-making without human oversight leading to harmful misinformation or hallucinations
-   - *AI Exchange Context*: Unwanted model behavior risks requiring oversight controls, explainability, and continuous monitoring to ensure accuracy and safety
+   - Critical decision-making without human oversight leading to harmful misinformation or hallucinations.
+   - *AI Exchange Context*: Unwanted model behavior risks requiring oversight controls, explainability, and continuous monitoring to ensure accuracy and safety.
 
 10. **LLM10: Unbounded Consumption** ([AI Exchange: AI Resource Exhaustion](https://owaspai.org/goto/airesourceexhaustion/))
-   - Resource exhaustion attacks and rate limiting bypass techniques causing denial of service
-   - *AI Exchange Context*: Model availability threats through resource depletion via excessive or crafted inputs
+   - Resource exhaustion attacks and rate limiting bypass techniques causing denial of service.
+   - *AI Exchange Context*: Model availability threats through resource depletion via excessive or crafted inputs.
 
   
 and, 
 
 11. **Model Theft** (in earlier OWASP Top 10 for LLM versions) ([AI Exchange: Model Theft Through Use](https://owaspai.org/goto/modeltheftuse/), [Runtime Model Theft](https://owaspai.org/goto/runtimemodeltheft/))
-    - Model extraction and intellectual property theft through API abuse and input-output harvesting
-    - *AI Exchange Context*: Model confidentiality threats including model parameter extraction, model replication, and intellectual property theft through various attack vectors
+    - Model extraction and intellectual property theft through API abuse and input-output harvesting.
+    - *AI Exchange Context*: Model confidentiality threats including model parameter extraction, model replication, and intellectual property theft through various attack vectors.
 
 
 ### Model Support:
-- **OpenAI Models**: GPT-3.5/GPT-4 demonstrations via API
+- **OpenAI Models**: GPT-3.5/GPT-4 demonstrations via OpenAI API.
 - **Ollama Models**: Free models, such as Mistral 7B and LLaMA 3.2 1B, are accessible through Ollama.
 
 
