@@ -109,7 +109,7 @@ Every weakness demonstrated in PwnzzAI features:
 ### Implemented Vulnerabilities:
 According to [OWASP AI Exchange threats](https://owaspai.org/docs/ai_security_overview/) and <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/" > OWASP Top 10 for LLM Applications 2025</a>:
 
-1. **Prompt Injection** [AI Exchange: Direct Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#221-direct-prompt-injection), [Indirect Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#222-indirect-prompt-injection), [Top 10: LLM-01] (https://genai.owasp.org/llmrisk/llm01-prompt-injection/).
+1. **Prompt Injection** [AI Exchange: Direct Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#221-direct-prompt-injection), [Indirect Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#222-indirect-prompt-injection), [Top 10: LLM-01](https://genai.owasp.org/llmrisk/llm01-prompt-injection/).
 
    - **Direct Prompt Injection**: Bypass system instructions through crafted user inputs to manipulate model behavior.
    - **Indirect Prompt Injection**: Exploit external data sources to inject malicious instructions and manipulate model responses.
