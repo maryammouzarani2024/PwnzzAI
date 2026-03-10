@@ -129,12 +129,12 @@ According to [OWASP AI Exchange threats](https://owaspai.org/docs/ai_security_ov
    - Demonstrate how malicious training data affects model responses and behavior.
    - *AI Exchange Context*: Development-time threats where training data manipulation or direct model parameter tampering leads to unwanted model behavior.
 
-5. **Improper Output Handling** [AI Exchange: Output Contains Conventional Injection](https://owaspai.org/docs/4_runtime_application_security_threats/#44-output-contains-conventional-injection), [Top 10:LLM05] (https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/)
+5. **Improper Output Handling** [AI Exchange: Output Contains Conventional Injection](https://owaspai.org/docs/4_runtime_application_security_threats/#44-output-contains-conventional-injection), [Top 10:LLM05](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/)
 
    - Unvalidated LLM outputs leading to XSS and other injection attacks in downstream systems.
    - *AI Exchange Context*: Textual model output may contain conventional injection attacks such as XSS-Cross site scripting, which can create a vulnerability when processed (e.g., shown on a website, execute a command).
 
-6. **Excessive Agency** [AI Exchange: Least Model Privilege](https://owaspai.org/goto/leastmodelprivilege/), [Oversight](https://owaspai.org/goto/oversight/), [Top 10:LLM06] (https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
+6. **Excessive Agency** [AI Exchange: Least Model Privilege](https://owaspai.org/goto/leastmodelprivilege/), [Oversight](https://owaspai.org/goto/oversight/), [Top 10:LLM06](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
    - Over-privileged LLM operations and autonomous actions without appropriate constraints.
    - *AI Exchange Context*: Impact limitation controls to restrict unwanted model behavior through privilege management and human oversight, particularly critical for agentic AI systems.
 
