@@ -23,7 +23,9 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
 ## About
 
 PwnzzAI Shop represents a **hands-on learning platform** purposefully built for instruction on AI technology protection. This intentionally insecure Flask-based web application showcases an extensive array of AI security weaknesses via an immersive pizza shop experience.
+
 **Founding partner**: ([OWASP AI Exchange ](https://owaspai.org/))
+
 ### Scope and Learning Goals
 
 PwnzzAI is designed as a comprehensive, evolving learning platform aligned with the **[AI Exchange risk taxonomy](https://owaspai.org/docs/ai_security_overview/#threats-overview)** Its scope expands progressively in step with OWASP AI Exchange security analysis frameworks and defensive guidance, ensuring long-term relevance as AI security practices mature.
