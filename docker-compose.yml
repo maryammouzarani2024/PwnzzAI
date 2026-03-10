@@ -17,7 +17,7 @@ services:
     build: .
     container_name: pwnzzai-shop
     ports:
-      - "5000:5000"
+      - "8080:8080"
     volumes:
       - ./uploads:/app/uploads
       - ./downloads:/app/downloads
