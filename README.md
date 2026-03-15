@@ -87,6 +87,7 @@ http://localhost:8080
 5. Follow logs if needed:
 
 ```bash
+
 # App logs
 docker compose logs -f pwnzzai-app
 
@@ -149,13 +150,6 @@ $env:OLLAMA_HOST="http://your-ollama-server:11434"
 
 4.  Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
 
-4. Open the app in your browser:
-
-
-```text
-http://localhost:8080
-```
-
 
 5. Follow app logs if needed:
 ```bash
@@ -169,12 +163,8 @@ docker compose -f docker-compose.external-ollama.yml down
 ```
 
 
-Default Ollama target for this option:
-
-Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab. 
 
 ### Option 3: Run Source Code Yourself
-
 
 Use this option if you want to run Python directly (without Docker for the app).
 
