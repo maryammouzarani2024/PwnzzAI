@@ -24,7 +24,9 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
 ## About
 
 PwnzzAI Shop represents a **hands-on learning platform** purposefully built for instruction on AI technology protection. This intentionally insecure Flask-based web application showcases an extensive array of AI security weaknesses via an immersive pizza shop experience.
-**Founding partner**: ([OWASP AI Exchange ](https://owaspai.org/))
+
+**Founding partner**: [OWASP AI Exchange](https://owaspai.org/)
+
 ### Scope and Learning Goals
 
 PwnzzAI is designed as a comprehensive, evolving learning platform aligned with the **[AI Exchange risk taxonomy](https://owaspai.org/docs/ai_security_overview/#threats-overview)** Its scope expands progressively in step with OWASP AI Exchange security analysis frameworks and defensive guidance, ensuring long-term relevance as AI security practices mature.
@@ -131,11 +133,16 @@ $env:OLLAMA_HOST="http://your-ollama-server:11434"
 
 3. Start PwnzzAI using the external Ollama compose file:
 
-```bash
-docker compose -f docker-compose.external-ollama.yml up -d
-```
+2. Run the container:
+   ```bash
+   docker run -p 8080:8080 ghcr.io/maryammouzarani2024/pwnzzai:latest
+   ```
 
+<<<<<<< HEAD
 4. Open the app in your browser:
+=======
+3. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
+>>>>>>> 79a736fe47655bebd6371660c84248f4941efb7c
 
 ```text
 http://localhost:8080
@@ -155,9 +162,7 @@ docker compose -f docker-compose.external-ollama.yml down
 
 Default Ollama target for this option:
 
-```text
-http://host.docker.internal:11434
-```
+4. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab. 
 
 ### Option 3: Run Source Code Yourself
 
@@ -226,51 +231,51 @@ Every weakness demonstrated in PwnzzAI features:
 3. **Hardened alternatives** detailing defensive approaches
 
 ### Implemented Vulnerabilities:
-According to <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/" > OWASP Top 10 for LLM Applications 2025</a> and [OWASP AI Exchange threats](https://owaspai.org/docs/ai_security_overview/):
+According to [OWASP AI Exchange threats](https://owaspai.org/docs/ai_security_overview/) and <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/" > OWASP Top 10 for LLM Applications 2025</a>:
 
-1. **Prompt Injection** ([AI Exchange: Direct Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#221-direct-prompt-injection), [Indirect Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#222-indirect-prompt-injection), [Top 10: LLM-01] (https://genai.owasp.org/llmrisk/llm01-prompt-injection/))
+1. **Prompt Injection** [AI Exchange: Direct Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#221-direct-prompt-injection), [Indirect Prompt Injection](https://owaspai.org/docs/2_threats_through_use/#222-indirect-prompt-injection), [Top 10: LLM-01](https://genai.owasp.org/llmrisk/llm01-prompt-injection/).
 
    - **Direct Prompt Injection**: Bypass system instructions through crafted user inputs to manipulate model behavior.
    - **Indirect Prompt Injection**: Exploit external data sources to inject malicious instructions and manipulate model responses.
    - *AI Exchange Context*: Model input threats where attackers craft instructions to deceive the model.
 
-2.  **Data Disclosure** ([AI Exchange: Disclosure of sensitive data in model output ](https://owaspai.org/docs/2_threats_through_use/#231-disclosure-of-sensitive-data-in-model-output), [Top 10: LLM-02](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/))
+2.  **Data Disclosure** [AI Exchange: Disclosure of sensitive data in model output ](https://owaspai.org/docs/2_threats_through_use/#231-disclosure-of-sensitive-data-in-model-output), [Top 10: LLM-02](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/)
    - Extraction of training data, system information, and credentials through model outputs.
    - *AI Exchange Context*: The output of the model may contain sensitive data from the training set or input (which may include augmentation data).
 
-3.  **Supply Chain Vulnerabilities** ([AI Exchange: Supply Chain Model Poisoning](https://owaspai.org/docs/3_development_time_threats/#313-supply-chain-model-poisoning), [Top 10: LLM 03](https://genai.owasp.org/llmrisk/llm032025-supply-chain/))
+3.  **Supply Chain Vulnerabilities** [AI Exchange: Supply Chain Model Poisoning](https://owaspai.org/docs/3_development_time_threats/#313-supply-chain-model-poisoning), [Top 10: LLM 03](https://genai.owasp.org/llmrisk/llm032025-supply-chain/)
 
    - Third-party model and plugin security risks from compromised suppliers.
    - *AI Exchange Context*: Development-time supply chain threats including poisoned pre-trained models, corrupted data sources, and compromised model hosting.
 
-4. **Data and Model Poisoning** ([AI Exchange: Data Poisoning](https://owaspai.org/docs/3_development_time_threats/#311-data-poisoning), [Model Poisoning](https://owaspai.org/goto/modelpoison/), [Top 10: LLM04](https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/))
+4. **Data and Model Poisoning** [AI Exchange: Data Poisoning](https://owaspai.org/docs/3_development_time_threats/#311-data-poisoning), [Model Poisoning](https://owaspai.org/goto/modelpoison/), [Top 10: LLM04](https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/)
 
    - Demonstrate how malicious training data affects model responses and behavior.
    - *AI Exchange Context*: Development-time threats where training data manipulation or direct model parameter tampering leads to unwanted model behavior.
 
-5. **Improper Output Handling** ([AI Exchange: Output Contains Conventional Injection](https://owaspai.org/docs/4_runtime_application_security_threats/#44-output-contains-conventional-injection), [Top 10:LLM05] (https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/))
+5. **Improper Output Handling** [AI Exchange: Output Contains Conventional Injection](https://owaspai.org/docs/4_runtime_application_security_threats/#44-output-contains-conventional-injection), [Top 10:LLM05](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/)
 
    - Unvalidated LLM outputs leading to XSS and other injection attacks in downstream systems.
    - *AI Exchange Context*: Textual model output may contain conventional injection attacks such as XSS-Cross site scripting, which can create a vulnerability when processed (e.g., shown on a website, execute a command).
 
-6. **Excessive Agency** ([AI Exchange: Least Model Privilege](https://owaspai.org/goto/leastmodelprivilege/), [Oversight](https://owaspai.org/goto/oversight/), [Top 10:LLM06] (https://genai.owasp.org/llmrisk/llm062025-excessive-agency/))
+6. **Excessive Agency** [AI Exchange: Least Model Privilege](https://owaspai.org/goto/leastmodelprivilege/), [Oversight](https://owaspai.org/goto/oversight/), [Top 10:LLM06](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
    - Over-privileged LLM operations and autonomous actions without appropriate constraints.
    - *AI Exchange Context*: Impact limitation controls to restrict unwanted model behavior through privilege management and human oversight, particularly critical for agentic AI systems.
 
-7. **System Prompt Leakage** ([AI Exchange: Sensitive Information Disclosure](https://owaspai.org/goto/disclosureuse/), [Top 10:LLM07](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/))
+7. **System Prompt Leakage** [AI Exchange: Sensitive Information Disclosure](https://owaspai.org/goto/disclosureuse/), [Top 10:LLM07](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/)
    - Extraction of secret information embedded in system prompts through manipulation techniques.
    - *AI Exchange Context*: Model use threats where attackers extract confidential instructions or configuration data through crafted inputs.
 
-8. **Vector and Embedding Weakness** ([AI Exchange: Direct augmentation data leak](https://owaspai.org/go/augmentationdataleak/), [Top 10:LLM08](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/))
+8. **Vector and Embedding Weakness** [AI Exchange: Direct augmentation data leak](https://owaspai.org/go/augmentationdataleak/), [Top 10:LLM08](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/)
 
    - Unauthorized access to embeddings containing sensitive information in RAG systems or vector databases.
    - *AI Exchange Context*: Augmentation data threats where retrieval repositories or embedding stores leak confidential information.
 
-9. **Misinformation** ([AI Exchange: Augmentation data manipulation](https://owaspai.org/docs/4_runtime_application_security_threats/#47-augmentation-data-manipulation), [Top 10:LLM09](https://genai.owasp.org/llmrisk/llm092025-misinformation/))
+9. **Misinformation** [AI Exchange: Augmentation data manipulation](https://owaspai.org/docs/4_runtime_application_security_threats/#47-augmentation-data-manipulation), [Top 10:LLM09](https://genai.owasp.org/llmrisk/llm092025-misinformation/)
    - Critical decision-making without human oversight leading to harmful misinformation or hallucinations.
    - *AI Exchange Context*: Unwanted model behavior risks requiring oversight controls, explainability, and continuous monitoring to ensure accuracy and safety.
 
-10. **Unbounded Consumption** ([AI Exchange: AI Resource Exhaustion](https://owaspai.org/docs/2_threats_through_use/#25-ai-resource-exhaustion), [Top 10:LLM10])
+10. **Unbounded Consumption** [AI Exchange: AI Resource Exhaustion](https://owaspai.org/docs/2_threats_through_use/#25-ai-resource-exhaustion), [Top 10:LLM10](https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/)
    - Resource exhaustion attacks and rate limiting bypass techniques causing denial of service.
    - *AI Exchange Context*: Model availability threats through resource depletion via excessive or crafted inputs.
 

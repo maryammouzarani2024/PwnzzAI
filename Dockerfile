@@ -17,10 +17,12 @@ COPY . .
 
 RUN mkdir -p uploads downloads instance
 
+# Expose Flask port
 EXPOSE 8080
 
 ENV FLASK_APP=main.py
 ENV PYTHONUNBUFFERED=1
 ENV OLLAMA_HOST=http://ollama:11434
 
-CMD ["flask", "run", "--host=0.0.0.0", "--port=8080", "--no-reload"]
+# Start Ollama in background, wait for it, then start Flask
+CMD ollama serve > /tmp/ollama.log 2>&1 & sleep 5 && flask run --host=0.0.0.0 --port=8080 --no-reload
