@@ -930,14 +930,14 @@ def setup_ollama():
         from application.ollama_setup import ensure_ollama_running, check_and_pull_model, model_name
 
         # Ensure Ollama is running (will attempt to start if not)
-        if not ensure_ollama_running():
+        if not ensure_ollama_running(base_url=OLLAMA_BASE_URL):
             return jsonify({
                 'success': False,
                 'error': 'Ollama could not be started. Please check if Ollama is installed or start it manually from https://ollama.ai'
             })
 
         # Pull the default model
-        success = check_and_pull_model(model_name)
+        success = check_and_pull_model(model_name, base_url=OLLAMA_BASE_URL)
         model_list=" , ".join(model_name)
         if success:
             return jsonify({
@@ -964,14 +964,14 @@ def setup_ollama_stream():
             yield f"data: {json.dumps({'status': 'Starting Ollama service...', 'progress': 5})}\n\n"
 
             # Ensure Ollama is running
-            if not ensure_ollama_running():
+            if not ensure_ollama_running(base_url=OLLAMA_BASE_URL):
                 yield f"data: {json.dumps({'status': 'error', 'error': 'Ollama could not be started. Please check if Ollama is installed or start it manually from https://ollama.ai'})}\n\n"
                 return
 
             yield f"data: {json.dumps({'status': 'Ollama service started', 'progress': 10})}\n\n"
 
             # Pull models with progress updates
-            for progress_update in check_and_pull_model_with_progress(model_name):
+            for progress_update in check_and_pull_model_with_progress(model_name, base_url=OLLAMA_BASE_URL):
                 # Scale progress from 10-100
                 scaled_progress = 10 + (progress_update['progress'] * 0.9)
                 progress_update['progress'] = scaled_progress
@@ -995,7 +995,7 @@ def check_ollama_status():
     try:
         from application.ollama_setup import ensure_ollama_running
 
-        if ensure_ollama_running():
+        if ensure_ollama_running(base_url=OLLAMA_BASE_URL):
             # Get available models
             response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
             if response.status_code == 200:
