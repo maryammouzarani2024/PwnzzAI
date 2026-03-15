@@ -7,7 +7,11 @@ model_name = ["mistral:7b", "llama3.2:1b"]
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 def start_ollama_service():
-    """Start Ollama service in the background using os.system()"""
+    """Start Ollama locally only when using localhost mode."""
+    if OLLAMA_BASE_URL != "http://localhost:11434":
+        print("Using external Ollama service; skipping local start")
+        return True
+
     try:
         print("Starting Ollama service...")
         # Start ollama serve in the background using shell
@@ -160,6 +164,7 @@ def check_and_pull_model(model_name, base_url=OLLAMA_BASE_URL):
 
 
 def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
+    
     # Convert single model name to list for uniform handling
     if isinstance(model_names, str):
         model_names = [model_names]
