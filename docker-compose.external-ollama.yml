@@ -1,0 +1,18 @@
+services:
+  pwnzzai-app:
+    image: ${PWNZZAI_IMAGE:-ghcr.io/maryammouzarani2024/pwnzzai:latest}
+    container_name: pwnzzai-shop
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./downloads:/app/downloads
+      - ./instance:/app/instance
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

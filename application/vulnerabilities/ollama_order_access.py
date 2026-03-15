@@ -2,6 +2,9 @@ import requests
 from flask import  session
 from sqlalchemy import func
 from application.model import Order
+import os
+
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 def extract_username_from_prompt(prompt):
     """Extract username from user prompt"""
@@ -87,7 +90,7 @@ def query_ollama_with_orders(user_query):
         
         # Call Ollama API (matching existing implementation)
         response = requests.post(
-            "http://localhost:11434/api/chat",
+            f"{OLLAMA_BASE_URL}/api/chat",
             json={
                 "model": "llama3.2:1b",
                 "messages": messages,
@@ -115,7 +118,7 @@ def query_ollama_with_orders(user_query):
             return f"Error calling Ollama API: {response.status_code}", False
             
     except requests.exceptions.ConnectionError:
-        return "Ollama service is not available. Please ensure Ollama is running on localhost:11434", False
+        return f"Ollama service is not available at {OLLAMA_BASE_URL}.", False
     except Exception as e:
         return f"Error connecting to Ollama: {str(e)}", False
 

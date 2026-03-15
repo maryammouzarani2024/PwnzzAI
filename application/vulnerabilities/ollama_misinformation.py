@@ -4,6 +4,9 @@ import faiss
 import numpy as np
 from application.model import Comment
 from sqlalchemy.orm import joinedload
+import os
+
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 # Global variables for RAG system
 embedder = None
@@ -88,7 +91,7 @@ def query_rag_system(user_query):
         
         # Call Ollama API
         response = requests.post(
-            "http://localhost:11434/api/chat",
+            f"{OLLAMA_BASE_URL}/api/chat",
             json={
                 "model": "llama3.2:1b",
                 "messages": messages,

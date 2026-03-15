@@ -19,6 +19,8 @@ from application.vulnerabilities.ollama_indirect_prompt_injection import chat_wi
 from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
 from werkzeug.utils import secure_filename
 
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+
 
 
 
@@ -995,7 +997,7 @@ def check_ollama_status():
 
         if ensure_ollama_running():
             # Get available models
-            response = requests.get("http://localhost:11434/api/tags", timeout=5)
+            response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
             if response.status_code == 200:
                 models_data = response.json()
                 models = [model['name'] for model in models_data.get('models', [])]
