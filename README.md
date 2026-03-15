@@ -87,15 +87,11 @@ http://localhost:8080
 5. Follow logs if needed:
 
 ```bash
-<<<<<<< HEAD
 # App logs
 docker compose logs -f pwnzzai-app
 
 # Ollama logs (optional)
 docker compose logs -f ollama
-=======
-docker compose logs -f
->>>>>>> main
 ```
 
 6. Stop everything when done:
@@ -121,7 +117,6 @@ PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
 Use this option if Ollama is already running somewhere else and you only want to run PwnzzAI in Docker.
 
 1. Keep your Ollama service running.
-<<<<<<< HEAD
 2. If your Ollama runs on a remote machine, set `OLLAMA_HOST` first.
 
 Linux/macOS:
@@ -137,70 +132,36 @@ $env:OLLAMA_HOST="http://your-ollama-server:11434"
 ```
 
 3. Start PwnzzAI using the external Ollama compose file:
-=======
-2. Start PwnzzAI using the external Ollama compose file:
->>>>>>> main
 
-2. Run the container:
+3.1. Run the container:
    ```bash
    docker run -p 8080:8080 ghcr.io/maryammouzarani2024/pwnzzai:latest
    ```
 
-<<<<<<< HEAD
-4. Open the app in your browser:
-=======
-3. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
->>>>>>> 79a736fe47655bebd6371660c84248f4941efb7c
+3.2. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
 
 ```text
 http://localhost:8080
 ```
 
-<<<<<<< HEAD
-5. Follow app logs if needed:
+4. Follow app logs if needed:
 
 ```bash
 docker compose -f docker-compose.external-ollama.yml logs -f pwnzzai-app
 ```
 
-6. Stop it when done:
+5. Stop it when done:
 
 ```bash
 docker compose -f docker-compose.external-ollama.yml down
 ```
 
-=======
-4. Stop it when done:
-
-```bash
-docker compose -f docker-compose.external-ollama.yml down
-```
-
->>>>>>> main
 Default Ollama target for this option:
 
-4. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab. 
-
-<<<<<<< HEAD
-### Option 3: Run Source Code Yourself
-
-=======
-If your Ollama runs on a remote machine, set `OLLAMA_HOST`:
-
-```bash
-OLLAMA_HOST=http://your-ollama-server:11434 docker compose -f docker-compose.external-ollama.yml up -d
-```
-
-Windows PowerShell version:
-
-```powershell
-$env:OLLAMA_HOST="http://your-ollama-server:11434"
-docker compose -f docker-compose.external-ollama.yml up -d
-```
+Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab. 
 
 ### Option 3: Run Source Code Yourself
 
->>>>>>> main
 Use this option if you want to run Python directly (without Docker for the app).
 
 1. Install Python 3.11.
