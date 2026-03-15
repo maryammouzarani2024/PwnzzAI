@@ -10,6 +10,7 @@ Thank you for your interest in contributing to PwnzzAI Shop! This project aims t
 - [Development Setup](#development-setup)
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
+   - [Docker Smoke Tests](#docker-smoke-tests)
 - [Submitting Changes](#submitting-changes)
 - [Reporting Issues](#reporting-issues)
 - [Security Considerations](#security-considerations)
@@ -83,4 +84,36 @@ You can contribute to PwnzzAI Shop in several ways:
 
 4. **Configure Environment**:
    - Copy `.flaskenv` if needed
-.
+
+## Testing
+
+Before opening a PR, run tests locally:
+
+```bash
+pytest -v
+```
+
+### Docker Smoke Tests
+
+Use the Docker smoke test routine before pushing to GitHub. It validates local Docker build and both Docker runtime modes.
+
+1. Run the smoke test script:
+
+```bash
+./scripts/docker-smoke-test.sh
+```
+
+2. What it validates:
+- `docker-compose.yml` syntax
+- `docker-compose.external-ollama.yml` syntax
+- local image build from `Dockerfile`
+- Option 1 runtime: PwnzzAI + bundled Ollama compose stack
+- Option 2 runtime: PwnzzAI + external Ollama compose stack
+
+3. Optional custom local image name:
+
+```bash
+APP_IMAGE=pwnzzai:my-local-test ./scripts/docker-smoke-test.sh
+```
+
+The script cleans up test containers automatically when it exits.
