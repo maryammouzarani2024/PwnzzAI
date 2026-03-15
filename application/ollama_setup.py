@@ -2,18 +2,12 @@ import requests
 import time
 import json
 import os
-import subprocess
-import re
 
-model_name=["mistral:7b", "llama3.2:1b"]
+model_name = ["mistral:7b", "llama3.2:1b"]
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 def start_ollama_service():
-    """Start Ollama locally only when using localhost mode."""
-    if OLLAMA_BASE_URL != "http://localhost:11434":
-        print("Using external Ollama service; skipping local start")
-        return True
-
+    """Start Ollama service in the background using os.system()"""
     try:
         print("Starting Ollama service...")
         # Start ollama serve in the background using shell
@@ -55,19 +49,28 @@ def check_ollama_running(base_url=OLLAMA_BASE_URL):
 
 
 def ensure_ollama_running(base_url=OLLAMA_BASE_URL, max_retries=3):
-    """Ensure Ollama is running, start it if not"""
+    """Ensure Ollama is running, start it if not.
+    When base_url points to an external/containerized Ollama (non-localhost),
+    skip the local start attempt and just verify connectivity."""
+    if base_url is None:
+        base_url = OLLAMA_BASE_URL
+
     # First check if already running
     if check_ollama_running(base_url):
         return True
 
-    # Try to start Ollama
-    print("Attempting to start Ollama...")
-    started = start_ollama_service()
-
-    if not started:
+    # Only attempt local start when Ollama is expected to be on localhost
+    is_local = "localhost" in base_url or "127.0.0.1" in base_url
+    if is_local:
+        print("Attempting to start local Ollama service...")
+        started = start_ollama_service()
+        if not started:
+            return False
+    else:
+        print(f"External Ollama at {base_url} is not reachable; skipping local start")
         return False
 
-    # Wait and retry checking if it's accessible
+    # Wait and retry checking if it's accessible (local start only)
     for i in range(max_retries):
         time.sleep(2)
         if check_ollama_running(base_url):
@@ -157,7 +160,6 @@ def check_and_pull_model(model_name, base_url=OLLAMA_BASE_URL):
 
 
 def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
-    
     # Convert single model name to list for uniform handling
     if isinstance(model_names, str):
         model_names = [model_names]
@@ -165,7 +167,6 @@ def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
     num_models = len(model_names)
 
     for idx, model in enumerate(model_names):
-        # Base progress per model
         base_progress = (idx / num_models) * 100
         progress_per_model = 100 / num_models
 
@@ -174,7 +175,6 @@ def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
             'progress': base_progress
         }
 
-        # Check if model exists locally
         if is_model_available(model, base_url):
             yield {
                 'status': f'✓ {model} is already available',
@@ -182,78 +182,91 @@ def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
             }
             continue
 
-        # Model doesn't exist, pull it
         yield {
             'status': f'Pulling {model}...',
             'progress': base_progress + (progress_per_model * 0.1)
         }
 
-        cmd = ["ollama", "pull", model]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        last_progress = 0
-        for line in iter(process.stdout.readline, ''):
-            line = line.strip()
-            if not line:
-                continue
+        try:
+            pull_response = requests.post(
+                f"{base_url}/api/pull",
+                json={"name": model, "stream": True},
+                stream=True,
+                timeout=1800
+            )
 
-            # Debug
-            print(f"[DEBUG] CLI output: {line}")
-
-               # Try multiple patterns to match Ollama's output
-                  # Pattern 1: "pulling 74701a8c35f6... 100%"
-            m = re.search(r'pulling\s+\w+.*?\s+(\d+)%', line)
-            if not m:
-                      # Pattern 2: "▕████████████▏ 100%"
-               m = re.search(r'(\d+)%', line)
-            if m:
-                 # Only yield if progress has increased significantly (avoid spam)
-                percent = float(m.group(1))
-                if percent > last_progress + 5 or percent >= 100:
-                             last_progress = percent
-                            # Scale progress to current model's portion
-                             model_progress = base_progress + (progress_per_model * 0.1) + (percent / 100 * 
-                                progress_per_model * 0.8)
-                             yield {
-                                 'status': f'Downloading {model}: {percent:.1f}%',
-                                 'progress': model_progress
-                            }
-
-            elif "verifying" in line.lower() and "digest" in line.lower():
+            if pull_response.status_code != 200:
                 yield {
-                    'status': f'Verifying {model} integrity...',
-                    'progress': base_progress + (progress_per_model * 0.95)
+                    'status': 'error',
+                    'error': f'Failed to pull {model}: {pull_response.text}',
+                    'progress': base_progress
                 }
+                return
 
-            elif "writing manifest" in line.lower():
-                yield {
-                    'status': f'Writing manifest for {model}...',
-                    'progress': base_progress + (progress_per_model * 0.98)
-                }
+            last_progress = 0
+            for line in pull_response.iter_lines():
+                if not line:
+                    continue
 
-            elif "success" in line.lower():
-                yield {
-                    'status': f'✓ {model} pulled successfully!',
-                    'progress': base_progress + progress_per_model
-                }
-                
-            elif "pulling manifest" in line.lower():
+                try:
+                    data = json.loads(line)
+                except Exception:
+                    continue
+
+                status = data.get('status', '')
+
+                if 'total' in data and 'completed' in data and data['total'] > 0:
+                    percent = (data['completed'] / data['total']) * 100
+                    if percent > last_progress + 5 or percent >= 100:
+                        last_progress = percent
+                        model_progress = base_progress + (progress_per_model * 0.1) + (percent / 100 * progress_per_model * 0.8)
+                        yield {
+                            'status': f'Downloading {model}: {percent:.1f}%',
+                            'progress': model_progress
+                        }
+                elif 'verifying' in status.lower():
                     yield {
-                            'status': f'Pulling manifest for {model}...',
-                             'progress': base_progress + (progress_per_model * 0.05)
+                        'status': f'Verifying {model} integrity...',
+                        'progress': base_progress + (progress_per_model * 0.95)
                     }
-         
-            elif "pulling" in line.lower() and "%" not in line:
-                        # Generic pulling message without percentage
+                elif 'writing manifest' in status.lower():
                     yield {
-                             'status': f'Downloading {model} layers...',
-                             'progress': base_progress + (progress_per_model * 0.3)
-                    }    
-
-        process.wait()
-        if process.returncode != 0:
+                        'status': f'Writing manifest for {model}...',
+                        'progress': base_progress + (progress_per_model * 0.98)
+                    }
+                elif 'success' in status.lower() or data.get('status') == 'success':
+                    yield {
+                        'status': f'✓ {model} pulled successfully!',
+                        'progress': base_progress + progress_per_model
+                    }
+                elif 'pulling manifest' in status.lower():
+                    yield {
+                        'status': f'Pulling manifest for {model}...',
+                        'progress': base_progress + (progress_per_model * 0.05)
+                    }
+                elif 'pulling' in status.lower():
+                    yield {
+                        'status': f'Downloading {model} layers...',
+                        'progress': base_progress + (progress_per_model * 0.3)
+                    }
+                elif 'error' in data:
+                    yield {
+                        'status': 'error',
+                        'error': data['error'],
+                        'progress': base_progress
+                    }
+                    return
+        except requests.exceptions.Timeout:
             yield {
                 'status': 'error',
-                'error': f'CLI pull failed for {model} with return code {process.returncode}',
+                'error': f'Timeout while pulling {model}',
+                'progress': base_progress
+            }
+            return
+        except Exception as e:
+            yield {
+                'status': 'error',
+                'error': f'Error pulling {model}: {str(e)}',
                 'progress': base_progress
             }
             return

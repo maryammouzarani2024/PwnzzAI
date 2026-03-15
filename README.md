@@ -85,7 +85,11 @@ http://localhost:8080
 5. Follow logs if needed:
 
 ```bash
-docker compose logs -f
+# App logs
+docker compose logs -f pwnzzai-app
+
+# Ollama logs (optional)
+docker compose logs -f ollama
 ```
 
 6. Stop everything when done:
@@ -111,19 +115,39 @@ PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
 Use this option if Ollama is already running somewhere else and you only want to run PwnzzAI in Docker.
 
 1. Keep your Ollama service running.
-2. Start PwnzzAI using the external Ollama compose file:
+2. If your Ollama runs on a remote machine, set `OLLAMA_HOST` first.
+
+Linux/macOS:
+
+```bash
+export OLLAMA_HOST=http://your-ollama-server:11434
+```
+
+Windows PowerShell:
+
+```powershell
+$env:OLLAMA_HOST="http://your-ollama-server:11434"
+```
+
+3. Start PwnzzAI using the external Ollama compose file:
 
 ```bash
 docker compose -f docker-compose.external-ollama.yml up -d
 ```
 
-3. Open the app in your browser:
+4. Open the app in your browser:
 
 ```text
 http://localhost:8080
 ```
 
-4. Stop it when done:
+5. Follow app logs if needed:
+
+```bash
+docker compose -f docker-compose.external-ollama.yml logs -f pwnzzai-app
+```
+
+6. Stop it when done:
 
 ```bash
 docker compose -f docker-compose.external-ollama.yml down
@@ -133,19 +157,6 @@ Default Ollama target for this option:
 
 ```text
 http://host.docker.internal:11434
-```
-
-If your Ollama runs on a remote machine, set `OLLAMA_HOST`:
-
-```bash
-OLLAMA_HOST=http://your-ollama-server:11434 docker compose -f docker-compose.external-ollama.yml up -d
-```
-
-Windows PowerShell version:
-
-```powershell
-$env:OLLAMA_HOST="http://your-ollama-server:11434"
-docker compose -f docker-compose.external-ollama.yml up -d
 ```
 
 ### Option 3: Run Source Code Yourself
