@@ -12,8 +12,9 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
 - [About](#about)
   - [Scope and Learning Goals](#scope-and-learning-goals)
 - [Setup Instructions](#setup-instructions)
-  - [Option 1: Using Docker (Recommended)](#option-1-using-docker-recommended)
-  - [Option 2: Local Setup](#option-2-local-setup)
+   - [Option 1: Docker (PwnzzAI + Ollama)](#option-1-docker-pwnzzai--ollama)
+   - [Option 2: Docker (Your Own Ollama + PwnzzAI Image)](#option-2-docker-your-own-ollama--pwnzzai-image)
+   - [Option 3: Run Source Code Yourself](#option-3-run-source-code-yourself)
 - [Features](#features)
 - [AI Security Coverage](#ai-security-coverage)
   - [Learning Framework](#learning-framework)
@@ -41,14 +42,78 @@ The project currently incorporates the OWASP Top 10 for LLMs, with an architectu
   
 ## Setup Instructions
 
-### Option 1: Using Docker (Recommended)
+Choose one of these 3 ways to run PwnzzAI:
 
-The easiest way to get started is using our pre-built Docker image:
+1. Docker with both images (PwnzzAI + Ollama)
+2. Docker with your own local/remote Ollama and only the PwnzzAI image
+3. Run the source code yourself
 
-1. Pull the Docker image:
-   ```bash
-   docker pull ghcr.io/maryammouzarani2024/pwnzzai:latest
-   ```
+### Before You Start (All Options)
+
+1. Install Docker Desktop from `https://www.docker.com/products/docker-desktop`.
+2. Open Docker Desktop and wait until it says Docker is running.
+3. Install Git if you do not already have it.
+4. Clone this repository and enter it:
+
+```bash
+git clone <REPO_URL>
+cd PwnzzAI
+```
+
+### Option 1: Docker (PwnzzAI + Ollama)
+
+Use this option if you want Docker to run both the PwnzzAI app and Ollama for you.
+
+1. Start both containers:
+
+```bash
+docker compose up -d
+```
+
+2. Verify both services are running:
+
+```bash
+docker compose ps
+```
+
+3. Open the app in your browser:
+
+```text
+http://localhost:8080
+```
+
+4. In the app, go to the Basics page and run Ollama setup to pull models.
+
+5. Follow logs if needed:
+
+```bash
+docker compose logs -f
+```
+
+6. Stop everything when done:
+
+```bash
+docker compose down
+```
+
+7. Optional full reset (removes saved Ollama models too):
+
+```bash
+docker compose down -v
+```
+
+If you publish the app image under another registry path, override the image name when starting:
+
+```bash
+PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
+```
+
+### Option 2: Docker (Your Own Ollama + PwnzzAI Image)
+
+Use this option if Ollama is already running somewhere else and you only want to run PwnzzAI in Docker.
+
+1. Keep your Ollama service running.
+2. Start PwnzzAI using the external Ollama compose file:
 
 2. Run the container:
    ```bash
@@ -57,33 +122,77 @@ The easiest way to get started is using our pre-built Docker image:
 
 3. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
 
-The image already includes Ollama so you only need to pull the required models as described in the lab setup section of the Basics page. 
+```text
+http://localhost:8080
+```
 
-### Option 2: Local Setup
+4. Stop it when done:
 
-1. Create a virtual environment (optional but recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-2. Install  the dependencies:
-   
-   (If you do not want to use Ollam, you can remove or comment the line "curl -fsSL https://ollama.com/install.sh | sh" from install.sh)
-   
-   
-   ```bash
-   ./install.sh
-   ```
+```bash
+docker compose -f docker-compose.external-ollama.yml down
+```
 
-3. Run the application:
-   ```bash
-   flask run
-   ```
+Default Ollama target for this option:
 
 4. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab. 
 
+If your Ollama runs on a remote machine, set `OLLAMA_HOST`:
 
-If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6xbS3A&t=26s"> this walkthrough </a>, that shows, step-by-step, how to set up the app using either options. 
+```bash
+OLLAMA_HOST=http://your-ollama-server:11434 docker compose -f docker-compose.external-ollama.yml up -d
+```
+
+Windows PowerShell version:
+
+```powershell
+$env:OLLAMA_HOST="http://your-ollama-server:11434"
+docker compose -f docker-compose.external-ollama.yml up -d
+```
+
+### Option 3: Run Source Code Yourself
+
+Use this option if you want to run Python directly (without Docker for the app).
+
+1. Install Python 3.11.
+2. Create and activate a virtual environment.
+
+Linux/macOS:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+Windows PowerShell:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+3. Install dependencies:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+4. Make sure Ollama is available:
+`http://localhost:11434` or another endpoint via `OLLAMA_HOST`.
+
+5. Run the app:
+
+```bash
+flask run --host=0.0.0.0 --port=8080
+```
+
+6. Open:
+
+```text
+http://localhost:8080
+```
+
+If you need more details, watch <a href="https://www.youtube.com/watch?v=Pv3PP6xbS3A&t=26s"> this walkthrough </a>, which shows step-by-step setup. 
 
 ## Features
 

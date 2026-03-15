@@ -1,0 +1,7 @@
+FROM ollama/ollama:latest
+
+EXPOSE 11434
+
+ENV OLLAMA_KEEP_ALIVE=-1
+
+CMD ["ollama", "serve"]

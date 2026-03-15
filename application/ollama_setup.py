@@ -6,9 +6,14 @@ import subprocess
 import re
 
 model_name=["mistral:7b", "llama3.2:1b"]
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 def start_ollama_service():
-    """Start Ollama service in the background using os.system()"""
+    """Start Ollama locally only when using localhost mode."""
+    if OLLAMA_BASE_URL != "http://localhost:11434":
+        print("Using external Ollama service; skipping local start")
+        return True
+
     try:
         print("Starting Ollama service...")
         # Start ollama serve in the background using shell
@@ -32,7 +37,7 @@ def start_ollama_service():
         return False
 
 
-def check_ollama_running(base_url="http://localhost:11434"):
+def check_ollama_running(base_url=OLLAMA_BASE_URL):
     """Check if Ollama service is running"""
     try:
         response = requests.get(f"{base_url}/api/tags", timeout=5)
@@ -49,7 +54,7 @@ def check_ollama_running(base_url="http://localhost:11434"):
     return False
 
 
-def ensure_ollama_running(base_url="http://localhost:11434", max_retries=3):
+def ensure_ollama_running(base_url=OLLAMA_BASE_URL, max_retries=3):
     """Ensure Ollama is running, start it if not"""
     # First check if already running
     if check_ollama_running(base_url):
@@ -88,7 +93,7 @@ def is_model_available(model, base_url):
                 print(f"Error checking models: {e}")
             return False
         
-def check_and_pull_model(model_name, base_url="http://localhost:11434"):
+def check_and_pull_model(model_name, base_url=OLLAMA_BASE_URL):
     """Check if model exists locally, pull if not"""
     for model in model_name:
 
@@ -151,7 +156,7 @@ def check_and_pull_model(model_name, base_url="http://localhost:11434"):
 
 
 
-def check_and_pull_model_with_progress(model_names, base_url="http://localhost:11434"):
+def check_and_pull_model_with_progress(model_names, base_url=OLLAMA_BASE_URL):
     
     # Convert single model name to list for uniform handling
     if isinstance(model_names, str):

@@ -1,6 +1,7 @@
 import re
 import sqlite3
 import requests
+import os
 
 # Insecure pizza search function using SQL injection vulnerable queries
 def search_pizza_price(pizza_type):
@@ -71,7 +72,7 @@ def search_pizza_price(pizza_type):
             conn.close()
 
 # Ollama API configuration
-OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL = "mistral:7b"  # You can change this to any model available in your Ollama installation
 
 def get_available_models():
@@ -132,7 +133,7 @@ def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
             return f"Error: Unable to connect to Ollama (status: {response.status_code})"
             
     except requests.exceptions.ConnectionError:
-        return "Error: Cannot connect to Ollama. Please ensure Ollama is running on localhost:11434"
+        return f"Error: Cannot connect to Ollama at {OLLAMA_BASE_URL}."
     except Exception as e:
         return f"Error communicating with Ollama: {str(e)}"
 

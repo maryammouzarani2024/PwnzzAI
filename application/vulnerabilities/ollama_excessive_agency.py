@@ -5,12 +5,13 @@ from datetime import datetime
 from flask import session
 import requests
 from sqlalchemy import func
+import os
 
 
 
 
 # Ollama API configuration
-OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL = "mistral:7b"
 
 def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
@@ -34,7 +35,7 @@ def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
             return f"Error: Unable to connect to Ollama (status: {response.status_code})"
             
     except requests.exceptions.ConnectionError:
-        return "Error: Cannot connect to Ollama. Please ensure Ollama is running on localhost:11434"
+        return f"Error: Cannot connect to Ollama at {OLLAMA_BASE_URL}."
     except Exception as e:
         return f"Error communicating with Ollama: {str(e)}"
 

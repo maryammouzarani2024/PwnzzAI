@@ -9,12 +9,11 @@ services:
     networks:
       - pwnzzai-network
     restart: unless-stopped
-    # Keep the container running
     environment:
       - OLLAMA_KEEP_ALIVE=-1
 
   pwnzzai-app:
-    build: .
+    image: ${PWNZZAI_IMAGE:-ghcr.io/maryammouzarani2024/pwnzzai:latest}
     container_name: pwnzzai-shop
     ports:
       - "8080:8080"

@@ -1,39 +1,28 @@
-# Use Python 3.11 slim image as base
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies including curl for Ollama installation
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
     libzbar0 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ollama
-RUN curl -fsSL https://ollama.com/install.sh | sh
-
-
-# Copy requirements first for better caching
 COPY requirements.txt .
+RUN python -m pip install --upgrade pip && \
+    pip install \
+    --retries 10 \
+    --timeout 600 \
+    -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
 COPY . .
 
-# Create necessary directories
 RUN mkdir -p uploads downloads instance
 
 # Expose Flask port
 EXPOSE 8080
 
-# Set environment variables
 ENV FLASK_APP=main.py
 ENV PYTHONUNBUFFERED=1
+ENV OLLAMA_HOST=http://ollama:11434
 
 # Start Ollama in background, wait for it, then start Flask
 CMD ollama serve > /tmp/ollama.log 2>&1 & sleep 5 && flask run --host=0.0.0.0 --port=8080 --no-reload
