@@ -2,15 +2,30 @@ import requests
 import time
 import json
 import os
+from urllib.parse import urlparse
 
 model_name = ["mistral:7b", "llama3.2:1b"]
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
-def start_ollama_service():
-    """Start Ollama locally only when using localhost mode."""
-    if OLLAMA_BASE_URL != "http://localhost:11434":
-        print("Using external Ollama service; skipping local start")
+
+def _is_local_ollama_url(base_url):
+    """Return True when the URL targets localhost/loopback addresses."""
+    if not base_url:
         return True
+
+    # urlparse requires a scheme to reliably populate hostname.
+    parsed = urlparse(base_url if "://" in base_url else f"http://{base_url}")
+    host = (parsed.hostname or "").lower()
+    return host in {"localhost", "127.0.0.1", "::1"}
+
+def start_ollama_service(base_url=None):
+    """Start Ollama locally only when using localhost mode."""
+    if base_url is None:
+        base_url = OLLAMA_BASE_URL
+
+    if not _is_local_ollama_url(base_url):
+        print(f"Using external Ollama service at {base_url}; checking connectivity")
+        return check_ollama_running(base_url)
 
     try:
         print("Starting Ollama service...")
@@ -40,14 +55,14 @@ def check_ollama_running(base_url=OLLAMA_BASE_URL):
     try:
         response = requests.get(f"{base_url}/api/tags", timeout=5)
         if response.status_code == 200:
-            print("✓ Ollama is running and accessible")
+            print(f"✓ Ollama is running and accessible at {base_url}")
             return True
-    except requests.exceptions.ConnectionError:
-        print("✗ Ollama is not running or not accessible")
+    except requests.exceptions.ConnectionError as e:
+        print(f"✗ Ollama is not running or not accessible at {base_url}: {e}")
     except requests.exceptions.Timeout:
-        print("✗ Ollama is not responding (timeout)")
+        print(f"✗ Ollama is not responding at {base_url} (timeout)")
     except Exception as e:
-        print(f"✗ Error connecting to Ollama: {e}")
+        print(f"✗ Error connecting to Ollama at {base_url}: {e}")
 
     return False
 
@@ -64,14 +79,20 @@ def ensure_ollama_running(base_url=OLLAMA_BASE_URL, max_retries=3):
         return True
 
     # Only attempt local start when Ollama is expected to be on localhost
-    is_local = "localhost" in base_url or "127.0.0.1" in base_url
+    is_local = _is_local_ollama_url(base_url)
     if is_local:
         print("Attempting to start local Ollama service...")
-        started = start_ollama_service()
+        started = start_ollama_service(base_url)
         if not started:
             return False
     else:
-        print(f"External Ollama at {base_url} is not reachable; skipping local start")
+        print(f"External Ollama at {base_url} is not reachable yet; retrying connectivity...")
+        for i in range(max_retries):
+            time.sleep(2)
+            if check_ollama_running(base_url):
+                return True
+            print(f"External retry {i+1}/{max_retries}...")
+        print(f"External Ollama at {base_url} is not reachable after retries")
         return False
 
     # Wait and retry checking if it's accessible (local start only)

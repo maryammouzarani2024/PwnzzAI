@@ -15,6 +15,7 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
    - [Option 1: Docker (PwnzzAI + Ollama)](#option-1-docker-pwnzzai--ollama)
    - [Option 2: Docker (Your Own Ollama + PwnzzAI Image)](#option-2-docker-your-own-ollama--pwnzzai-image)
    - [Option 3: Run Source Code Yourself](#option-3-run-source-code-yourself)
+   - [Troubleshooting: Ollama Connection (WSL + Docker)](OLLAMA_CONNECTION_TROUBLESHOOTING.md)
 - [Features](#features)
 - [AI Security Coverage](#ai-security-coverage)
   - [Learning Framework](#learning-framework)
@@ -116,6 +117,10 @@ PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
 ### Option 2: Docker (Your Own Ollama + PwnzzAI Image)
 
 Use this option if Ollama is already running somewhere else and you only want to run PwnzzAI in Docker.
+
+If you run Ollama on WSL and PwnzzAI in Docker, see
+[`OLLAMA_CONNECTION_TROUBLESHOOTING.md`](OLLAMA_CONNECTION_TROUBLESHOOTING.md)
+for connectivity fixes (`Connection refused`, `host.docker.internal`, binding, and env validation).
 
 1. Keep your Ollama service running.
 
