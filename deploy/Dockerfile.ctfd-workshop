@@ -1,0 +1,26 @@
+# CTFd 3.7.x + docker_challenges plugin cloned from GitHub at build time (default: northdpole fork with fixes).
+#
+# Build context: deploy/ (see deploy/docker-compose.workshop.yml).
+
+FROM ctfd/ctfd:3.7.7
+
+USER root
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG DOCKER_CHALLENGES_GIT_URL=https://github.com/northdpole/CTFd-Docker-Challenges.git
+ARG DOCKER_CHALLENGES_REF=master
+
+RUN git clone --depth 1 --branch "${DOCKER_CHALLENGES_REF}" "${DOCKER_CHALLENGES_GIT_URL}" /tmp/ctfd-dc \
+    && rm -rf /tmp/ctfd-dc/.git \
+    && mv /tmp/ctfd-dc/docker_challenges /opt/CTFd/CTFd/plugins/docker_challenges \
+    && rm -rf /tmp/ctfd-dc
+
+RUN chown -R ctfd:ctfd /opt/CTFd/CTFd/plugins/docker_challenges
+
+RUN /opt/venv/bin/pip install --no-cache-dir -r /opt/CTFd/CTFd/plugins/docker_challenges/requirements.txt \
+    && chown -R ctfd:ctfd /opt/venv
+
+USER ctfd
