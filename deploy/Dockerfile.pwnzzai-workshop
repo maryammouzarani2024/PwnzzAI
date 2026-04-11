@@ -1,0 +1,45 @@
+# Workshop / CTFd image: Flask only; use a shared Ollama on the host/compose network.
+# Build from repository root: docker build -f deploy/Dockerfile.pwnzzai-workshop ...
+#
+# The CTFd Docker plugin does not inject env at container start; bake config with --build-arg.
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
+    libzbar0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip && \
+    pip install \
+    --retries 10 \
+    --timeout 600 \
+    -r requirements.txt
+
+COPY . .
+
+RUN mkdir -p uploads downloads instance
+
+EXPOSE 8080
+
+ENV FLASK_APP=main.py
+ENV PYTHONUNBUFFERED=1
+
+ARG SECRET_KEY=""
+ARG GEMINI_API_KEY=""
+ARG GOOGLE_API_KEY=""
+ARG GEMINI_MODEL="gemini-1.5-flash"
+ARG OLLAMA_HOST="http://172.17.0.1:11434"
+ARG OLLAMA_FALLBACK_MODEL="llama3.2:1b"
+
+ENV SECRET_KEY=${SECRET_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+ENV GOOGLE_API_KEY=${GOOGLE_API_KEY}
+ENV GEMINI_MODEL=${GEMINI_MODEL}
+ENV OLLAMA_HOST=${OLLAMA_HOST}
+ENV OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL}
+
+CMD ["flask", "run", "--host=0.0.0.0", "--port=8080", "--no-reload"]

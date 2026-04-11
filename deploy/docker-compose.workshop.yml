@@ -1,0 +1,87 @@
+# CTFd workshop stack: CTFd + Docker API proxy + Ollama + (optional) challenge registration.
+#
+# Usage from repo root:
+#   export $(grep -v '^#' .env | xargs)   # optional
+#   docker compose -f deploy/docker-compose.workshop.yml up -d --build
+#
+# CTFd image: docker_challenges is git-cloned at build time (default: northdpole/CTFd-Docker-Challenges fork).
+#
+# PwnzzAI challenge containers reach Ollama via the default Docker bridge gateway
+# (OLLAMA_HOST baked into the image, default http://172.17.0.1:11434).
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    # Published on the host so per-user challenge containers can use OLLAMA_HOST
+    # like http://<docker0-gateway>:11434 (default bridge). Lock down port 11434 in your security group.
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+
+  # Restricted Docker API for CTFd. HAProxy matches /containers/*/start|stop before generic /containers,
+  # so ALLOW_START / ALLOW_STOP must be enabled or container start returns 403 → plugin shows 500.
+  # See: https://github.com/Tecnativa/docker-socket-proxy/blob/master/haproxy.cfg
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      # Read-write: :ro on the socket can break create/start on some hosts/runtimes.
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CONTAINERS: 1
+      IMAGES: 1
+      INFO: 1
+      NETWORKS: 1
+      POST: 1
+      DELETE: 1
+      # Required for POST .../containers/{id}/start and .../stop (CTFd Docker Challenges plugin).
+      ALLOW_START: 1
+      ALLOW_STOP: 1
+      ALLOW_RESTARTS: 1
+      DISTRIBUTION: 1
+      PING: 1
+      VERSION: 1
+      BUILD: 0
+      COMMIT: 0
+      CONFIGS: 0
+      EXEC: 0
+      GRPC: 0
+      NODES: 0
+      PLUGINS: 0
+      SERVICES: 0
+      SESSION: 0
+      SWARM: 0
+      SYSTEM: 0
+      TASKS: 0
+      VOLUMES: 0
+
+  ctfd:
+    build:
+      context: .
+      dockerfile: Dockerfile.ctfd-workshop
+      args:
+        DOCKER_CHALLENGES_GIT_URL: ${DOCKER_CHALLENGES_GIT_URL:-https://github.com/northdpole/CTFd-Docker-Challenges.git}
+        DOCKER_CHALLENGES_REF: ${DOCKER_CHALLENGES_REF:-master}
+    restart: unless-stopped
+    environment:
+      UPLOAD_FOLDER: /var/uploads
+      DATABASE_URL: sqlite:////var/uploads/ctfd.db
+      SECRET_KEY: ${CTFD_SECRET_KEY:-}
+      # Required — must be set when running compose (repo-root .env; bootstrap/redeploy export it).
+      DOCKER_CHALLENGES_PUBLIC_HOST: ${DOCKER_CHALLENGES_PUBLIC_HOST:?missing DOCKER_CHALLENGES_PUBLIC_HOST in environment}
+    volumes:
+      - ctfd_uploads:/var/uploads
+    ports:
+      - "${CTFD_PUBLISH:-0.0.0.0:8000}:8000"
+    depends_on:
+      - docker-socket-proxy
+      - ollama
+
+volumes:
+  ollama_data:
+  ctfd_uploads:
