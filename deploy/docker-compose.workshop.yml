@@ -67,6 +67,7 @@ services:
       args:
         DOCKER_CHALLENGES_GIT_URL: ${DOCKER_CHALLENGES_GIT_URL:-https://github.com/northdpole/CTFd-Docker-Challenges.git}
         DOCKER_CHALLENGES_REF: ${DOCKER_CHALLENGES_REF:-master}
+        DOCKER_CHALLENGES_CACHE_BUSTER: ${DOCKER_CHALLENGES_CACHE_BUSTER:-}
     restart: unless-stopped
     environment:
       UPLOAD_FOLDER: /var/uploads

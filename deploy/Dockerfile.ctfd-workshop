@@ -12,8 +12,10 @@ RUN apt-get update \
 
 ARG DOCKER_CHALLENGES_GIT_URL=https://github.com/northdpole/CTFd-Docker-Challenges.git
 ARG DOCKER_CHALLENGES_REF=master
+ARG DOCKER_CHALLENGES_CACHE_BUSTER=
 
-RUN git clone --depth 1 --branch "${DOCKER_CHALLENGES_REF}" "${DOCKER_CHALLENGES_GIT_URL}" /tmp/ctfd-dc \
+RUN echo "docker_challenges cache buster: ${DOCKER_CHALLENGES_CACHE_BUSTER}" \
+    && git clone --depth 1 --branch "${DOCKER_CHALLENGES_REF}" "${DOCKER_CHALLENGES_GIT_URL}" /tmp/ctfd-dc \
     && rm -rf /tmp/ctfd-dc/.git \
     && mv /tmp/ctfd-dc/docker_challenges /opt/CTFd/CTFd/plugins/docker_challenges \
     && rm -rf /tmp/ctfd-dc
