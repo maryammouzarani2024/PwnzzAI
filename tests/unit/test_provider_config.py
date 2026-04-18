@@ -43,3 +43,61 @@ def test_provider_snapshot_has_expected_fields(monkeypatch):
     snapshot = provider_config.provider_snapshot()
     assert snapshot["model_provider"] == "ollama"
     assert snapshot["ollama_model"] == "mistral:7b"
+    assert snapshot["resolved_litellm_model"] == "openai/gpt-4o-mini"
+    assert snapshot["api_response_model_type"] == "openai"
+
+
+def test_resolved_litellm_model_default(monkeypatch):
+    monkeypatch.delenv("LITELLM_MODEL", raising=False)
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-4o-mini")
+    provider_config = _reload_provider_config()
+    assert provider_config.resolved_litellm_model() == "openai/gpt-4o-mini"
+
+
+def test_resolved_litellm_model_explicit(monkeypatch):
+    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-2.0-flash")
+    provider_config = _reload_provider_config()
+    assert provider_config.resolved_litellm_model() == "gemini/gemini-2.0-flash"
+
+
+def test_llm_ui_snapshot_defaults_openai(monkeypatch):
+    monkeypatch.delenv("LITELLM_MODEL", raising=False)
+    monkeypatch.delenv("LLM_UI_PROVIDER_NAME", raising=False)
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-4o-mini")
+    provider_config = _reload_provider_config()
+    ui = provider_config.llm_ui_snapshot()
+    assert ui["provider_name"] == "OpenAI"
+    assert ui["tab_cloud_title"] == "OpenAI model"
+    assert "OpenAI" in ui["status_connected"]
+    assert provider_config.api_response_model_type() == "openai"
+
+
+def test_llm_ui_snapshot_gemini(monkeypatch):
+    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-2.0-flash")
+    monkeypatch.delenv("LLM_UI_PROVIDER_NAME", raising=False)
+    provider_config = _reload_provider_config()
+    ui = provider_config.llm_ui_snapshot()
+    assert ui["provider_name"] == "Google Gemini"
+    assert provider_config.api_response_model_type() == "gemini"
+
+
+def test_llm_ui_provider_name_override(monkeypatch):
+    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-2.0-flash")
+    monkeypatch.setenv("LLM_UI_PROVIDER_NAME", "Custom Cloud")
+    provider_config = _reload_provider_config()
+    ui = provider_config.llm_ui_snapshot()
+    assert ui["provider_name"] == "Custom Cloud"
+
+
+def test_cloud_api_key_valid_openai(monkeypatch):
+    monkeypatch.delenv("LITELLM_MODEL", raising=False)
+    provider_config = _reload_provider_config()
+    assert provider_config.cloud_api_key_valid("sk-abc123") is True
+    assert provider_config.cloud_api_key_valid("not-sk") is False
+
+
+def test_cloud_api_key_valid_non_openai(monkeypatch):
+    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-2.0-flash")
+    provider_config = _reload_provider_config()
+    assert provider_config.cloud_api_key_valid("AIzaSyDummyKey0000") is True
+    assert provider_config.cloud_api_key_valid("short") is False
