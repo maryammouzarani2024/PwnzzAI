@@ -2,17 +2,26 @@
 
 This directory runs **[CTFd](https://github.com/CTFd/CTFd)** with the **docker_challenges** plugin (**cloned from [northdpole/CTFd-Docker-Challenges](https://github.com/northdpole/CTFd-Docker-Challenges)** — a fork of [offsecginger/CTFd-Docker-Challenges](https://github.com/offsecginger/CTFd-Docker-Challenges) with compatibility fixes — at CTFd image build time), plus a shared **[Ollama](https://ollama.com/)** service and a **PwnzzAI** image that participants spawn per session from the scoreboard.
 
-Setup is **two steps**: (1) bootstrap Docker, the workshop image, and the stack; (2) after the CTFd setup wizard, register the challenge with an **admin API token**. The registration script also **applies Docker API settings** (`docker-socket-proxy:2375`) inside the local `ctfd` container so you do not need to use Admin → Docker Config manually for the default stack.
+Setup is **two steps**: (1) setup model infra + CTFd with a single command; (2) after the CTFd setup wizard, register the challenge with an **admin API token**. The registration script also **applies Docker API settings** (`docker-socket-proxy:2375`) inside the local `ctfd` container so you do not need to use Admin → Docker Config manually for the default stack.
 
 ## What gets installed
 
 | Piece | Role |
 |--------|------|
 | Docker Engine | Host runtime; the plugin creates per-user containers via the Docker API. |
-| `deploy/docker-compose.workshop.yml` | Brings up **Ollama**, **docker-socket-proxy** (restricted Docker API), and **CTFd** (custom image that includes the plugin). |
-| Workshop image (`pwnzzai-workshop:latest` by default) | Built from `deploy/Dockerfile.pwnzzai-workshop` — Flask app only; talks to Ollama over the Docker bridge gateway. |
+| `deploy/docker-compose.workshop.yml` | Brings up **docker-socket-proxy**, **CTFd**, and (by default) **one** shared **Ollama** container with GPU (`gpus: all`). The Ollama service uses Compose profile **`local-ollama`** (enabled by default via **`COMPOSE_PROFILES`**). |
+| Workshop image (`pwnzzai-workshop:latest` by default) | Built from `deploy/Dockerfile.pwnzzai-workshop` — Flask only; **`OLLAMA_HOST`** is baked in so **every** spawned participant container talks to the **same** model endpoint (not one Ollama per user). |
 
 Related files: **`deploy/`** (compose, Dockerfiles), **`deploy/register_pwnzzai_challenge.py`** (API helper used by step 2).
+
+### One shared model endpoint, many Pwnzai containers
+
+- **CTFd** and **docker-socket-proxy** are separate from inference. **Ollama** (when enabled) is a **single** long-lived container with its own image and volume (`ollama_data`). It is **not** embedded in each challenge instance.
+- Each participant gets a **Pwnzai Flask** container from the workshop image. Those instances are **stateless with respect to models**: they all use the **`OLLAMA_HOST`** value that was baked in at **image build time** (typically `http://<docker0-gateway>:11434` toward the host-published Ollama port).
+- **You do not** run one model container per participant. Many Pwnzai containers → **one** Ollama (or **one** remote Ollama URL).
+- **GPU** is attached only to the **Ollama** service (`gpus: all`). Install the **NVIDIA Container Toolkit** on the host so the daemon can schedule GPU workloads. If `docker compose up` fails on GPU, remove or comment the `gpus:` line for CPU-only labs.
+- **Separate host (remote GPU)**: On the GPU machine, run Ollama with port **11434** reachable from the CTFd host. In **`.env`**, set **`OLLAMA_HOST=http://<gpu-host-ip>:11434`** before **`bootstrap`** / workshop image build, and set **`COMPOSE_PROFILES=`** (empty) or remove **`local-ollama`** from the profile list so this compose file **does not** start a second Ollama on the CTFd host (avoids port **11434** conflicts). `setup-model-and-ctfd.sh` skips local port checks and local `ollama pull` when the local profile is off.
+- **Conflict checks**: `scripts/ctfd_setup/setup-model-and-ctfd.sh` sources **`shared-model-validate.inc.sh`** to detect a bad **11434** bind and to assert a single local **`ollama`** service when the **`local-ollama`** profile is enabled. Compose project name is **`pwnzzai-workshop`** (see `name:` in the compose file).
 
 ### `docker_challenges` plugin (Git clone)
 
@@ -36,7 +45,7 @@ If you already ran the bootstrap and only need to **rebuild the scoreboard** (CT
 ./scripts/ctfd_setup/redeploy-ctfd-workshop.sh
 ```
 
-The script rebuilds the **`ctfd`** image and restarts that container. It does **not** reinstall Docker, rebuild the PwnzzAI workshop image, or restart Ollama unless you use the full bootstrap again. The repo-root **`.env`** is loaded; **`DOCKER_CHALLENGES_PUBLIC_HOST`** must be set (same rules as bootstrap).
+The script rebuilds the **`ctfd`** image and restarts that container. It ensures **`docker-socket-proxy`** is up and, when **`COMPOSE_PROFILES`** includes **`local-ollama`**, restarts the **shared Ollama** service. It does **not** reinstall Docker or rebuild the PwnzzAI workshop image (use bootstrap / `setup-model-and-ctfd.sh` for that). The repo-root **`.env`** is loaded; **`DOCKER_CHALLENGES_PUBLIC_HOST`** must be set (same rules as bootstrap).
 
 ### Teardown (stop CTFd, Ollama, and the workshop stack)
 
@@ -59,8 +68,8 @@ From the **repository root**:
 ```bash
 cp .env.example .env
 # Edit .env: set DOCKER_CHALLENGES_PUBLIC_HOST to this machine's public hostname or IP (required).
-chmod +x scripts/ctfd_setup/bootstrap-ctfd-workshop.sh
-./scripts/ctfd_setup/bootstrap-ctfd-workshop.sh
+chmod +x scripts/ctfd_setup/setup-model-and-ctfd.sh
+./scripts/ctfd_setup/setup-model-and-ctfd.sh
 ```
 
 **Required:** a repo-root **`.env`** with **`DOCKER_CHALLENGES_PUBLIC_HOST`** (see **`.env.example`**). Bootstrap, redeploy, **`docker compose`** for CTFd, and the register scripts will fail without it. You can use **`PWNZZAI_PUBLIC_HOST`** instead; scripts treat it as an alias.
@@ -81,12 +90,12 @@ If you use **`deploy/docker-compose.workshop.yml`** on this machine, **step 2’
 After step 1 and the CTFd wizard, run:
 
 ```bash
-chmod +x scripts/ctfd_setup/register-pwnzzai-challenge.sh
+chmod +x scripts/ctfd_setup/setup-pwnzzai-on-ctfd.sh
 export CTFD_URL='http://127.0.0.1:8000'   # change if CTFd is elsewhere
 export CTFD_API_TOKEN='paste-token-here'
 # Optional:
 # export CHALLENGE_FLAG='flag{example}'
-./scripts/ctfd_setup/register-pwnzzai-challenge.sh
+./scripts/ctfd_setup/setup-pwnzzai-on-ctfd.sh
 ```
 
 You can put **`CTFD_API_TOKEN`** (and optionally **`CTFD_URL`**, **`CHALLENGE_FLAG`**) in **`.env`** instead of exporting in the shell; the script sources the repo-root `.env` if present.
@@ -112,7 +121,12 @@ If present in `.env` (or the environment when you run the bootstrap), these are 
 - `SECRET_KEY` — PwnzzAI Flask secret
 - `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GEMINI_MODEL` — optional Gemini routing
 - `OLLAMA_HOST` — URL the app uses to reach Ollama (see next section)
+- `MODEL_PROVIDER` — `ollama`, `openai`, or `auto`
+- `OLLAMA_MODEL` — model tag for the shared Ollama container
 - `OLLAMA_FALLBACK_MODEL`
+- `OPENAI_API_KEY`, `OPENAI_MODEL`
+- `ALLOW_PRECONFIGURED_OPENAI_KEY`, `PREFER_SESSION_OPENAI_KEY`
+- `MODEL_TIMEOUT_SECONDS`, `ENABLE_PROVIDER_FALLBACK`
 
 If **`OLLAMA_HOST`** is unset, the bootstrap picks a default aimed at containers on the default Docker bridge, typically **`http://<docker0-gateway>:11434`** or **`http://172.17.0.1:11434`**, so user instances can reach Ollama published on the host.
 
@@ -124,6 +138,8 @@ If **`OLLAMA_HOST`** is unset, the bootstrap picks a default aimed at containers
 - **`CTFD_SECRET_KEY`** — forwarded into the CTFd container as `SECRET_KEY` (recommended in production).
 - **`PWNZZAI_ROOT`** — if the repo is not two levels above the script, set this to the repo root explicitly.
 - **`PWNZZAI_WORKSHOP_IMAGE`** — override the tag used for the workshop image (default `pwnzzai-workshop:latest`).
+- **`COMPOSE_PROFILES`** — include **`local-ollama`** (default) to start the **single** shared Ollama container on this host. Set **empty** when using a **remote** model host only (see [One shared model endpoint](#one-shared-model-endpoint-many-pwnzai-containers)).
+- **`OLLAMA_PUBLISH`** — host bind for Ollama (default **`0.0.0.0:11434`**). Narrow in production.
 
 ### Variables for step 2 (register script)
 
@@ -192,14 +208,41 @@ Adjust package installation and paths for **Amazon Linux** or other AMIs if you 
 - **Participants’ apps cannot reach Ollama** — Check `OLLAMA_HOST` baked into the image, firewall rules, and that Ollama is listening on the host port expected from the bridge gateway.
 - **Challenge registration fails** — Complete the CTFd setup wizard first; ensure the API token is valid and `CTFD_URL` matches where CTFd listens. If registration fails on `docker compose exec`, set **`CTFD_SKIP_DOCKER_CONFIG=1`** and configure **Admin → Docker Config** manually.
 
+## Verification checkpoints
+
+Run the checkpoint gates after both setup scripts complete:
+
+```bash
+chmod +x scripts/qa/run-model-integration-gates.sh
+./scripts/qa/run-model-integration-gates.sh
+```
+
+Gate 2 and gate 4 run the same **standalone model probes** as `scripts/docker-smoke-test.sh` (via `scripts/qa/probes-standalone.inc.sh`): HTTP checks on `/`, `/basics`, `/login`, JSON validation on `/check-ollama-status`, a real `POST /chat-with-ollama-dos`, and validation that an empty message returns HTTP 400. Optional: set **`EXPECTED_OLLAMA_MODEL`** (e.g. `mistral:7b`) so the probe fails if that tag is not present in Ollama’s model list (after `ollama pull`).
+
+Standalone smoke (bundled + external Ollama) before CTFd:
+
+```bash
+chmod +x scripts/docker-smoke-test.sh
+./scripts/docker-smoke-test.sh
+```
+
+Run the shared-model concurrency/SLA check (default 20 users, 60s timeout):
+
+```bash
+chmod +x scripts/qa/load-test-shared-model.sh
+USERS=20 TIMEOUT_SECONDS=60 ./scripts/qa/load-test-shared-model.sh
+```
+
 ## Files in this directory
 
 | File | Purpose |
 |------|---------|
 | `bootstrap-ctfd-workshop.sh` | Step 1: Docker, workshop image, compose stack. Prints instructions for step 2. |
+| `setup-model-and-ctfd.sh` | Preferred Step 1 wrapper: runs bootstrap and verifies shared model availability. |
 | `redeploy-ctfd-workshop.sh` | Rebuild and restart only the CTFd container (e.g. after changing plugin Git URL/ref in `.env`). |
 | `teardown-ctfd-workshop.sh` | Stop and remove the compose stack; optional `--volumes`, `--rmi-workshop`. |
 | `register-pwnzzai-challenge.sh` | Step 2: Creates the PwnzzAI docker challenge via CTFd API (needs admin token). |
+| `setup-pwnzzai-on-ctfd.sh` | Preferred Step 2 wrapper for challenge registration. |
 | `reregister-pwnzzai-challenge.sh` | Deletes challenges matching `CHALLENGE_NAME`, then creates the challenge again. |
 | `README.md` | This document. |
 
