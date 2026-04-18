@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from datetime import datetime
-from openai import OpenAI
+from application.llm_chat import chat_completion
 from application.model import User, Pizza
 from flask import session
 from sqlalchemy import func
@@ -10,16 +10,14 @@ DEFAULT_MODEL = "gpt-4o-mini"  # You can change this to any OpenAI model availab
 
 
 def openai_chat(prompt: str, api_key: str) -> str:
-    """Wrapper around OpenAI chat completion with explicit API key"""
-    client = OpenAI(api_key=api_key)
-    response = client.chat.completions.create(
+    """Wrapper around cloud LLM chat completion with explicit API key"""
+    text = chat_completion(
+        [{"role": "user", "content": prompt}],
+        api_key=api_key,
         model=DEFAULT_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2  # keep output stable
+        temperature=0.2,
     )
-    
-    
-    return response.choices[0].message.content.strip()
+    return text.strip()
 
 
 def extract_order(order_text: str, api_key: str):

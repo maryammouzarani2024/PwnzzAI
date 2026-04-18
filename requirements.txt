@@ -12,6 +12,7 @@ numpy==1.26.4
 
 # AI/LLM Integration
 openai==1.69.0
+litellm==1.55.8
 sentence-transformers==5.0.0
 faiss-cpu==1.11.0.post1
 

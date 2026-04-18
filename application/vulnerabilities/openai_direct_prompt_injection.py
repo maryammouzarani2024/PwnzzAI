@@ -1,4 +1,4 @@
-from openai import OpenAI
+from application.llm_chat import chat_completion
 
 # Define prompt levels
 system_prompts = {
@@ -13,21 +13,18 @@ system_prompts = {
 
 def chat_with_openai_direct_prompt_injection(user_message: str, api_key: str, level: str = "1") -> str:
     try:
-        client = OpenAI(api_key=api_key)
-
         system_prompt = system_prompts.get(level, system_prompts["1"])
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
+        return chat_completion(
+            [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
             ],
+            api_key=api_key,
+            model="gpt-3.5-turbo",
             max_tokens=500,
-            temperature=0.7
+            temperature=0.7,
         )
-
-        return response.choices[0].message.content
 
     except Exception as e:
         return f"Error: {str(e)}"
