@@ -13,6 +13,22 @@ sys.path.insert(0, str(project_root))
 
 # Set environment variable to prevent route initialization during tests
 os.environ['TESTING'] = 'True'
+os.environ.setdefault('OPENAI_MODEL', 'gpt-4o-mini')
+
+# Default cloud LLM config for tests (avoid inheriting workshop LITELLM_* from the shell).
+for _k in (
+    'LITELLM_MODEL',
+    'LAB_CLOUD_LLM_MODEL',
+    'LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY',
+    'LLM_UI_PROVIDER_NAME',
+    'LLM_UI_KEY_LABEL',
+    'LLM_UI_KEY_PLACEHOLDER',
+    'LLM_UI_DOCS_URL',
+    'LLM_UI_DOCS_ANCHOR',
+    'LLM_UI_LAB_HEADING',
+    'LLM_UI_LAB_DESCRIPTION',
+):
+    os.environ.pop(_k, None)
 
 from application import app, db
 from application.model import User, Pizza, Comment, Order

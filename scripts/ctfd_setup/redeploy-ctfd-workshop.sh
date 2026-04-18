@@ -31,6 +31,8 @@ if [[ -f "$ENV_FILE" ]]; then
   set +a
 fi
 
+export COMPOSE_PROFILES="${COMPOSE_PROFILES:-local-ollama}"
+
 # shellcheck source=scripts/ctfd_setup/require-public-host.inc.sh
 source "${PWNZZAI_ROOT}/scripts/ctfd_setup/require-public-host.inc.sh"
 require_docker_challenges_public_host "${ENV_FILE}"
@@ -56,11 +58,29 @@ fi
 
 log_info "Rebuilding the CTFd image (this can take a minute)..."
 cd "${PWNZZAI_ROOT}/deploy"
+# Force-refresh plugin clone layers on every redeploy while preserving other Docker cache layers.
+DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER:-$(date +%s)}"
+log_info "Using DOCKER_CHALLENGES_CACHE_BUSTER=${DOCKER_CHALLENGES_CACHE_BUSTER}"
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
+  DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
   dc -f docker-compose.workshop.yml build ctfd
 
 log_info "Restarting the CTFd container with the new image..."
+# Ensure dependencies are up: redeploy uses --no-deps for ctfd and otherwise can
+# leave ctfd running without docker-socket-proxy/ollama after partial restarts.
+log_info "Ensuring docker-socket-proxy is running..."
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
+  DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
+  dc -f docker-compose.workshop.yml up -d docker-socket-proxy
+if [[ "${COMPOSE_PROFILES:-local-ollama}" == *local-ollama* ]]; then
+  log_info "Ensuring local shared ollama service is running (profile local-ollama)..."
+  CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
+    DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
+    dc -f docker-compose.workshop.yml up -d ollama
+fi
+
+CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
+  DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
   dc -f docker-compose.workshop.yml up -d --force-recreate --no-deps ctfd
 
 log_info "Waiting for CTFd to answer on port 8000..."

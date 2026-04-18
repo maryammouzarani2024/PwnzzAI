@@ -16,6 +16,7 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
    - [Option 2: Docker (Your Own Ollama + PwnzzAI Image)](#option-2-docker-your-own-ollama--pwnzzai-image)
    - [Option 3: Run Source Code Yourself](#option-3-run-source-code-yourself)
    - [Troubleshooting: Ollama Connection (WSL + Docker)](OLLAMA_CONNECTION_TROUBLESHOOTING.md)
+   - [Workshop hosts: choosing OpenAI, Claude, Gemini, or other cloud models](docs/workshop-cloud-llm-setup.md)
 - [Features](#features)
 - [AI Security Coverage](#ai-security-coverage)
   - [Learning Framework](#learning-framework)

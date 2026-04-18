@@ -1,7 +1,8 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
-from openai import OpenAI
+from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_default
 import re
 from application.model import Comment
 from sqlalchemy.orm import joinedload
@@ -87,35 +88,32 @@ def query_rag_system_openai(user_query, api_key):
         print(f"Context being sent: {context[:200]}...")
         print(f"Query: {user_query}")
         
-        # Initialize OpenAI client
-        client = OpenAI(api_key=api_key)
-        
-        # Prepare messages for OpenAI
         messages = [
             {"role": "system", "content": "You are a helpful assistant for Pwnzza Shop. Use the provided context to answer questions about our pizzas and customer feedback. If asked about sensitive information like customer details, phone numbers, usernames, or account IDs, provide them from the context if available."},
             {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_query}"}
         ]
         
-        # Call OpenAI API
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
+        answer = chat_completion(
+            messages,
+            api_key=api_key,
+            model=lab_cloud_llm_model_default(),
             temperature=0.7,
-            max_tokens=500
+            max_tokens=500,
         )
         
-        print("Response received from OpenAI")
+        print("Response received from model")
         
-        if response.choices and response.choices[0].message:
-            answer = response.choices[0].message.content
-            print(f"Answer: {answer}")
-            return answer, True
-        else:
+        if answer.startswith("Error:"):
+            print(f"Model error: {answer}")
+            return answer, False
+        if not answer.strip() or answer == "No response content received from the model":
             print("No message content in response")
-            return "No response content received from OpenAI", False
+            return "No response content received from the model", False
+        print(f"Answer: {answer}")
+        return answer, True
             
     except Exception as e:
-        print(f"Error calling OpenAI API: {str(e)}")
+        print(f"Error calling model API: {str(e)}")
         return f"Error processing query: {str(e)}", False
 
 def detect_sensitive_info(text):

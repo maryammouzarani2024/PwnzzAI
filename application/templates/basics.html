@@ -236,19 +236,24 @@
                         
                         <div class="setup-options">
                             <div class="setup-option">
-                                <h3><i class="fas fa-cloud"></i> Option 1: OpenAI API (Paid)</h3>
-                                <p>Use GPT models through OpenAI's API. This requires an API key and usage will be charged to your account.</p>
+                                <h3><i class="fas fa-cloud"></i> {{ llm_ui.lab_heading }}</h3>
+                                <p>{{ llm_ui.lab_description }}</p>
                                 
                                 <div class="api-key-section">
-                                    <label for="openai-api-key">OpenAI API Key:</label>
+                                    <label for="openai-api-key">{{ llm_ui.key_label }}</label>
                                     <div class="api-key-input">
-                                        <input type="password" id="openai-api-key" placeholder="Enter your OpenAI API key" class="form-control">
+                                        <input type="password" id="openai-api-key" placeholder="{{ llm_ui.key_placeholder }}" class="form-control">
                                         <button id="save-api-key" class="btn">Save API Key</button>
                                     </div>
                                     <div id="api-key-status" class="status-message"></div>
                                     <p class="help-text">
-                                        <small>Your API key will be stored in your session and used across all vulnerability demonstrations. 
-                                        Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>.</small>
+                                        <small>Your API key will be stored in your session and used across all vulnerability demonstrations.
+                                        {% if llm_ui.docs_url %}
+                                        Get your API key from <a href="{{ llm_ui.docs_url }}" target="_blank">{{ llm_ui.docs_anchor }}</a>.
+                                        {% else %}
+                                        See your provider's documentation to obtain an API key ({{ llm_ui.docs_anchor }}).
+                                        {% endif %}
+                                        </small>
                                     </p>
                                 </div>
                             </div>
@@ -287,7 +292,7 @@
                         
                         <div class="setup-recommendation">
                             <p><strong>Recommendation:</strong> For the best learning experience, we recommend starting with Ollama (free) 
-                            and optionally adding OpenAI API access for comparison between open-source and frontier models.</p>
+                            and optionally adding cloud LLM API access for comparison between open-source and frontier models.</p>
                         </div>
                     </div>
                 </div>
@@ -305,6 +310,7 @@
     </style>
     
     <script>
+        const LLM_UI = {{ llm_ui | tojson }};
         document.getElementById('generate-model').addEventListener('click', async function() {
             // Show loading indicator
             document.getElementById('loading-indicator').style.display = 'block';
@@ -447,7 +453,7 @@
                 
                 if (data.success) {
                     statusDiv.className = 'status-message status-success';
-                    statusDiv.textContent = 'API key saved successfully! You can now use OpenAI models across all vulnerability demonstrations.';
+                    statusDiv.textContent = 'API key saved successfully! ' + LLM_UI.save_success_followup;
                     document.getElementById('openai-api-key').value = '';
                 } else {
                     statusDiv.className = 'status-message status-error';
@@ -552,7 +558,7 @@
                 if (data.has_key) {
                     const statusDiv = document.getElementById('api-key-status');
                     statusDiv.className = 'status-message status-success';
-                    statusDiv.textContent = 'OpenAI API key is already configured.';
+                    statusDiv.textContent = LLM_UI.provider_name + ' API key is already configured.';
                 }
             } catch (error) {
                 console.log('Could not check API key status');

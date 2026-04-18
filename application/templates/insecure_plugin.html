@@ -51,7 +51,7 @@
                 <div class="model-tabs">
                     <div class="tab-headers">
                         <div class="tab-header active" data-tab="blenderbot-model">Free Model</div>
-                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
+                        <div class="tab-header" data-tab="openai-model">{{ llm_ui.tab_cloud_title }}</div>
                     </div>
                     
                     <!-- BlenderBot Tab Content -->
@@ -149,12 +149,12 @@
                                                                 <div class="model-implementation-section">
                                                                     <!-- OpenAI Status Section -->
                                                                     <div class="token-section openai-token-section">
-                                                                        <h3>OpenAI API Status</h3>
+                                                                        <h3>{{ llm_ui.provider_name }} API status</h3>
                                                                         <div id="openai-api-status" class="api-status disconnected">
                                                                             <i class="fas fa-circle-xmark"></i> Checking API key...
                                                                         </div>
                                                                         <p class="help-text">
-                                                                            <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                                                            <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
                                                                         </p>
                                                                     </div>
                                                                     
@@ -173,8 +173,8 @@
                                                                     
                                                                     <!-- OpenAI Vulnerability Explanation -->
                                                                     <div class="security-vulnerability">
-                                                                        <h3><i class="fas"></i> OpenAI API Function/Tool Calling with SQL Injection</h3>
-                                                                        <p>This implementation uses OpenAI's function calling feature but creates a critical SQL injection vulnerability, you can view the code here:</p>
+                                                                        <h3><i class="fas"></i> Cloud LLM function/tool calling with SQL injection</h3>
+                                                                        <p>This implementation uses the model provider's tool-calling feature but creates a critical SQL injection vulnerability, you can view the code here:</p>
                                                                         
                                                                         <details class="code-dropdown">
                                                                             <summary class="code-dropdown-title">View Vulnerable Code</summary>
@@ -404,6 +404,7 @@ def secure_function_executor(function_name, params):
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             
             // BlenderBot tab elements
             const userMessageInput = document.getElementById('user-message');
@@ -443,10 +444,11 @@ def secure_function_executor(function_name, params):
                     console.log('API key check result:', data);
                     
                     if (data.has_key) {
-                        console.log('API key found in session, enabling OpenAI interface');
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
+                        console.log('API key found in session, enabling cloud LLM interface');
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status connected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         if (openaiUserMessageInput) {
                             openaiUserMessageInput.disabled = false;
@@ -456,7 +458,7 @@ def secure_function_executor(function_name, params):
                         }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to help with pizza prices using OpenAI. You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'");
+                            addBotMessage(openaiChatMessages, "API key detected from Lab Setup! I'm ready to help with pizza prices using " + ui.provider_name + ". You can ask questions like 'What's the price of a Pepperoni pizza?' or 'How much does a Margherita cost?'");
                         }
                     } else {
                         console.log('No API key found in session');

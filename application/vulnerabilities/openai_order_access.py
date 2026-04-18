@@ -1,6 +1,7 @@
 import re
 from flask import  session
 from application.model import Order
+from application.provider_config import lab_cloud_llm_model_default, llm_ui_snapshot
 
 def extract_username_from_prompt(prompt):
     """Extract username from user prompt"""
@@ -59,12 +60,10 @@ def get_user_orders_data(target_username=None):
         return f"Error accessing order data: {e}"
 
 def query_openai_with_orders(user_query, api_token):
-    """Query OpenAI model with access to user orders"""
+    """Query cloud LLM with access to user orders"""
     try:
-        import openai
-        
-        client = openai.OpenAI(api_key=api_token)
-        
+        from application.llm_chat import chat_completion
+
         # Extract username from prompt (VULNERABLE)
         target_username = extract_username_from_prompt(user_query)
         
@@ -78,21 +77,23 @@ def query_openai_with_orders(user_query, api_token):
 
 Answer questions about the user's orders based on this information. Be helpful and provide details when asked about their previous orders."""
 
-        response_obj = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
+        llm_response = chat_completion(
+            [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_query}
             ],
+            api_key=api_token,
+            model=lab_cloud_llm_model_default(),
             max_tokens=300,
-            temperature=0.7
+            temperature=0.7,
         )
-        
-        llm_response = response_obj.choices[0].message.content
+        if llm_response.startswith("Error:"):
+            return llm_response, False
         return llm_response, True
         
     except Exception as e:
-        return f"Error connecting to OpenAI: {str(e)}", False
+        name = llm_ui_snapshot()["provider_name"]
+        return f"Error connecting to {name}: {str(e)}", False
 
 def detect_order_access(response):
     """Detect if order information was disclosed in the response"""

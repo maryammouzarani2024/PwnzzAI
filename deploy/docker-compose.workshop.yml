@@ -1,16 +1,24 @@
-# CTFd workshop stack: CTFd + Docker API proxy + Ollama + (optional) challenge registration.
+# CTFd workshop stack: CTFd + Docker API proxy + optional local Ollama + challenge registration.
+#
+# Architecture (important):
+# - ONE shared Ollama container (or ONE remote Ollama host) holds models. Every spawned Pwnzai
+#   challenge container uses the same OLLAMA_HOST baked into the workshop image — there is
+#   NOT one model container per participant.
+# - Local GPU: enable profile `local-ollama` (default COMPOSE_PROFILES=local-ollama in .env.example).
+# - Remote GPU on another machine: set COMPOSE_PROFILES= (empty) or unset local-ollama, set
+#   OLLAMA_HOST=http://<gpu-host>:11434 before building the workshop image (see README).
 #
 # Usage from repo root:
-#   export $(grep -v '^#' .env | xargs)   # optional
 #   docker compose -f deploy/docker-compose.workshop.yml up -d --build
 #
-# CTFd image: docker_challenges is git-cloned at build time (default: northdpole/CTFd-Docker-Challenges fork).
-#
-# PwnzzAI challenge containers reach Ollama via the default Docker bridge gateway
-# (OLLAMA_HOST baked into the image, default http://172.17.0.1:11434).
+# CTFd image: docker_challenges is git-cloned at build time (default: northdpole fork).
+
+name: pwnzzai-workshop
 
 services:
   ollama:
+    profiles:
+      - local-ollama
     image: ollama/ollama:latest
     restart: unless-stopped
     volumes:
@@ -18,9 +26,11 @@ services:
     # Published on the host so per-user challenge containers can use OLLAMA_HOST
     # like http://<docker0-gateway>:11434 (default bridge). Lock down port 11434 in your security group.
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PUBLISH:-0.0.0.0:11434}:11434"
     environment:
       - OLLAMA_KEEP_ALIVE=-1
+    # GPU: requires NVIDIA Container Toolkit on the host (nvidia-smi on host).
+    gpus: all
 
   # Restricted Docker API for CTFd. HAProxy matches /containers/*/start|stop before generic /containers,
   # so ALLOW_START / ALLOW_STOP must be enabled or container start returns 403 → plugin shows 500.
@@ -67,6 +77,7 @@ services:
       args:
         DOCKER_CHALLENGES_GIT_URL: ${DOCKER_CHALLENGES_GIT_URL:-https://github.com/northdpole/CTFd-Docker-Challenges.git}
         DOCKER_CHALLENGES_REF: ${DOCKER_CHALLENGES_REF:-master}
+        DOCKER_CHALLENGES_CACHE_BUSTER: ${DOCKER_CHALLENGES_CACHE_BUSTER:-}
     restart: unless-stopped
     environment:
       UPLOAD_FOLDER: /var/uploads
@@ -80,7 +91,6 @@ services:
       - "${CTFD_PUBLISH:-0.0.0.0:8000}:8000"
     depends_on:
       - docker-socket-proxy
-      - ollama
 
 volumes:
   ollama_data:

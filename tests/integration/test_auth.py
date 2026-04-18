@@ -151,6 +151,8 @@ class TestLabSetup:
         data = json.loads(response.data)
         assert 'has_key' in data
         assert data['has_key'] is False
+        assert 'llm_ui' in data
+        assert data['llm_ui']['provider_name'] == 'OpenAI'
 
     def test_check_openai_api_key_after_setting(self, client):
         """Test checking API key after setting it."""
@@ -166,6 +168,7 @@ class TestLabSetup:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data['has_key'] is True
+        assert data['llm_ui']['provider_name'] == 'OpenAI'
 
     def test_check_ollama_status(self, client):
         """Test checking Ollama status endpoint."""

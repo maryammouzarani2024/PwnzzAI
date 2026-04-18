@@ -12,7 +12,7 @@ import os
 
 # Ollama API configuration
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-DEFAULT_MODEL = "mistral:7b"
+DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", os.environ.get("OLLAMA_FALLBACK_MODEL", "mistral:7b"))
 
 def chat_with_ollama(user_message, model_name=DEFAULT_MODEL):
     """Send a message to Ollama and get the response"""

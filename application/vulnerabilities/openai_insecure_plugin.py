@@ -1,6 +1,12 @@
 import json
 import sqlite3
-from openai import OpenAI
+
+from application.llm_chat import (
+    completion_followup,
+    completion_with_tools,
+    format_tool_error,
+)
+from application.provider_config import lab_cloud_llm_model_default
 
 def get_pizza_price(pizza_type):
     """
@@ -69,21 +75,18 @@ price_function = {
 def chat_with_openai(user_input, api_key):
     
     try:
-        
-        client = OpenAI(api_key=api_key)
-        
-        # Call OpenAI API with function calling
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Using the latest version of GPT-3.5-turbo
-            messages=[
+        response = completion_with_tools(
+            [
                 {"role": "system", "content": "You are a helpful pizza shop assistant that can provide prices for different pizza types. "},
                 {"role": "user", "content": user_input},
             ],
+            api_key=api_key,
             tools=[{
                 "type": "function",
                 "function": price_function
             }],
-            tool_choice="auto"
+            tool_choice="auto",
+            model=lab_cloud_llm_model_default(),
         )
         
         # Check if the model wants to call a function
@@ -103,9 +106,8 @@ def chat_with_openai(user_input, api_key):
                         print(f"DEBUG: get_pizza_price returned: {price}")
                         
                         # Get a response that includes the function result
-                        second_response = client.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            messages=[
+                        second_response = completion_followup(
+                            [
                                 {"role": "system", "content": "You are a helpful pizza shop assistant that can provide prices for different pizza types."},
                                 {"role": "user", "content": user_input},
                                 {"role": "assistant", "content": None, "tool_calls": [
@@ -120,20 +122,16 @@ def chat_with_openai(user_input, api_key):
                                 ]},
                                 {"role": "tool", "tool_call_id": tool_call.id, "content": f"The price for {pizza_type} pizza is {price}"}
                             ],
+                            api_key=api_key,
+                            model=lab_cloud_llm_model_default(),
                         )
-                        print(f"DEBUG: Tool call content sent to OpenAI: 'The price for {pizza_type} pizza is {price}'")
+                        print(f"DEBUG: Tool call content sent to model: 'The price for {pizza_type} pizza is {price}'")
                         final_response = second_response.choices[0].message.content
-                        print(f"DEBUG: Final OpenAI response: {final_response}")
+                        print(f"DEBUG: Final model response: {final_response}")
                         return final_response
         
         # Return the original response if no function was called
         return message.content
     
     except Exception as e:
-        # Check for common OpenAI API errors
-        if "authentication" in str(e).lower() or "api key" in str(e).lower():
-            return "Error: Invalid OpenAI API key. Please provide a valid API key."
-        elif "rate limit" in str(e).lower():
-            return "Error: OpenAI API rate limit exceeded. Please try again later."
-        else:
-            return f"Error: {str(e)}"
+        return format_tool_error(e)

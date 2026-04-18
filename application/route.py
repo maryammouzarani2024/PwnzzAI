@@ -17,9 +17,17 @@ from application import sentiment_model
 
 from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
 from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
+from application.provider_config import (
+    OLLAMA_HOST,
+    OLLAMA_MODEL,
+    api_response_model_type,
+    cloud_api_key_valid,
+    get_openai_api_key,
+    llm_ui_snapshot,
+)
 from werkzeug.utils import secure_filename
 
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_BASE_URL = OLLAMA_HOST
 
 
 
@@ -209,7 +217,7 @@ def test_openai_leakage():
         user_query = data.get('query', '')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -222,7 +230,7 @@ def test_openai_leakage():
         # If no API token provided, return clear error message
         if not api_token:
             return jsonify({
-                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['missing_key_error'],
                 'has_leakage': False,
                 'leaked_info': [],
                 'model_type': 'error'
@@ -456,7 +464,7 @@ def chat_with_pizza_assistant_direct_prompt():
         
         # The vulnerability: Directly passing user message to the LLM+plugin system
         # where the LLM can control function execution
-        response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name="mistral:7b")
+        response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name=OLLAMA_MODEL)
 
 
         return jsonify({'response': response})
@@ -475,18 +483,18 @@ def chat_with_openai_plugin():
         message = data.get('message', '')
         
         # Use OpenAI API key from session instead of user input
-        openai_api_key = session.get('openai_api_key', '')
+        openai_api_key = get_openai_api_key(session)
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
         
         # Import the OpenAI insecure plugin
         from application.vulnerabilities.openai_insecure_plugin import chat_with_openai
         
-        # VULNERABLE: Directly using user-provided API key with OpenAI
+        # VULNERABLE: Directly using user-provided API key with the configured cloud LLM
         response = chat_with_openai(message, openai_api_key)
         
         return jsonify({'response': response})
@@ -752,7 +760,7 @@ def test_openai_order_access():
         user_query = data.get('query', '')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -768,13 +776,13 @@ def test_openai_order_access():
                 'response': "You need to be logged in to access order information.",
                 'has_access_violation': False,
                 'accessed_info': [],
-                'model_type': 'openai'
+                'model_type': api_response_model_type()
             })
         
         # If no API token, return error
         if not api_token:
             return jsonify({
-                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['missing_key_error'],
                 'has_access_violation': False,
                 'accessed_info': [],
                 'model_type': 'error'
@@ -853,7 +861,7 @@ def test_openai_excessive_agency():
         
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -863,7 +871,7 @@ def test_openai_excessive_agency():
             
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please set up your OpenAI API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['excessive_agency_token_error'],
                 'model_type': 'error'
             })
         
@@ -902,9 +910,8 @@ def save_openai_api_key():
         if not api_key:
             return jsonify({'success': False, 'error': 'No API key provided'})
         
-        # Basic validation - OpenAI keys start with 'sk-'
-        if not api_key.startswith('sk-'):
-            return jsonify({'success': False, 'error': 'Invalid API key format. OpenAI keys start with sk-'})
+        if not cloud_api_key_valid(api_key):
+            return jsonify({'success': False, 'error': llm_ui_snapshot()['invalid_key_message']})
         
         # Store in session
         session['openai_api_key'] = api_key
@@ -917,11 +924,11 @@ def save_openai_api_key():
 @application.app.route('/check-openai-api-key')
 def check_openai_api_key():
     """Check if OpenAI API key is saved in session"""
-    has_key = 'openai_api_key' in session and session.get('openai_api_key', '').strip() != ''
+    has_key = get_openai_api_key(session) != ''
     print("Session check - has openai_api_key:", has_key)
     if has_key:
-        print("Session openai_api_key value:", session.get('openai_api_key', 'NOT_FOUND')[:10] + "...")
-    return jsonify({'has_key': has_key})
+        print("Session openai_api_key value:", get_openai_api_key(session)[:10] + "...")
+    return jsonify({'has_key': has_key, 'llm_ui': llm_ui_snapshot()})
 
 @application.app.route('/setup-ollama', methods=['POST'])
 def setup_ollama():
@@ -1067,7 +1074,7 @@ def test_openai_misinformation():
         user_query = data.get('query', '')
 
         # Get API token from session
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
 
         if not user_query:
             return jsonify({
@@ -1080,7 +1087,7 @@ def test_openai_misinformation():
         # If no API token, return error
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'response': llm_ui_snapshot()['misinformation_connect_hint'],
                 'has_misinformation': False,
                 'misinformation_detected': [],
                 'model_type': 'error'
@@ -1479,13 +1486,13 @@ def chat_with_openai_dos():
         message = data.get('message', '')
         
         # Use OpenAI API key from session instead of user input
-        openai_api_key = session.get('openai_api_key', '')
+        openai_api_key = get_openai_api_key(session)
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
         
         # Import the OpenAI DoS module
         from application.vulnerabilities.openai_dos import chat_with_openai
@@ -1510,13 +1517,13 @@ def chat_with_openai_plugin_direct_prompt():
         level = data.get('level', '1')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
 
         if not message:
             return jsonify({'error': 'No message provided'}), 400
 
         if not api_token:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
 
         from application.vulnerabilities.openai_direct_prompt_injection import chat_with_openai_direct_prompt_injection
 
@@ -1600,9 +1607,9 @@ def upload_qr_openai():
         return jsonify({'error': 'No file selected'}), 400
 
     # Get the OpenAI API key from the user's session
-    api_token = session.get('openai_api_key', '')
+    api_token = get_openai_api_key(session)
     if not api_token:
-        return jsonify({'error': 'OpenAI API key not found in session. Please set it in the Lab Setup.'}), 400
+        return jsonify({'error': llm_ui_snapshot()['session_key_missing_short']}), 400
 
     # Get the injection level from the form data sent by the JavaScript
     level = request.form.get('level', '1')
