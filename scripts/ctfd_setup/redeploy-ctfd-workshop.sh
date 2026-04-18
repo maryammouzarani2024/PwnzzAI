@@ -31,6 +31,8 @@ if [[ -f "$ENV_FILE" ]]; then
   set +a
 fi
 
+export COMPOSE_PROFILES="${COMPOSE_PROFILES:-local-ollama}"
+
 # shellcheck source=scripts/ctfd_setup/require-public-host.inc.sh
 source "${PWNZZAI_ROOT}/scripts/ctfd_setup/require-public-host.inc.sh"
 require_docker_challenges_public_host "${ENV_FILE}"
@@ -66,10 +68,16 @@ CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_C
 log_info "Restarting the CTFd container with the new image..."
 # Ensure dependencies are up: redeploy uses --no-deps for ctfd and otherwise can
 # leave ctfd running without docker-socket-proxy/ollama after partial restarts.
-log_info "Ensuring docker-socket-proxy and ollama are running..."
+log_info "Ensuring docker-socket-proxy is running..."
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
   DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
-  dc -f docker-compose.workshop.yml up -d docker-socket-proxy ollama
+  dc -f docker-compose.workshop.yml up -d docker-socket-proxy
+if [[ "${COMPOSE_PROFILES:-local-ollama}" == *local-ollama* ]]; then
+  log_info "Ensuring local shared ollama service is running (profile local-ollama)..."
+  CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
+    DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
+    dc -f docker-compose.workshop.yml up -d ollama
+fi
 
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
   DOCKER_CHALLENGES_CACHE_BUSTER="${DOCKER_CHALLENGES_CACHE_BUSTER}" \
