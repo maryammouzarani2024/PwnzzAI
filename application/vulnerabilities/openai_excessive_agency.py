@@ -2,11 +2,10 @@ import sqlite3
 import json
 from datetime import datetime
 from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_excessive_agency
 from application.model import User, Pizza
 from flask import session
 from sqlalchemy import func
-
-DEFAULT_MODEL = "gpt-4o-mini"  # You can change this to any OpenAI model available
 
 
 def openai_chat(prompt: str, api_key: str) -> str:
@@ -14,7 +13,7 @@ def openai_chat(prompt: str, api_key: str) -> str:
     text = chat_completion(
         [{"role": "user", "content": prompt}],
         api_key=api_key,
-        model=DEFAULT_MODEL,
+        model=lab_cloud_llm_model_excessive_agency(),
         temperature=0.2,
     )
     return text.strip()

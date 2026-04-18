@@ -4,6 +4,7 @@ This module provides a simple chat interface using OpenAI's API.
 """
 
 from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_default
 
 
 def chat_with_openai(user_message: str, api_key: str) -> str:
@@ -23,7 +24,7 @@ def chat_with_openai(user_message: str, api_key: str) -> str:
             {"role": "user", "content": user_message}
         ],
         api_key=api_key,
-        model="gpt-3.5-turbo",
+        model=lab_cloud_llm_model_default(),
         max_tokens=500,
         temperature=0.7,
     )

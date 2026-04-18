@@ -45,6 +45,8 @@ def test_provider_snapshot_has_expected_fields(monkeypatch):
     assert snapshot["ollama_model"] == "mistral:7b"
     assert snapshot["resolved_litellm_model"] == "openai/gpt-4o-mini"
     assert snapshot["api_response_model_type"] == "openai"
+    assert snapshot["lab_cloud_llm_model_default"] == "gpt-3.5-turbo"
+    assert snapshot["lab_cloud_llm_model_excessive_agency"] == "gpt-4o-mini"
 
 
 def test_resolved_litellm_model_default(monkeypatch):
@@ -101,3 +103,25 @@ def test_cloud_api_key_valid_non_openai(monkeypatch):
     provider_config = _reload_provider_config()
     assert provider_config.cloud_api_key_valid("AIzaSyDummyKey0000") is True
     assert provider_config.cloud_api_key_valid("short") is False
+
+
+def test_lab_cloud_llm_model_defaults(monkeypatch):
+    monkeypatch.delenv("LAB_CLOUD_LLM_MODEL", raising=False)
+    monkeypatch.delenv("LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY", raising=False)
+    provider_config = _reload_provider_config()
+    assert provider_config.lab_cloud_llm_model_default() == "gpt-3.5-turbo"
+    assert provider_config.lab_cloud_llm_model_excessive_agency() == "gpt-4o-mini"
+
+
+def test_lab_cloud_llm_model_overrides(monkeypatch):
+    monkeypatch.setenv("LAB_CLOUD_LLM_MODEL", "anthropic/claude-3-5-sonnet-20240620")
+    monkeypatch.setenv("LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY", "gemini/gemini-2.0-flash")
+    provider_config = _reload_provider_config()
+    assert provider_config.lab_cloud_llm_model_default() == "anthropic/claude-3-5-sonnet-20240620"
+    assert provider_config.lab_cloud_llm_model_excessive_agency() == "gemini/gemini-2.0-flash"
+
+
+def test_lab_cloud_llm_model_empty_falls_back(monkeypatch):
+    monkeypatch.setenv("LAB_CLOUD_LLM_MODEL", "   ")
+    provider_config = _reload_provider_config()
+    assert provider_config.lab_cloud_llm_model_default() == "gpt-3.5-turbo"

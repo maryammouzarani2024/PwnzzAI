@@ -18,6 +18,8 @@ os.environ.setdefault('OPENAI_MODEL', 'gpt-4o-mini')
 # Default cloud LLM config for tests (avoid inheriting workshop LITELLM_* from the shell).
 for _k in (
     'LITELLM_MODEL',
+    'LAB_CLOUD_LLM_MODEL',
+    'LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY',
     'LLM_UI_PROVIDER_NAME',
     'LLM_UI_KEY_LABEL',
     'LLM_UI_KEY_PLACEHOLDER',

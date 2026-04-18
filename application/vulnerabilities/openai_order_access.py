@@ -1,7 +1,7 @@
 import re
 from flask import  session
 from application.model import Order
-from application.provider_config import llm_ui_snapshot
+from application.provider_config import lab_cloud_llm_model_default, llm_ui_snapshot
 
 def extract_username_from_prompt(prompt):
     """Extract username from user prompt"""
@@ -83,7 +83,7 @@ Answer questions about the user's orders based on this information. Be helpful a
                 {"role": "user", "content": user_query}
             ],
             api_key=api_token,
-            model="gpt-3.5-turbo",
+            model=lab_cloud_llm_model_default(),
             max_tokens=300,
             temperature=0.7,
         )

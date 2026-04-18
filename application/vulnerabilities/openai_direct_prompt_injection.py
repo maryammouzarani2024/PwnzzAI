@@ -1,4 +1,5 @@
 from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_default
 
 # Define prompt levels
 system_prompts = {
@@ -21,7 +22,7 @@ def chat_with_openai_direct_prompt_injection(user_message: str, api_key: str, le
                 {"role": "user", "content": user_message}
             ],
             api_key=api_key,
-            model="gpt-3.5-turbo",
+            model=lab_cloud_llm_model_default(),
             max_tokens=500,
             temperature=0.7,
         )

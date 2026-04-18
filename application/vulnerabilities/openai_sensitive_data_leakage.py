@@ -2,6 +2,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_default
 import re
 from application.model import Comment
 from sqlalchemy.orm import joinedload
@@ -95,7 +96,7 @@ def query_rag_system_openai(user_query, api_key):
         answer = chat_completion(
             messages,
             api_key=api_key,
-            model="gpt-3.5-turbo",
+            model=lab_cloud_llm_model_default(),
             temperature=0.7,
             max_tokens=500,
         )

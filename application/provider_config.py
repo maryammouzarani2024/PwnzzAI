@@ -27,6 +27,22 @@ def _llm_ui_str(name: str) -> str:
     return os.environ.get(name, "").strip()
 
 
+def lab_cloud_llm_model_default() -> str:
+    """
+    Model id for most cloud LLM lab demos (DPI, insecure plugin, RAG, DoS, order access, etc.).
+    Bare names (e.g. gpt-3.5-turbo) are routed as openai/... by llm_chat; use a full LiteLLM
+    route (e.g. anthropic/claude-3-5-sonnet-20240620) to use another provider.
+    """
+    raw = os.environ.get("LAB_CLOUD_LLM_MODEL", "gpt-3.5-turbo").strip()
+    return raw or "gpt-3.5-turbo"
+
+
+def lab_cloud_llm_model_excessive_agency() -> str:
+    """Model id for the excessive-agency cloud demo only (defaults to gpt-4o-mini)."""
+    raw = os.environ.get("LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY", "gpt-4o-mini").strip()
+    return raw or "gpt-4o-mini"
+
+
 def get_openai_api_key(session_obj) -> str:
     session_key = (session_obj.get("openai_api_key", "") if session_obj else "").strip()
     env_key = os.environ.get("OPENAI_API_KEY", "").strip()
@@ -221,4 +237,6 @@ def provider_snapshot() -> dict:
         "enable_provider_fallback": ENABLE_PROVIDER_FALLBACK,
         "resolved_litellm_model": resolved_litellm_model(),
         "api_response_model_type": api_response_model_type(),
+        "lab_cloud_llm_model_default": lab_cloud_llm_model_default(),
+        "lab_cloud_llm_model_excessive_agency": lab_cloud_llm_model_excessive_agency(),
     }

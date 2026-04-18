@@ -6,6 +6,7 @@ from application.llm_chat import (
     completion_with_tools,
     format_tool_error,
 )
+from application.provider_config import lab_cloud_llm_model_default
 
 def get_pizza_price(pizza_type):
     """
@@ -71,9 +72,6 @@ price_function = {
     },
 }
 
-_TOOL_MODEL = "gpt-3.5-turbo"
-
-
 def chat_with_openai(user_input, api_key):
     
     try:
@@ -88,7 +86,7 @@ def chat_with_openai(user_input, api_key):
                 "function": price_function
             }],
             tool_choice="auto",
-            model=_TOOL_MODEL,
+            model=lab_cloud_llm_model_default(),
         )
         
         # Check if the model wants to call a function
@@ -125,7 +123,7 @@ def chat_with_openai(user_input, api_key):
                                 {"role": "tool", "tool_call_id": tool_call.id, "content": f"The price for {pizza_type} pizza is {price}"}
                             ],
                             api_key=api_key,
-                            model=_TOOL_MODEL,
+                            model=lab_cloud_llm_model_default(),
                         )
                         print(f"DEBUG: Tool call content sent to model: 'The price for {pizza_type} pizza is {price}'")
                         final_response = second_response.choices[0].message.content
