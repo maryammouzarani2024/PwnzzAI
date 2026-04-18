@@ -56,6 +56,15 @@ if ! wait_for_http "http://localhost:${APP_PORT}" 45 2; then
   (cd "$ROOT_DIR" && docker compose logs --tail=200)
   exit 1
 fi
+if ! wait_for_http "http://localhost:${APP_PORT}/check-ollama-status" 45 2; then
+  echo "Ollama status endpoint did not become reachable for Option 1"
+  (cd "$ROOT_DIR" && docker compose logs --tail=200)
+  exit 1
+fi
+APP_BASE="http://127.0.0.1:${APP_PORT}"
+# shellcheck source=scripts/qa/probes-standalone.inc.sh
+source "${ROOT_DIR}/scripts/qa/probes-standalone.inc.sh"
+run_standalone_model_probes
 log "Option 1 passed"
 (cd "$ROOT_DIR" && PWNZZAI_IMAGE="$APP_IMAGE" docker compose down)
 
@@ -75,6 +84,15 @@ if ! wait_for_http "http://localhost:${APP_PORT}" 45 2; then
   (cd "$ROOT_DIR" && docker compose -f docker-compose.external-ollama.yml logs --tail=200)
   exit 1
 fi
+if ! wait_for_http "http://localhost:${APP_PORT}/check-ollama-status" 45 2; then
+  echo "Ollama status endpoint did not become reachable for Option 2"
+  (cd "$ROOT_DIR" && docker compose -f docker-compose.external-ollama.yml logs --tail=200)
+  exit 1
+fi
+APP_BASE="http://127.0.0.1:${APP_PORT}"
+# shellcheck source=scripts/qa/probes-standalone.inc.sh
+source "${ROOT_DIR}/scripts/qa/probes-standalone.inc.sh"
+run_standalone_model_probes
 log "Option 2 passed"
 
 log "All smoke tests passed successfully"
