@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 import os
 
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", os.environ.get("OLLAMA_FALLBACK_MODEL", "llama3.2:1b"))
 
 # Global variables for RAG system
 embedder = None
@@ -93,7 +94,7 @@ def query_rag_system(user_query):
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/chat",
             json={
-                "model": "llama3.2:1b",
+                "model": OLLAMA_MODEL,
                 "messages": messages,
                 "stream": False,
                 "keep_alive": -1,

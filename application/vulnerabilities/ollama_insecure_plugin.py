@@ -73,7 +73,7 @@ def search_pizza_price(pizza_type):
 
 # Ollama API configuration
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-DEFAULT_MODEL = "mistral:7b"  # You can change this to any model available in your Ollama installation
+DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", os.environ.get("OLLAMA_FALLBACK_MODEL", "mistral:7b"))
 
 def get_available_models():
     """

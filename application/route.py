@@ -17,9 +17,10 @@ from application import sentiment_model
 
 from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
 from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
+from application.provider_config import OLLAMA_HOST, OLLAMA_MODEL, get_openai_api_key
 from werkzeug.utils import secure_filename
 
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_BASE_URL = OLLAMA_HOST
 
 
 
@@ -209,7 +210,7 @@ def test_openai_leakage():
         user_query = data.get('query', '')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -456,7 +457,7 @@ def chat_with_pizza_assistant_direct_prompt():
         
         # The vulnerability: Directly passing user message to the LLM+plugin system
         # where the LLM can control function execution
-        response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name="mistral:7b")
+        response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name=OLLAMA_MODEL)
 
 
         return jsonify({'response': response})
@@ -475,7 +476,7 @@ def chat_with_openai_plugin():
         message = data.get('message', '')
         
         # Use OpenAI API key from session instead of user input
-        openai_api_key = session.get('openai_api_key', '')
+        openai_api_key = get_openai_api_key(session)
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
@@ -752,7 +753,7 @@ def test_openai_order_access():
         user_query = data.get('query', '')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -853,7 +854,7 @@ def test_openai_excessive_agency():
         
         data = request.get_json()
         user_query = data.get('query', '')
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
         
         if not user_query:
             return jsonify({
@@ -917,10 +918,10 @@ def save_openai_api_key():
 @application.app.route('/check-openai-api-key')
 def check_openai_api_key():
     """Check if OpenAI API key is saved in session"""
-    has_key = 'openai_api_key' in session and session.get('openai_api_key', '').strip() != ''
+    has_key = get_openai_api_key(session) != ''
     print("Session check - has openai_api_key:", has_key)
     if has_key:
-        print("Session openai_api_key value:", session.get('openai_api_key', 'NOT_FOUND')[:10] + "...")
+        print("Session openai_api_key value:", get_openai_api_key(session)[:10] + "...")
     return jsonify({'has_key': has_key})
 
 @application.app.route('/setup-ollama', methods=['POST'])
@@ -1067,7 +1068,7 @@ def test_openai_misinformation():
         user_query = data.get('query', '')
 
         # Get API token from session
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
 
         if not user_query:
             return jsonify({
@@ -1479,7 +1480,7 @@ def chat_with_openai_dos():
         message = data.get('message', '')
         
         # Use OpenAI API key from session instead of user input
-        openai_api_key = session.get('openai_api_key', '')
+        openai_api_key = get_openai_api_key(session)
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
@@ -1510,7 +1511,7 @@ def chat_with_openai_plugin_direct_prompt():
         level = data.get('level', '1')
         
         # Use OpenAI API key from session instead of user input
-        api_token = session.get('openai_api_key', '')
+        api_token = get_openai_api_key(session)
 
         if not message:
             return jsonify({'error': 'No message provided'}), 400
@@ -1600,7 +1601,7 @@ def upload_qr_openai():
         return jsonify({'error': 'No file selected'}), 400
 
     # Get the OpenAI API key from the user's session
-    api_token = session.get('openai_api_key', '')
+    api_token = get_openai_api_key(session)
     if not api_token:
         return jsonify({'error': 'OpenAI API key not found in session. Please set it in the Lab Setup.'}), 400
 

@@ -4,7 +4,11 @@ import json
 import os
 from urllib.parse import urlparse
 
-model_name = ["mistral:7b", "llama3.2:1b"]
+primary_model = os.environ.get("OLLAMA_MODEL", "mistral:7b").strip()
+fallback_model = os.environ.get("OLLAMA_FALLBACK_MODEL", "llama3.2:1b").strip()
+model_name = [primary_model]
+if fallback_model and fallback_model != primary_model:
+    model_name.append(fallback_model)
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 

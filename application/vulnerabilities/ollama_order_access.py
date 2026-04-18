@@ -5,6 +5,7 @@ from application.model import Order
 import os
 
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", os.environ.get("OLLAMA_FALLBACK_MODEL", "llama3.2:1b"))
 
 def extract_username_from_prompt(prompt):
     """Extract username from user prompt"""
@@ -92,7 +93,7 @@ def query_ollama_with_orders(user_query):
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/chat",
             json={
-                "model": "llama3.2:1b",
+                "model": OLLAMA_MODEL,
                 "messages": messages,
                 "stream": False,
                 "keep_alive": -1,
