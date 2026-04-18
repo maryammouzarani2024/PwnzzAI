@@ -61,7 +61,7 @@
                             <div style="flex: 1;">
                                 <p>
                                     Now you can place your order by chatting directly with our AI.</p>
-                                    <p> The free Ollama and OpenAI models can access the database and insert new orders—but keep in mind, they might not have full access control.  </p>
+                                    <p> The free Ollama model and the configured cloud model ({{ llm_ui.provider_name }}) can access the database and insert new orders—but keep in mind, they might not have full access control.  </p>
                                     <p>Have fun talking to the model, ordering your pizza, and maybe even surprising other users with a special order! 😉</p>
                                     <p>For example, you can try:
                                             <ul>
@@ -96,9 +96,9 @@
                                 </div>
                             </div>
                             
-                            <!-- OpenAI Testing Panel -->
+                            <!-- Cloud LLM testing panel -->
                             <div class="test-panel">
-                                <h5>OpenAI Model</h5>
+                                <h5>{{ llm_ui.tab_cloud_title }}</h5>
                                 <div class="token-section">
                                     <div id="openai-agency-status" class="api-status disconnected">
                                         <i class="fas fa-circle-xmark"></i> no API connected
@@ -210,6 +210,7 @@
     <script>
         // Show flash message as popup
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             const flashMessage = document.getElementById('flash-message');
             if (flashMessage) {
                 flashMessage.style.display = 'block';
@@ -342,10 +343,11 @@
                     console.log('API key check result:', data);
                     
                     if (data.has_key) {
-                        console.log('API key found in session, enabling OpenAI interface');
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
+                        console.log('API key found in session, enabling cloud LLM interface');
                         if (openaiAgencyStatus) {
                             openaiAgencyStatus.className = 'api-status connected';
-                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         if (testOpenaiAgencyButton) {
                             testOpenaiAgencyButton.disabled = false;

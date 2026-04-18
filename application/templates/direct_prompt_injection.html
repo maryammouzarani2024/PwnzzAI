@@ -59,7 +59,7 @@
                 <div class="model-tabs">
                     <div class="tab-headers">
                         <div class="tab-header active" data-tab="blenderbot-model">Free Model</div>
-                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
+                        <div class="tab-header" data-tab="openai-model">{{ llm_ui.tab_cloud_title }}</div>
                     </div>
 
                     <!-- BlenderBot Tab Content -->
@@ -114,12 +114,12 @@
                         </div> 
                             <!-- OpenAI Status Section -->
                             <div class="token-section openai-token-section">
-                                <h3>OpenAI API Status</h3>
+                                <h3>{{ llm_ui.provider_name }} API status</h3>
                                 <div id="openai-api-status" class="api-status disconnected">
                                     <i class="fas fa-circle-xmark"></i> Checking API key...
                                 </div>
                                 <p class="help-text">
-                                    <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                    <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
                                 </p>
                                 </div>
                             
@@ -170,6 +170,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             
             const dpiLevelSelector = document.getElementById('dpi-level');
             let selectedDpiLevel = dpiLevelSelector.value;
@@ -225,10 +226,11 @@
                     console.log('API key check result:', data);
                     
                     if (data.has_key) {
-                        console.log('API key found in session, enabling OpenAI interface');
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
+                        console.log('API key found in session, enabling cloud LLM interface');
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status connected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         if (openaiUserMessageInput) {
                             openaiUserMessageInput.disabled = false;
@@ -238,7 +240,7 @@
                         }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "Hi, I’m your pizza assistant, powered by an OpenAI model. I have your API key so let's start. Got a secret coupon word? Share it with me, and I’ll serve you up five delicious, free pizzas!");
+                            addBotMessage(openaiChatMessages, "Hi, I'm your pizza assistant, powered by " + ui.provider_name + ". I have your API key so let's start. Got a secret coupon word? Share it with me, and I'll serve you up five delicious, free pizzas!");
                         }
                     } else {
                         console.log('No API key found in session');

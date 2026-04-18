@@ -119,16 +119,16 @@
                                      
                                 </div>
                                 
-                                <!-- OpenAI Testing Panel -->
+                                <!-- Cloud LLM testing panel -->
                                 <div class="test-panel">
-                                    <h5>OpenAI Model</h5>
+                                    <h5>{{ llm_ui.tab_cloud_title }}</h5>
                                     <div class="token-section">
-                                        <h6>OpenAI API Status:</h6>
+                                        <h6>{{ llm_ui.provider_name }} API status</h6>
                                         <div id="openai-status" class="api-status disconnected">
                                             <i class="fas fa-circle-xmark"></i> Checking API key...
                                         </div>
                                         <p class="help-text">
-                                            <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                            <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
                                         </p>
                                         <div class="rag-controls">
                                             <button id="update-rag-openai" class="btn btn-primary">
@@ -225,16 +225,16 @@
                                 </div>
                             </div>
                             
-                            <!-- OpenAI Testing Panel -->
+                            <!-- Cloud LLM order-access panel -->
                             <div class="test-panel">
-                                <h5>OpenAI Model Test</h5>
+                                <h5>{{ llm_ui.tab_cloud_title }} test</h5>
                                 <div class="token-section">
-                                    <h6>OpenAI API Status:</h6>
+                                    <h6>{{ llm_ui.provider_name }} API status</h6>
                                     <div id="openai-order-status" class="api-status disconnected">
                                         <i class="fas fa-circle-xmark"></i> Checking API key...
                                     </div>
                                     <p class="help-text">
-                                        <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                        <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
                                     </p>
                                 </div>
                                 <div class="input-section">
@@ -428,6 +428,7 @@ def query_database(query, llm_context):
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             // Tab functionality
             const tabButtons = document.querySelectorAll('.tab-button');
             
@@ -499,7 +500,7 @@ def query_database(query, llm_context):
             // Update OpenAI RAG button functionality
             updateRagOpenaiButton.addEventListener('click', function() {
                 openaiRagUpdateStatus.className = 'rag-status updating';
-                openaiRagUpdateStatus.textContent = 'Updating OpenAI RAG system...';
+                openaiRagUpdateStatus.textContent = LLM_UI_DEFAULT.rag_update_progress_sensitive;
                 updateRagOpenaiButton.disabled = true;
                 
                 fetch('/update-rag-openai', {
@@ -512,16 +513,16 @@ def query_database(query, llm_context):
                 .then(data => {
                     if (data.success) {
                         openaiRagUpdateStatus.className = 'rag-status';
-                        openaiRagUpdateStatus.textContent = 'OpenAI RAG system updated successfully';
+                        openaiRagUpdateStatus.textContent = LLM_UI_DEFAULT.rag_update_success_sensitive;
                     } else {
                         openaiRagUpdateStatus.className = 'rag-status error';
-                        openaiRagUpdateStatus.textContent = 'Error updating OpenAI RAG system';
+                        openaiRagUpdateStatus.textContent = LLM_UI_DEFAULT.rag_update_error_sensitive;
                     }
                 })
                 .catch(error => {
                     openaiRagUpdateStatus.className = 'rag-status error';
-                    openaiRagUpdateStatus.textContent = 'Error updating OpenAI RAG system';
-                    console.error('Error updating OpenAI RAG:', error);
+                    openaiRagUpdateStatus.textContent = LLM_UI_DEFAULT.rag_update_error_sensitive;
+                    console.error('Error updating cloud RAG:', error);
                 })
                 .finally(() => {
                     updateRagOpenaiButton.disabled = false;
@@ -769,16 +770,17 @@ def query_database(query, llm_context):
                     console.log('API key check result:', data);
                     
                     if (data.has_key) {
-                        console.log('API key found in session, enabling OpenAI interfaces');
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
+                        console.log('API key found in session, enabling cloud LLM interfaces');
                         // Update training data leakage test status
                         if (openaiStatus) {
                             openaiStatus.className = 'api-status connected';
-                            openaiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         // Update order access test status  
                         if (openaiOrderStatus) {
                             openaiOrderStatus.className = 'api-status connected';
-                            openaiOrderStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiOrderStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         // Enable test buttons
                         if (openaiTestButton) {

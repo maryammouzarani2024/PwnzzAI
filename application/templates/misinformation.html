@@ -88,16 +88,16 @@
                                     </div>
                                 </div>
                                 
-                                <!-- OpenAI Testing Panel -->
+                                <!-- Cloud LLM testing panel -->
                                 <div class="test-panel">
-                                    <h5>OpenAI Model</h5>
+                                    <h5>{{ llm_ui.tab_cloud_title }}</h5>
                                     <div class="token-section">
-                                        <h6>OpenAI API Status:</h6>
+                                        <h6>{{ llm_ui.provider_name }} API status</h6>
                                         <div id="openai-misinfo-status" class="api-status disconnected">
                                             <i class="fas fa-circle-xmark"></i> Checking API key...
                                         </div>
                                         <p class="help-text">
-                                            <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                            <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
                                         </p>
                                         <div class="rag-controls">
                                             <button id="update-rag-openai-misinfo" class="btn btn-primary">
@@ -252,6 +252,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             // Tab functionality
             const tabButtons = document.querySelectorAll('.tab-button');
             
@@ -356,7 +357,7 @@
             if (updateRagOpenaiMisinfoButton) {
                 updateRagOpenaiMisinfoButton.addEventListener('click', function() {
                     openaiRagUpdateStatusMisinfo.className = 'rag-status updating';
-                    openaiRagUpdateStatusMisinfo.textContent = 'Updating OpenAI comment system...';
+                    openaiRagUpdateStatusMisinfo.textContent = LLM_UI_DEFAULT.rag_update_progress_misinfo;
                     updateRagOpenaiMisinfoButton.disabled = true;
 
                     fetch('/update-rag-openai-misinfo', {
@@ -369,16 +370,16 @@
                     .then(data => {
                         if (data.success) {
                             openaiRagUpdateStatusMisinfo.className = 'rag-status';
-                            openaiRagUpdateStatusMisinfo.textContent = 'OpenAI comment system updated successfully';
+                            openaiRagUpdateStatusMisinfo.textContent = LLM_UI_DEFAULT.rag_update_success_misinfo;
                         } else {
                             openaiRagUpdateStatusMisinfo.className = 'rag-status error';
-                            openaiRagUpdateStatusMisinfo.textContent = 'Error updating OpenAI comment system';
+                            openaiRagUpdateStatusMisinfo.textContent = LLM_UI_DEFAULT.rag_update_error_misinfo;
                         }
                     })
                     .catch(error => {
                         openaiRagUpdateStatusMisinfo.className = 'rag-status error';
-                        openaiRagUpdateStatusMisinfo.textContent = 'Error updating OpenAI comment system';
-                        console.error('Error updating OpenAI RAG:', error);
+                        openaiRagUpdateStatusMisinfo.textContent = LLM_UI_DEFAULT.rag_update_error_misinfo;
+                        console.error('Error updating cloud RAG:', error);
                     })
                     .finally(() => {
                         updateRagOpenaiMisinfoButton.disabled = false;
@@ -393,9 +394,10 @@
                     const data = await response.json();
 
                     if (data.has_key) {
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
                         if (openaiMisinfoStatus) {
                             openaiMisinfoStatus.className = 'api-status connected';
-                            openaiMisinfoStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API (from session)';
+                            openaiMisinfoStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected + ' (from session)';
                         }
                         if (openaiMisinfoPromptInput) {
                             openaiMisinfoPromptInput.disabled = false;
