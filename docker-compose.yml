@@ -16,7 +16,7 @@ services:
     image: ${PWNZZAI_IMAGE:-ghcr.io/maryammouzarani2024/pwnzzai:latest}
     container_name: pwnzzai-shop
     ports:
-      - "8080:5000"
+      - "8080:8080"
     volumes:
       - ./uploads:/app/uploads
       - ./downloads:/app/downloads
