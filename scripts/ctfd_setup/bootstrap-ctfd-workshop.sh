@@ -11,7 +11,8 @@
 # access the Docker socket (see scripts/ctfd_setup/README.md).
 #
 # Typical .env keys consumed when building the workshop image (see deploy/Dockerfile.pwnzzai-workshop):
-#   SECRET_KEY  GEMINI_API_KEY  GOOGLE_API_KEY  GEMINI_MODEL  OLLAMA_HOST  OLLAMA_FALLBACK_MODEL
+#   SECRET_KEY  GEMINI_API_KEY  GOOGLE_API_KEY  GEMINI_MODEL  MODEL_PROVIDER
+#   OLLAMA_HOST  OLLAMA_MODEL  OLLAMA_FALLBACK_MODEL  OPENAI_API_KEY  OPENAI_MODEL
 #
 # Optional:
 #   PWNZZAI_ROOT=/path/to/PwnzzAI     (default: repository root — two levels above this script)
@@ -236,6 +237,9 @@ else
   log_info "No .env at ${ENV_FILE} yet — you must create one with DOCKER_CHALLENGES_PUBLIC_HOST (see .env.example)."
 fi
 
+# Default local shared Ollama container (profile). Empty COMPOSE_PROFILES = no local ollama (remote OLLAMA_HOST only).
+export COMPOSE_PROFILES="${COMPOSE_PROFILES:-local-ollama}"
+
 # shellcheck source=scripts/ctfd_setup/require-public-host.inc.sh
 source "${PWNZZAI_ROOT}/scripts/ctfd_setup/require-public-host.inc.sh"
 require_docker_challenges_public_host "${ENV_FILE}"
@@ -269,8 +273,16 @@ dock build \
   --build-arg "GEMINI_API_KEY=${GEMINI_API_KEY:-}" \
   --build-arg "GOOGLE_API_KEY=${GOOGLE_API_KEY:-}" \
   --build-arg "GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}" \
+  --build-arg "MODEL_PROVIDER=${MODEL_PROVIDER:-auto}" \
   --build-arg "OLLAMA_HOST=${OLLAMA_HOST}" \
+  --build-arg "OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b}" \
   --build-arg "OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-llama3.2:1b}" \
+  --build-arg "OPENAI_API_KEY=${OPENAI_API_KEY:-}" \
+  --build-arg "OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}" \
+  --build-arg "ALLOW_PRECONFIGURED_OPENAI_KEY=${ALLOW_PRECONFIGURED_OPENAI_KEY:-true}" \
+  --build-arg "PREFER_SESSION_OPENAI_KEY=${PREFER_SESSION_OPENAI_KEY:-true}" \
+  --build-arg "MODEL_TIMEOUT_SECONDS=${MODEL_TIMEOUT_SECONDS:-60}" \
+  --build-arg "ENABLE_PROVIDER_FALLBACK=${ENABLE_PROVIDER_FALLBACK:-true}" \
   -t "$WORKSHOP_TAG" \
   "$PWNZZAI_ROOT"
 
