@@ -4,12 +4,14 @@
 # - ONE shared Ollama container (or ONE remote Ollama host) holds models. Every spawned Pwnzai
 #   challenge container uses the same OLLAMA_HOST baked into the workshop image — there is
 #   NOT one model container per participant.
-# - Local GPU: enable profile `local-ollama` (default COMPOSE_PROFILES=local-ollama in .env.example).
-# - Remote GPU on another machine: set COMPOSE_PROFILES= (empty) or unset local-ollama, set
-#   OLLAMA_HOST=http://<gpu-host>:11434 before building the workshop image (see README).
+# - Local Ollama (CPU or GPU): enable profile `local-ollama` (default COMPOSE_PROFILES in .env.example).
+#   NVIDIA GPU: merge deploy/docker-compose.workshop.nvidia.yml (bootstrap/redeploy do this when nvidia-smi works).
+# - Remote Ollama: set COMPOSE_PROFILES= (empty) or unset local-ollama, set
+#   OLLAMA_HOST=http://<ollama-host>:11434 before building the workshop image (see README).
 #
-# Usage from repo root:
+# Usage from repo root (CPU Ollama):
 #   docker compose -f deploy/docker-compose.workshop.yml up -d --build
+# With NVIDIA GPU for local Ollama, add: -f deploy/docker-compose.workshop.nvidia.yml
 #
 # CTFd image: docker_challenges is git-cloned at build time (default: northdpole fork).
 
@@ -29,8 +31,6 @@ services:
       - "${OLLAMA_PUBLISH:-0.0.0.0:11434}:11434"
     environment:
       - OLLAMA_KEEP_ALIVE=-1
-    # GPU: requires NVIDIA Container Toolkit on the host (nvidia-smi on host).
-    gpus: all
 
   # Restricted Docker API for CTFd. HAProxy matches /containers/*/start|stop before generic /containers,
   # so ALLOW_START / ALLOW_STOP must be enabled or container start returns 403 → plugin shows 500.

@@ -1,0 +1,10 @@
+# Optional second compose file — merge with docker-compose.workshop.yml only on NVIDIA hosts.
+#
+# Typical DigitalOcean droplets have no GPU; including this file there causes:
+#   "failed to discover GPU vendor from CDI: no known GPU vendor found"
+# Scripts auto-attach this file when nvidia-smi works, unless PWNZZAI_OLLAMA_GPU=0.
+# Force GPU request: PWNZZAI_OLLAMA_GPU=1 (requires NVIDIA Container Toolkit + driver).
+
+services:
+  ollama:
+    gpus: all

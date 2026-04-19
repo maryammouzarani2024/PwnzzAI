@@ -78,8 +78,11 @@ fi
 
 log_info "Stopping workshop stack..."
 cd "${PWNZZAI_ROOT}/deploy"
+# shellcheck source=scripts/ctfd_setup/workshop-compose-flags.inc.sh
+source "${PWNZZAI_ROOT}/scripts/ctfd_setup/workshop-compose-flags.inc.sh"
+pwnzzai_set_workshop_compose_flags
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
-  dc -f docker-compose.workshop.yml "${DOWN_ARGS[@]}"
+  dc "${PWNZZAI_WORKSHOP_COMPOSE_FLAGS[@]}" "${DOWN_ARGS[@]}"
 
 if [[ "$RMI_WORKSHOP" -eq 1 ]]; then
   WORKSHOP_TAG="${PWNZZAI_WORKSHOP_IMAGE:-pwnzzai-workshop:latest}"

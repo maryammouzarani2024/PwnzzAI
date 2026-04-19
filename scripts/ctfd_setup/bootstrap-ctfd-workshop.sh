@@ -16,6 +16,7 @@
 #
 # Optional:
 #   PWNZZAI_ROOT=/path/to/PwnzzAI     (default: repository root — two levels above this script)
+#   PWNZZAI_OLLAMA_GPU=0|1            (0=never merge NVIDIA compose; 1=always merge; unset=merge if nvidia-smi works)
 #   OLLAMA_HOST                        (default: http://<docker0-gateway>:11434)
 #   CTFD_SECRET_KEY                    (recommended for production CTFd)
 #   DOCKER_CHALLENGES_PUBLIC_HOST      (public DNS/IP for challenge links — not docker-socket-proxy)
@@ -288,8 +289,16 @@ dock build \
 
 log_info "Starting CTFd stack (docker compose in ${PWNZZAI_ROOT}/deploy)"
 cd "${PWNZZAI_ROOT}/deploy"
+# shellcheck source=scripts/ctfd_setup/workshop-compose-flags.inc.sh
+source "${PWNZZAI_ROOT}/scripts/ctfd_setup/workshop-compose-flags.inc.sh"
+pwnzzai_set_workshop_compose_flags
+if [[ "${#PWNZZAI_WORKSHOP_COMPOSE_FLAGS[@]}" -gt 2 ]]; then
+  log_info "Compose includes docker-compose.workshop.nvidia.yml (Ollama GPU request)."
+else
+  log_info "Compose is CPU-only for Ollama (no nvidia merge). Set PWNZZAI_OLLAMA_GPU=0 to force, or =1 if you use NVIDIA."
+fi
 CTFD_SECRET_KEY="${CTFD_SECRET_KEY:-}" DOCKER_CHALLENGES_PUBLIC_HOST="${DOCKER_CHALLENGES_PUBLIC_HOST}" \
-  dcompose -f docker-compose.workshop.yml up -d --build
+  dcompose "${PWNZZAI_WORKSHOP_COMPOSE_FLAGS[@]}" up -d --build
 
 log_info "Waiting for CTFd HTTP on http://127.0.0.1:8000 ..."
 for _ in $(seq 1 60); do

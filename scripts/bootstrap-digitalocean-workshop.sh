@@ -24,6 +24,9 @@
 #   DO_AUTO_CTFD_SECRET=1                               # append CTFD_SECRET_KEY to .env if unset (openssl rand)
 #   PWNZZAI_SKIP_HOST_HARDENING=1                         # only run workshop bootstrap (not recommended)
 #   PWNZZAI_HARDEN_SSH=1                                # default: tighten sshd if root has authorized_keys
+#   PWNZZAI_SSH_PASSWORD_AUTH=1                         # allow root/password SSH (e.g. DO emailed root password); less secure
+#   PWNZZAI_OLLAMA_GPU=0                                # force CPU-only Ollama compose (default on CPU clouds; avoids CDI/GPU errors)
+#   PWNZZAI_OLLAMA_GPU=1                                # force NVIDIA GPU compose merge (requires driver + NVIDIA Container Toolkit)
 #
 set -euo pipefail
 
@@ -169,14 +172,36 @@ configure_ssh_hardening() {
   if [[ "${PWNZZAI_HARDEN_SSH:-1}" != "1" ]]; then
     return 0
   fi
+  local drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
+  if [[ "${PWNZZAI_SSH_PASSWORD_AUTH:-}" == "1" ]]; then
+    log_warn "PWNZZAI_SSH_PASSWORD_AUTH=1 — sshd will allow password authentication (including root). Prefer SSH keys when you can."
+    cat <<'SSHD' >"$drop"
+# PwnzzAI workshop — password SSH enabled (bootstrap-digitalocean-workshop.sh / PWNZZAI_SSH_PASSWORD_AUTH=1)
+PasswordAuthentication yes
+KbdInteractiveAuthentication yes
+PermitRootLogin yes
+X11Forwarding no
+MaxAuthTries 6
+LoginGraceTime 60
+ClientAliveInterval 300
+ClientAliveCountMax 2
+SSHD
+    if sshd -t 2>/dev/null; then
+      systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null || true
+      log_info "SSH drop-in written (${drop}) with password auth allowed. Open a second session to verify before you disconnect."
+    else
+      log_warn "sshd -t failed; removed ${drop}"
+      rm -f "$drop"
+    fi
+    return 0
+  fi
   local ak=/root/.ssh/authorized_keys
   if [[ ! -s "$ak" ]]; then
-    log_warn "Skipping aggressive SSH hardening: $ak missing or empty (avoid lockout)."
+    log_warn "Skipping aggressive SSH hardening: $ak missing or empty (avoid lockout). Use PWNZZAI_SSH_PASSWORD_AUTH=1 if you rely on password login."
     return 0
   fi
   chmod 700 /root/.ssh 2>/dev/null || true
   chmod 600 "$ak" 2>/dev/null || true
-  local drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
   cat <<'SSHD' >"$drop"
 # PwnzzAI workshop — key-based access only when authorized_keys exists (installed by bootstrap-digitalocean-workshop.sh)
 PasswordAuthentication no
@@ -282,6 +307,14 @@ main() {
   maybe_auto_public_host
   maybe_auto_ctfd_secret
 
+  # Pick up PWNZZAI_* flags (SSH, Ollama GPU) from .env before host hardening / workshop bootstrap.
+  if [[ -f "$ENV_FILE" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    set +a
+  fi
+
   if [[ "${PWNZZAI_SKIP_HOST_HARDENING:-}" == "1" ]]; then
     log_warn "PWNZZAI_SKIP_HOST_HARDENING=1 — skipping UFW/fail2ban/sysctl/SSH."
   else
@@ -307,6 +340,7 @@ main() {
   log_info "       (2) Open http://<public>:8000 and finish the CTFd wizard."
   log_info "       (3) Admin → API token → ${PWNZZAI_ROOT}/scripts/ctfd_setup/register-pwnzzai-challenge.sh"
   log_info "       (4) Add HTTPS reverse proxy for production; this stack is HTTP-only by default."
+  log_info "       (5) CPU droplet: leave PWNZZAI_OLLAMA_GPU unset (default). GPU droplet: install NVIDIA Container Toolkit or set PWNZZAI_OLLAMA_GPU=0 for CPU Ollama."
   log_info "—"
 }
 
