@@ -13,6 +13,7 @@ Here, you'll explore **practical examples** of how vulnerabilities are created, 
   - [Scope and Learning Goals](#scope-and-learning-goals)
 - [Setup Instructions](#setup-instructions)
    - [Option 1: Docker (PwnzzAI + Ollama)](#option-1-docker-pwnzzai--ollama)
+   - [If the default image does not pull (build locally)](#if-the-default-image-does-not-pull-build-locally)
    - [Option 2: Docker (Your Own Ollama + PwnzzAI Image)](#option-2-docker-your-own-ollama--pwnzzai-image)
    - [Option 3: Run Source Code Yourself](#option-3-run-source-code-yourself)
    - [Troubleshooting: Ollama Connection (WSL + Docker)](OLLAMA_CONNECTION_TROUBLESHOOTING.md)
@@ -115,6 +116,34 @@ If you publish the app image under another registry path, override the image nam
 PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
 ```
 
+### If the default image does not pull (build locally)
+
+`docker compose` uses the image named in `docker-compose.yml` (by default `ghcr.io/maryammouzarani2024/pwnzzai:latest`). If `docker compose up` fails with **`denied`**, **`unauthorized`**, or similar when pulling that image, the registry may require login or your account may not have pull access. You can still run everything from this repository by **building the app image locally** and pointing compose at it.
+
+From the repository root:
+
+```bash
+docker build -t pwnzzai-local:dev .
+PWNZZAI_IMAGE=pwnzzai-local:dev docker compose up -d
+```
+
+Windows PowerShell:
+
+```powershell
+docker build -t pwnzzai-local:dev .
+$env:PWNZZAI_IMAGE="pwnzzai-local:dev"; docker compose up -d
+```
+
+Then open **`http://localhost:8080`**. The first load can fail briefly while Flask starts inside the container; wait a few seconds and refresh if you see a connection error.
+
+If you do have access to the registry image, you can authenticate first (example for GitHub Container Registry):
+
+```bash
+docker login ghcr.io
+```
+
+The same `PWNZZAI_IMAGE=pwnzzai-local:dev` approach applies to **Option 2** if you use `docker-compose.external-ollama.yml` and hit the same pull error.
+
 ### Option 2: Docker (Your Own Ollama + PwnzzAI Image)
 
 Use this option if Ollama is already running somewhere else and you only want to run PwnzzAI in Docker.
@@ -125,7 +154,7 @@ for connectivity fixes (`Connection refused`, `host.docker.internal`, binding, a
 
 1. Keep your Ollama service running.
 
-2. If your Ollama runs on a remote machine, set `OLLAMA_HOST` first.
+2. If Ollama is on a **remote** machine, set `OLLAMA_HOST` before starting (skip this if Ollama is on the same machine as Docker and reachable at the default in `docker-compose.external-ollama.yml`, `http://host.docker.internal:11434`).
 
 Linux/macOS:
 
@@ -139,23 +168,15 @@ Windows PowerShell:
 $env:OLLAMA_HOST="http://your-ollama-server:11434"
 ```
 
-3. Start PwnzzAI using the external Ollama compose file:
-
-
-Linux/macOS:
+3. Start PwnzzAI with the external-Ollama compose file:
 
 ```bash
-export OLLAMA_HOST=http://your-ollama-server:11434
+docker compose -f docker-compose.external-ollama.yml up -d
 ```
 
-Windows PowerShell:
+If the default app image does not pull from GHCR, build locally and set `PWNZZAI_IMAGE` as in [If the default image does not pull (build locally)](#if-the-default-image-does-not-pull-build-locally).
 
-```powershell
-$env:OLLAMA_HOST="http://your-ollama-server:11434"
-```
-
-4.  Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
-
+4. Visit `http://localhost:8080` in your browser to see the application. Start from the Basic page and setup your lab.
 
 5. Follow app logs if needed:
 ```bash

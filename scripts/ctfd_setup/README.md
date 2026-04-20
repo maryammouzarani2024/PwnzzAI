@@ -14,6 +14,8 @@ Setup is **two steps**: (1) setup model infra + CTFd with a single command; (2) 
 
 Related files: **`deploy/`** (compose, Dockerfiles), **`deploy/register_pwnzzai_challenge.py`** (API helper used by step 2).
 
+The **standard** PwnzzAI shop (`docker-compose.yml` in the repo root, port **8080**) is separate from this CTFd stack. If the default app image does not pull from GHCR, see the root **README** section **“If the default image does not pull (build locally)”**.
+
 ### One shared model endpoint, many Pwnzai containers
 
 - **CTFd** and **docker-socket-proxy** are separate from inference. **Ollama** (when enabled) is a **single** long-lived container with its own image and volume (`ollama_data`). It is **not** embedded in each challenge instance.

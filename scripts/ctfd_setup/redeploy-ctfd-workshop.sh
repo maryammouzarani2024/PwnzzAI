@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuild and restart only the CTFd container (after changing CTFd-Docker-Challenges/ or compose).
+# Rebuild and restart only the CTFd container (after changing plugin Git settings in .env or compose).
 #
 # Run from anywhere; uses the PwnzzAI repo this script lives in. Requires Docker.
 #

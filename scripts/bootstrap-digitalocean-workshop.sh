@@ -16,6 +16,18 @@
 #
 # Usage:
 #   sudo ./scripts/bootstrap-digitalocean-workshop.sh
+#   sudo ./scripts/bootstrap-digitalocean-workshop.sh --cleanup [--volumes] [--rmi-workshop]
+#
+# Stress / load checks (from repo root, stack running):
+#   • Shared Ollama + app HTTP (concurrent users): scripts/qa/load-test-shared-model.sh
+#       APP_URL=http://<host>:8080 USERS=20 TIMEOUT_SECONDS=60 ./scripts/qa/load-test-shared-model.sh
+#     (8080 must be reachable — e.g. standalone smoke container published on the host, or ssh -L 8080:127.0.0.1:8080.)
+#   • Broader smoke + model gates (set APP_URL, CTFD_URL, CTFD_API_TOKEN per script header):
+#       ./scripts/qa/run-model-integration-gates.sh
+#
+# Remote cleanup (must execute on the droplet — Docker/compose are local there):
+#   ssh root@<public> 'cd /opt/PwnzzAI && sudo ./scripts/bootstrap-digitalocean-workshop.sh --cleanup'
+#   # adjust path if repo is elsewhere; add --volumes / --rmi-workshop as needed
 #
 # Environment (optional):
 #   PWNZZAI_ROOT=/opt/PwnzzAI
@@ -296,7 +308,75 @@ host_hardening() {
   configure_ssh_hardening
 }
 
+remove_pwnzzai_ollama_isolate_iptables() {
+  local port="${OLLAMA_ISOLATE_PORT:-11434}"
+  while iptables -D DOCKER-USER -p tcp --dport "$port" -s 172.17.0.0/16 -j RETURN \
+    -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
+    :
+  done
+  while iptables -D DOCKER-USER -p tcp --dport "$port" -j DROP \
+    -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
+    :
+  done
+  if ip6tables -S DOCKER-USER >/dev/null 2>&1; then
+    while ip6tables -D DOCKER-USER -p tcp --dport "$port" -j DROP \
+      -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
+      :
+    done
+  fi
+}
+
+cleanup_workshop_host() {
+  require_root
+  log_info "Cleanup mode — reversing workshop stack + bootstrap-specific host bits (repo: ${PWNZZAI_ROOT})"
+
+  local td="${PWNZZAI_ROOT}/scripts/ctfd_setup/teardown-ctfd-workshop.sh"
+  if [[ -x "$td" ]] || [[ -f "$td" ]]; then
+    bash "$td" "$@"
+  else
+    log_warn "Teardown script missing at ${td} — skipping compose down."
+  fi
+
+  if systemctl is-enabled pwnzzai-docker-ollama-isolate.service >/dev/null 2>&1 \
+    || systemctl is-active pwnzzai-docker-ollama-isolate.service >/dev/null 2>&1; then
+    systemctl disable --now pwnzzai-docker-ollama-isolate.service 2>/dev/null || true
+  fi
+  rm -f /etc/systemd/system/pwnzzai-docker-ollama-isolate.service
+  rm -f /usr/local/sbin/pwnzzai-docker-ollama-isolate.sh
+  systemctl daemon-reload 2>/dev/null || true
+
+  remove_pwnzzai_ollama_isolate_iptables
+  log_info "Removed pwnzzai-ollama-isolate DOCKER-USER rules (if any)."
+
+  local sysctl_f=/etc/sysctl.d/99-pwnzzai-workshop.conf
+  if [[ -f "$sysctl_f" ]]; then
+    rm -f "$sysctl_f"
+    sysctl --system >/dev/null 2>&1 || true
+    log_info "Removed ${sysctl_f}"
+  fi
+
+  local ssh_drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
+  if [[ -f "$ssh_drop" ]]; then
+    rm -f "$ssh_drop"
+    if sshd -t 2>/dev/null; then
+      systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null || true
+    fi
+    log_info "Removed SSH drop-in ${ssh_drop} (verify sshd before closing this session)."
+  fi
+
+  log_info "—"
+  log_info "Cleanup finished. Docker, UFW, fail2ban, and packages were left installed."
+  log_info "Participant-spawned containers may still exist: docker ps -a"
+  log_info "—"
+}
+
 main() {
+  if [[ "${1:-}" == "--cleanup" ]] || [[ "${1:-}" == "cleanup" ]]; then
+    shift
+    cleanup_workshop_host "$@"
+    exit 0
+  fi
+
   require_root
   require_apt
   log_info "PwnzzAI DigitalOcean workshop bootstrap (repo: ${PWNZZAI_ROOT})"
