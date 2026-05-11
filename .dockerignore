@@ -27,6 +27,7 @@ wheels/
 venv/
 ENV/
 env/
+.venv/
 
 # IDE
 .vscode/
@@ -59,6 +60,7 @@ docker-compose.yml
 .pytest_cache/
 .coverage
 htmlcov/
+tmp/
 
 # Uploads (keep local, mount as volume)
 uploads/*
