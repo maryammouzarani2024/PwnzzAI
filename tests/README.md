@@ -60,6 +60,12 @@ pytest tests/functional/
 scripts/qa/run-challenge-solve-e2e.sh
 ```
 
+The pytest module `tests/e2e/test_challenge_solvability_e2e.py` is **skipped by default** (no live server). To run it against an already-running app:
+
+```bash
+RUN_E2E=1 APP_BASE=http://127.0.0.1:8080 pytest tests/e2e/test_challenge_solvability_e2e.py -q
+```
+
 Optional:
 
 ```bash

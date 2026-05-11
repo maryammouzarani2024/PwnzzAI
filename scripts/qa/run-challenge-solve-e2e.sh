@@ -73,7 +73,7 @@ log "Ensuring Ollama model is pulled: ${OLLAMA_MODEL}"
 docker exec ollama ollama pull "${OLLAMA_MODEL}" >/dev/null
 
 log "Running E2E solvability harness (set E2E_OPENAI_API_KEY for cloud-marked tests; E2E_SKIP_RAG_REFRESH=1 to skip slow RAG refresh)"
-APP_BASE="${APP_BASE}" OLLAMA_MODEL="${OLLAMA_MODEL}" "${ROOT_DIR}/.venv/bin/python" -m pytest \
+RUN_E2E=1 APP_BASE="${APP_BASE}" OLLAMA_MODEL="${OLLAMA_MODEL}" "${ROOT_DIR}/.venv/bin/python" -m pytest \
   "${ROOT_DIR}/tests/e2e/test_challenge_solvability_e2e.py" -q
 
 log "E2E solvability harness passed."

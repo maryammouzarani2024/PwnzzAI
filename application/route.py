@@ -54,6 +54,20 @@ def _ollama_unavailable_message(feature_name: str) -> str:
     )
 
 
+def _ollama_remote_gate_enabled() -> bool:
+    """Skip live Ollama HTTP probes under pytest / Flask test client (monkeypatch targets)."""
+    if (os.environ.get("TESTING") or "").strip().lower() in {"1", "true", "yes"}:
+        return False
+    try:
+        from flask import current_app, has_request_context
+
+        if has_request_context() and getattr(current_app, "testing", False):
+            return False
+    except RuntimeError:
+        pass
+    return True
+
+
 def _seed_minimum_app_data() -> None:
     """Ensure essential DB objects exist so root/login never hard-fail."""
     application.db.create_all()
@@ -353,19 +367,20 @@ def test_ollama_leakage():
     """API endpoint for testing Ollama model for training data leakage"""
     try:
         from application.vulnerabilities.ollama_sensitive_data_leakage import query_rag_system, detect_sensitive_info
-        available, _, _ = _ollama_status_snapshot()
-        if not available:
-            msg = _ollama_unavailable_message("training-data-leak/ollama")
-            return jsonify(
-                {
-                    'response': msg,
-                    'has_leakage': False,
-                    'leaked_info': [],
-                    'model_type': 'error',
-                    'ollama_available': False,
-                }
-            )
-        
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                msg = _ollama_unavailable_message("training-data-leak/ollama")
+                return jsonify(
+                    {
+                        'response': msg,
+                        'has_leakage': False,
+                        'leaked_info': [],
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
+
         data = request.get_json()
         user_query = data.get('query', '')
         
@@ -543,16 +558,6 @@ def chat_with_pizza_assistant():
 def chat_with_pizza_assistant_direct_prompt():
     """API endpoint for the pizza assistant chat - using insecure plugin design"""
     try:
-        available, _, _ = _ollama_status_snapshot()
-        if not available:
-            return jsonify(
-                {
-                    'response': _ollama_unavailable_message("direct prompt injection"),
-                    'model_type': 'error',
-                    'ollama_available': False,
-                }
-            )
-
         # Get data from request
         data = request.get_json()
         message = data.get('message', '')
@@ -562,6 +567,17 @@ def chat_with_pizza_assistant_direct_prompt():
 
         if not message:
             return jsonify({'error': 'No message provided'}), 400
+
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                return jsonify(
+                    {
+                        'response': _ollama_unavailable_message("direct prompt injection"),
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
 
         if escalation_stage is not None:
             from application.vulnerabilities.direct_prompt_escalation import run_escalation_ollama
@@ -1238,18 +1254,19 @@ def test_ollama_misinformation():
     """Test Ollama model for misinformation using comments"""
     try:
         from application.vulnerabilities.ollama_misinformation import query_ollama_for_misinformation
-        available, _, _ = _ollama_status_snapshot()
-        if not available:
-            return jsonify(
-                {
-                    'response': _ollama_unavailable_message("misinformation/ollama"),
-                    'has_misinformation': False,
-                    'misinformation_detected': [],
-                    'model_type': 'error',
-                    'ollama_available': False,
-                }
-            )
-        
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                return jsonify(
+                    {
+                        'response': _ollama_unavailable_message("misinformation/ollama"),
+                        'has_misinformation': False,
+                        'misinformation_detected': [],
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
+
         data = request.get_json()
         user_query = data.get('query', '')
         

@@ -6,14 +6,19 @@ __pycache__/
 # Virtual environment
 venv/
 .venv/
-.gitignore
 .flaskenv
+
+# Local scratch / accidental clones (not part of this repo)
+tmp/
+docs/tmp/
+CTFd-Docker-Challenges/
 
 # Database
 instance/
 uploads/
 downloads/
 catering_sql_lab.db
+
 # Environment variables
 .env
 
@@ -23,5 +28,3 @@ catering_sql_lab.db
 
 # OS files
 .DS_Store
-
-.gitignorecatering_sql_lab.db

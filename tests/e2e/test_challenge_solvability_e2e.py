@@ -27,6 +27,20 @@ from tests.e2e.challenge_catalog import (
 )
 
 
+def _run_live_e2e() -> bool:
+    """Opt-in: CI and default `pytest` do not assume a server on APP_BASE."""
+    return os.environ.get("RUN_E2E", "").strip().lower() in {"1", "true", "yes"}
+
+
+pytestmark = [
+    pytest.mark.e2e,
+    pytest.mark.skipif(
+        not _run_live_e2e(),
+        reason="Live HTTP e2e: set RUN_E2E=1, start the app, optional APP_BASE (default http://127.0.0.1:8080)",
+    ),
+]
+
+
 APP_BASE = os.getenv("APP_BASE", "http://127.0.0.1:8080").rstrip("/")
 TIMEOUT = int(os.getenv("E2E_HTTP_TIMEOUT", "120"))
 RAG_TIMEOUT = int(os.getenv("E2E_RAG_TIMEOUT", "600"))
