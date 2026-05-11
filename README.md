@@ -59,7 +59,7 @@ Choose one of these 3 ways to run PwnzzAI:
 4. Clone this repository and enter it:
 
 ```bash
-git clone <REPO_URL>
+git clone https://github.com/OWASP/PwnzzAI.git
 cd PwnzzAI
 ```
 
@@ -118,7 +118,7 @@ PWNZZAI_IMAGE=ghcr.io/your-org/pwnzzai:latest docker compose up -d
 
 ### If the default image does not pull (build locally)
 
-`docker compose` uses the image named in `docker-compose.yml` (by default `ghcr.io/maryammouzarani2024/pwnzzai:latest`). If `docker compose up` fails with **`denied`**, **`unauthorized`**, or similar when pulling that image, the registry may require login or your account may not have pull access. You can still run everything from this repository by **building the app image locally** and pointing compose at it.
+`docker compose` uses the default `pwnzzai-app` image from `docker-compose.yml` (overridable with **`PWNZZAI_IMAGE`**). If `docker compose up` fails with **`denied`**, **`unauthorized`**, or similar when pulling that image, the registry may require login or your account may not have pull access. You can still run everything from this repository by **building the app image locally** and pointing compose at it.
 
 From the repository root:
 
