@@ -446,18 +446,22 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ api_key: apiKey }),
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        provider: (LLM_UI.provider_name || '').toLowerCase(),
+                        model: LLM_UI.resolved_model || '',
+                    }),
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
                     statusDiv.className = 'status-message status-success';
-                    statusDiv.textContent = 'API key saved successfully! ' + LLM_UI.save_success_followup;
+                    statusDiv.textContent = `API key saved for ${data.provider_name || LLM_UI.provider_name}! ` + LLM_UI.save_success_followup;
                     document.getElementById('openai-api-key').value = '';
                 } else {
                     statusDiv.className = 'status-message status-error';
-                    statusDiv.textContent = data.error || 'Failed to save API key.';
+                    statusDiv.textContent = (data.error || 'Failed to save API key.') + (data.guidance ? ` ${data.guidance}` : '');
                 }
             } catch (error) {
                 statusDiv.className = 'status-message status-error';

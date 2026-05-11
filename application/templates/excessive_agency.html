@@ -356,7 +356,7 @@
                         console.log('No API key found in session');
                         if (openaiAgencyStatus) {
                             openaiAgencyStatus.className = 'api-status disconnected';
-                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                            openaiAgencyStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found. Please set it in Lab Setup.';
                         }
                     }
                 } catch (error) {

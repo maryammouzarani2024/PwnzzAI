@@ -96,7 +96,7 @@
                                                 <i class="fas fa-circle-xmark"></i> Checking API key...
                                             </div>
                                             <p class="help-text">
-                                                <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                                <small>Set your API key in <a href="{{ url_for('basics') }}">Lab Setup</a> to use this feature.</small>
                                             </p>
                                         </div>
                                         
@@ -1153,7 +1153,7 @@
                         // No token found in session
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status disconnected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found. Please set it in Lab Setup.';
                         }
                     }
                 } catch (error) {

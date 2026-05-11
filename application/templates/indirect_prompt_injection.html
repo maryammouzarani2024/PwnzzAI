@@ -115,7 +115,7 @@
                                     <i class="fas fa-circle-xmark"></i> Checking API key...
                                 </div>
                                 <p class="help-text">
-                                    <small>Set up your API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                    <small>Set your API key in <a href="{{ url_for('basics') }}">Lab Setup</a> to use this feature.</small>
                                 </p>
                                 </div>
                             
@@ -176,6 +176,19 @@
                     </section>
                 </div>
             </details>
+
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Defense Playbook (Incident Response)</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p><strong>Detect:</strong> model outputs that follow instructions embedded in QR payloads or file metadata rather than operator policy.</p>
+                        <p><strong>Contain:</strong> stop auto-processing uploads; quarantine images pending human review.</p>
+                        <p><strong>Eradicate:</strong> strip metadata channels before model context; rotate secrets referenced in legacy QR tests.</p>
+                        <p><strong>Recover:</strong> redeploy parsers that treat uploads as data-only; verify downstream agents ignore hidden channels.</p>
+                        <p><strong>Lessons learned:</strong> multimodal and file metadata are untrusted prompt surfaces—sign and classify sources.</p>
+                    </section>
+                </div>
+            </details>
         </div>
     </main>
 
@@ -214,7 +227,7 @@
 
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status disconnected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found. Please set it in Lab Setup.';
                         }
                     }
                 } catch (error) {
