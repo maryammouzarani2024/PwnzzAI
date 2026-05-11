@@ -18,7 +18,7 @@ def test_normalize_litellm_model_bare_name_gets_openai_prefix(monkeypatch):
 
 
 def test_normalize_litellm_model_passes_through_prefixed(monkeypatch):
-    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-2.0-flash")
+    monkeypatch.setenv("LITELLM_MODEL", "gemini/gemini-3.1-flash-lite")
     monkeypatch.setenv("OPENAI_MODEL", "gpt-4o-mini")
     import application.llm_chat as llm_chat
     assert llm_chat.normalize_litellm_model("gemini/gemini-1.5-flash") == "gemini/gemini-1.5-flash"
