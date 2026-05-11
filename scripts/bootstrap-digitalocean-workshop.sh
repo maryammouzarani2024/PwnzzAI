@@ -16,18 +16,6 @@
 #
 # Usage:
 #   sudo ./scripts/bootstrap-digitalocean-workshop.sh
-#   sudo ./scripts/bootstrap-digitalocean-workshop.sh --cleanup [--volumes] [--rmi-workshop]
-#
-# Stress / load checks (from repo root, stack running):
-#   • Shared Ollama + app HTTP (concurrent users): scripts/qa/load-test-shared-model.sh
-#       APP_URL=http://<host>:8080 USERS=20 TIMEOUT_SECONDS=60 ./scripts/qa/load-test-shared-model.sh
-#     (8080 must be reachable — e.g. standalone smoke container published on the host, or ssh -L 8080:127.0.0.1:8080.)
-#   • Broader smoke + model gates (set APP_URL, CTFD_URL, CTFD_API_TOKEN per script header):
-#       ./scripts/qa/run-model-integration-gates.sh
-#
-# Remote cleanup (must execute on the droplet — Docker/compose are local there):
-#   ssh root@<public> 'cd /opt/PwnzzAI && sudo ./scripts/bootstrap-digitalocean-workshop.sh --cleanup'
-#   # adjust path if repo is elsewhere; add --volumes / --rmi-workshop as needed
 #
 # Environment (optional):
 #   PWNZZAI_ROOT=/opt/PwnzzAI
@@ -36,9 +24,6 @@
 #   DO_AUTO_CTFD_SECRET=1                               # append CTFD_SECRET_KEY to .env if unset (openssl rand)
 #   PWNZZAI_SKIP_HOST_HARDENING=1                         # only run workshop bootstrap (not recommended)
 #   PWNZZAI_HARDEN_SSH=1                                # default: tighten sshd if root has authorized_keys
-#   PWNZZAI_SSH_PASSWORD_AUTH=1                         # allow root/password SSH (e.g. DO emailed root password); less secure
-#   PWNZZAI_OLLAMA_GPU=0                                # force CPU-only Ollama compose (default on CPU clouds; avoids CDI/GPU errors)
-#   PWNZZAI_OLLAMA_GPU=1                                # force NVIDIA GPU compose merge (requires driver + NVIDIA Container Toolkit)
 #
 set -euo pipefail
 
@@ -184,36 +169,14 @@ configure_ssh_hardening() {
   if [[ "${PWNZZAI_HARDEN_SSH:-1}" != "1" ]]; then
     return 0
   fi
-  local drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
-  if [[ "${PWNZZAI_SSH_PASSWORD_AUTH:-}" == "1" ]]; then
-    log_warn "PWNZZAI_SSH_PASSWORD_AUTH=1 — sshd will allow password authentication (including root). Prefer SSH keys when you can."
-    cat <<'SSHD' >"$drop"
-# PwnzzAI workshop — password SSH enabled (bootstrap-digitalocean-workshop.sh / PWNZZAI_SSH_PASSWORD_AUTH=1)
-PasswordAuthentication yes
-KbdInteractiveAuthentication yes
-PermitRootLogin yes
-X11Forwarding no
-MaxAuthTries 6
-LoginGraceTime 60
-ClientAliveInterval 300
-ClientAliveCountMax 2
-SSHD
-    if sshd -t 2>/dev/null; then
-      systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null || true
-      log_info "SSH drop-in written (${drop}) with password auth allowed. Open a second session to verify before you disconnect."
-    else
-      log_warn "sshd -t failed; removed ${drop}"
-      rm -f "$drop"
-    fi
-    return 0
-  fi
   local ak=/root/.ssh/authorized_keys
   if [[ ! -s "$ak" ]]; then
-    log_warn "Skipping aggressive SSH hardening: $ak missing or empty (avoid lockout). Use PWNZZAI_SSH_PASSWORD_AUTH=1 if you rely on password login."
+    log_warn "Skipping aggressive SSH hardening: $ak missing or empty (avoid lockout)."
     return 0
   fi
   chmod 700 /root/.ssh 2>/dev/null || true
   chmod 600 "$ak" 2>/dev/null || true
+  local drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
   cat <<'SSHD' >"$drop"
 # PwnzzAI workshop — key-based access only when authorized_keys exists (installed by bootstrap-digitalocean-workshop.sh)
 PasswordAuthentication no
@@ -308,75 +271,7 @@ host_hardening() {
   configure_ssh_hardening
 }
 
-remove_pwnzzai_ollama_isolate_iptables() {
-  local port="${OLLAMA_ISOLATE_PORT:-11434}"
-  while iptables -D DOCKER-USER -p tcp --dport "$port" -s 172.17.0.0/16 -j RETURN \
-    -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
-    :
-  done
-  while iptables -D DOCKER-USER -p tcp --dport "$port" -j DROP \
-    -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
-    :
-  done
-  if ip6tables -S DOCKER-USER >/dev/null 2>&1; then
-    while ip6tables -D DOCKER-USER -p tcp --dport "$port" -j DROP \
-      -m comment --comment 'pwnzzai-ollama-isolate' 2>/dev/null; do
-      :
-    done
-  fi
-}
-
-cleanup_workshop_host() {
-  require_root
-  log_info "Cleanup mode — reversing workshop stack + bootstrap-specific host bits (repo: ${PWNZZAI_ROOT})"
-
-  local td="${PWNZZAI_ROOT}/scripts/ctfd_setup/teardown-ctfd-workshop.sh"
-  if [[ -x "$td" ]] || [[ -f "$td" ]]; then
-    bash "$td" "$@"
-  else
-    log_warn "Teardown script missing at ${td} — skipping compose down."
-  fi
-
-  if systemctl is-enabled pwnzzai-docker-ollama-isolate.service >/dev/null 2>&1 \
-    || systemctl is-active pwnzzai-docker-ollama-isolate.service >/dev/null 2>&1; then
-    systemctl disable --now pwnzzai-docker-ollama-isolate.service 2>/dev/null || true
-  fi
-  rm -f /etc/systemd/system/pwnzzai-docker-ollama-isolate.service
-  rm -f /usr/local/sbin/pwnzzai-docker-ollama-isolate.sh
-  systemctl daemon-reload 2>/dev/null || true
-
-  remove_pwnzzai_ollama_isolate_iptables
-  log_info "Removed pwnzzai-ollama-isolate DOCKER-USER rules (if any)."
-
-  local sysctl_f=/etc/sysctl.d/99-pwnzzai-workshop.conf
-  if [[ -f "$sysctl_f" ]]; then
-    rm -f "$sysctl_f"
-    sysctl --system >/dev/null 2>&1 || true
-    log_info "Removed ${sysctl_f}"
-  fi
-
-  local ssh_drop=/etc/ssh/sshd_config.d/99-pwnzzai-workshop.conf
-  if [[ -f "$ssh_drop" ]]; then
-    rm -f "$ssh_drop"
-    if sshd -t 2>/dev/null; then
-      systemctl reload sshd 2>/dev/null || systemctl reload ssh 2>/dev/null || true
-    fi
-    log_info "Removed SSH drop-in ${ssh_drop} (verify sshd before closing this session)."
-  fi
-
-  log_info "—"
-  log_info "Cleanup finished. Docker, UFW, fail2ban, and packages were left installed."
-  log_info "Participant-spawned containers may still exist: docker ps -a"
-  log_info "—"
-}
-
 main() {
-  if [[ "${1:-}" == "--cleanup" ]] || [[ "${1:-}" == "cleanup" ]]; then
-    shift
-    cleanup_workshop_host "$@"
-    exit 0
-  fi
-
   require_root
   require_apt
   log_info "PwnzzAI DigitalOcean workshop bootstrap (repo: ${PWNZZAI_ROOT})"
@@ -386,14 +281,6 @@ main() {
   ensure_env_file
   maybe_auto_public_host
   maybe_auto_ctfd_secret
-
-  # Pick up PWNZZAI_* flags (SSH, Ollama GPU) from .env before host hardening / workshop bootstrap.
-  if [[ -f "$ENV_FILE" ]]; then
-    set -a
-    # shellcheck disable=SC1090
-    source "$ENV_FILE"
-    set +a
-  fi
 
   if [[ "${PWNZZAI_SKIP_HOST_HARDENING:-}" == "1" ]]; then
     log_warn "PWNZZAI_SKIP_HOST_HARDENING=1 — skipping UFW/fail2ban/sysctl/SSH."
@@ -420,7 +307,6 @@ main() {
   log_info "       (2) Open http://<public>:8000 and finish the CTFd wizard."
   log_info "       (3) Admin → API token → ${PWNZZAI_ROOT}/scripts/ctfd_setup/register-pwnzzai-challenge.sh"
   log_info "       (4) Add HTTPS reverse proxy for production; this stack is HTTP-only by default."
-  log_info "       (5) CPU droplet: leave PWNZZAI_OLLAMA_GPU unset (default). GPU droplet: install NVIDIA Container Toolkit or set PWNZZAI_OLLAMA_GPU=0 for CPU Ollama."
   log_info "—"
 }
 

@@ -6,11 +6,8 @@ __pycache__/
 # Virtual environment
 venv/
 .venv/
+.gitignore
 .flaskenv
-
-# Local scratch / accidental clones (not part of this repo)
-tmp/
-CTFd-Docker-Challenges/
 
 # Database
 instance/
@@ -25,3 +22,5 @@ downloads/
 
 # OS files
 .DS_Store
+
+.gitignorecatering_sql_lab.db
