@@ -26,7 +26,7 @@ def test_openai_dos_uses_lab_cloud_llm_model_default(monkeypatch):
 
 
 def test_openai_excessive_agency_uses_excessive_agency_env(monkeypatch):
-    monkeypatch.setenv("LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY", "gemini/gemini-2.0-flash")
+    monkeypatch.setenv("LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY", "gemini/gemini-3.1-flash-lite")
     import application.provider_config as pc
     import application.vulnerabilities.openai_excessive_agency as ea
 
@@ -40,4 +40,4 @@ def test_openai_excessive_agency_uses_excessive_agency_env(monkeypatch):
 
     monkeypatch.setattr(ea, "chat_completion", fake_chat_completion)
     ea.openai_chat("order pizza", "sk-fake")
-    assert captured["model"] == "gemini/gemini-2.0-flash"
+    assert captured["model"] == "gemini/gemini-3.1-flash-lite"

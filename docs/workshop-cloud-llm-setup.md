@@ -29,31 +29,37 @@ You can change later; just update the settings and restart again.
 
 ---
 
-## Step 2 — Two numbers that control *which model name* is used
+## Step 2 — Which model name is used (no hardcoded defaults in the app)
 
-The workshop app uses **two** settings for cloud labs:
+Cloud model IDs come **only from environment variables** (or from **`LITELLM_MODEL`** / **`GEMINI_MODEL`** / **`OPENAI_MODEL`** for fallbacks). Set at least one path below or cloud calls may get an empty model name.
 
-1. **`LAB_CLOUD_LLM_MODEL`** — Used for **most** cloud demos (prompt injection, insecure plugin, data leakage RAG, misinformation, DoS demo, order access, etc.).  
-   - If you do **nothing**, it defaults to a small OpenAI-style model name (`gpt-3.5-turbo`).
+**Per-lab overrides (optional):**
 
-2. **`LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY`** — Used **only** for the **Excessive agency** cloud demo.  
-   - If you do **nothing**, it defaults to `gpt-4o-mini`.
+1. **`LAB_CLOUD_LLM_MODEL`** — **Most** cloud demos (prompt injection, insecure plugin, RAG, misinformation, DoS, order access, etc.).
 
-You can set either or both to a **full route** that includes the provider, for example:
+2. **`LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY`** — **Excessive agency** cloud demo only. If unset, the app falls back to `LAB_CLOUD_LLM_MODEL`, then **`GEMINI_MODEL`**, then **`OPENAI_MODEL`**.
+
+**If those are unset**, each resolves in order: **`GEMINI_MODEL`** (see Step 3) → bare **`OPENAI_MODEL`** (LiteLLM route `openai/...`).
+
+You can set lab variables to a **full route** with a provider prefix, for example:
 
 - `openai/gpt-4o-mini` — OpenAI
 - `anthropic/claude-3-5-sonnet-20240620` — Anthropic Claude (example; check Anthropic’s current model list)
-- `gemini/gemini-2.0-flash` — Google Gemini (example; check Google’s current model list)
+- `gemini/gemini-3.1-flash-lite` — Google Gemini (example; check Google’s current model list)
 
 **Rule of thumb:** If the value contains a **`/`**, the app sends it to LiteLLM as-is. If it does **not** contain a **`/`**, the app assumes OpenAI and adds `openai/` in front (so `gpt-3.5-turbo` becomes `openai/gpt-3.5-turbo`).
 
 ---
 
-## Step 3 — Optional: global default route (`LITELLM_MODEL`)
+## Step 3 — Global route: `LITELLM_MODEL` or `GEMINI_MODEL`
 
-**`LITELLM_MODEL`** is optional. When set, it is mainly used when the app needs a **default route** without a per-lab model (for example some fallbacks).  
+**`LITELLM_MODEL`** (optional) — Full LiteLLM route, e.g. `gemini/gemini-3.1-flash-lite`, `openai/gpt-4o-mini`. When set, it wins for the Lab Setup UI and for any code path that uses the “resolved” default model.
 
-For day-to-day workshop tuning, **start with `LAB_CLOUD_LLM_MODEL` and `LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY`** first.
+**`GEMINI_MODEL`** (optional) — Google model id **without** picking a default in code: either a **bare** id (e.g. `gemini-3.1-flash-lite`, turned into `gemini/gemini-3.1-flash-lite`) or a **full** `provider/model` string if you include a `/`.
+
+Resolution order for the global default: **`LITELLM_MODEL`** → **`GEMINI_MODEL`** → **`OPENAI_MODEL`** → `openai/{OPENAI_MODEL}`.
+
+For workshops, either set **`GEMINI_MODEL`** plus **`GEMINI_API_KEY`**, or set explicit **`LAB_CLOUD_*`** / **`LITELLM_MODEL`** as in the examples below.
 
 ---
 
@@ -73,15 +79,16 @@ Participants can also paste a key in **Lab Setup** in the app; that key is sent 
 
 ## Step 5 — Examples you can copy
 
-### Example A — Everything default (OpenAI-style names, OpenAI keys)
+### Example A — OpenAI for cloud labs
 
-Do not set `LAB_CLOUD_*`. Set only:
+Set a bare OpenAI model name (the app prefixes `openai/`) and your key:
 
 ```bash
 export OPENAI_API_KEY="sk-..."
+export OPENAI_MODEL="gpt-4o-mini"
 ```
 
-Use the model names already built into the defaults, or set:
+Optional explicit per-lab names:
 
 ```bash
 export LAB_CLOUD_LLM_MODEL="gpt-3.5-turbo"
@@ -98,9 +105,19 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ### Example C — Google Gemini for most labs
 
+Minimal (bare Gemini id; no model string hardcoded in the application):
+
 ```bash
-export LAB_CLOUD_LLM_MODEL="gemini/gemini-2.0-flash"
-export LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY="gemini/gemini-2.0-flash"
+export GEMINI_MODEL="gemini-3.1-flash-lite"
+export GEMINI_API_KEY="your-google-ai-studio-key"
+```
+
+Equivalent explicit routes (optional):
+
+```bash
+export LITELLM_MODEL="gemini/gemini-3.1-flash-lite"
+export LAB_CLOUD_LLM_MODEL="gemini/gemini-3.1-flash-lite"
+export LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY="gemini/gemini-3.1-flash-lite"
 export GEMINI_API_KEY="your-google-ai-studio-key"
 ```
 

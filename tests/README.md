@@ -54,6 +54,28 @@ pytest tests/integration/
 pytest tests/functional/
 ```
 
+### Run E2E Solvability Harness (Docker + Ollama)
+
+```bash
+scripts/qa/run-challenge-solve-e2e.sh
+```
+
+Optional:
+
+```bash
+# Override model tag (default: llama3.2:1b; must match app OLLAMA_MODEL in compose)
+E2E_OLLAMA_MODEL="mistral:7b" scripts/qa/run-challenge-solve-e2e.sh
+
+# Cloud-marked tests (OpenAI direct injection, RAG cloud paths, etc.)
+E2E_OPENAI_API_KEY="sk-..." scripts/qa/run-challenge-solve-e2e.sh
+
+# Skip slow SentenceTransformer RAG refresh probes (first run can download MiniLM)
+E2E_SKIP_RAG_REFRESH=1 scripts/qa/run-challenge-solve-e2e.sh
+
+# Keep stack up for debugging after run
+KEEP_STACK_UP=1 scripts/qa/run-challenge-solve-e2e.sh
+```
+
 ### Run Security Tests Only
 
 ```bash
