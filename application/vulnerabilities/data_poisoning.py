@@ -1,8 +1,18 @@
 from application.model import Comment
+from sqlalchemy.exc import OperationalError, ProgrammingError
+
+
+def _comments_from_db():
+    """Return pizza comments for the lab, or [] if the DB is missing tables (e.g. not migrated)."""
+    try:
+        return list(Comment.query.all())
+    except (OperationalError, ProgrammingError):
+        return []
+
 
 def create_sentiment_model():
      # Get all the existing comments to display
-    comments = Comment.query.all()
+    comments = _comments_from_db()
     
     # Create training data for the initial model
     training_texts = []
@@ -74,7 +84,7 @@ def create_sentiment_model():
 def create_new_model_with_poisoned_data(user_comments):
     
         # Get all pizza comments from the database as base data
-        db_comments = Comment.query.all()
+        db_comments = _comments_from_db()
         training_texts = []
         training_labels = []
         

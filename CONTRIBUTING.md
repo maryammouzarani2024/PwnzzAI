@@ -34,7 +34,7 @@ You can contribute to PwnzzAI Shop in several ways:
 
 ## Getting Started
 
-1. **Fork the Repository**: Click the 'Fork' button on the [GitHub repository](https://github.com/maryammouzarani2024/PwnzzAI)
+1. **Fork the Repository**: Click the **Fork** button on the canonical repo: [https://github.com/OWASP/PwnzzAI](https://github.com/OWASP/PwnzzAI)
 
 2. **Clone Your Fork**:
    ```bash
@@ -42,10 +42,12 @@ You can contribute to PwnzzAI Shop in several ways:
    cd PwnzzAI
    ```
 
-3. **Add Upstream Remote**:
+3. **Add Upstream Remote** (track the canonical OWASP project):
    ```bash
-   git remote add upstream https://github.com/maryammouzarani2024/PwnzzAI.git
+   git remote add upstream https://github.com/OWASP/PwnzzAI.git
    ```
+
+   If your GitHub fork still shows the **old parent repository**, GitHub will not let you open a pull request into **OWASP/PwnzzAI** from that fork. Fix it by **forking again from [OWASP/PwnzzAI](https://github.com/OWASP/PwnzzAI)** (or asking an org admin to **re-parent** your existing fork), then add a second remote (for example `origin` → your fork, `upstream` → OWASP) and push your topic branch there before opening the PR.
 
 4. **Create a Branch**:
    ```bash

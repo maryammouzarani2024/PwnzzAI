@@ -44,3 +44,13 @@ class Order(db.Model):
     
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     pizza = db.relationship('Pizza', backref=db.backref('orders', lazy=True))
+
+
+class RoutingFlag(db.Model):
+    """Synthetic routing tokens for the catering SQL / tool-abuse lab."""
+
+    __bind_key__ = "catering_sql"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    flag_code = db.Column(db.String(64), nullable=False)

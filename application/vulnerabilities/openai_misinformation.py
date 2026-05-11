@@ -1,8 +1,10 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
-from openai import OpenAI
+from application.llm_chat import chat_completion
+from application.provider_config import lab_cloud_llm_model_default
 from application.model import Comment
+from application.provider_config import llm_ui_snapshot
 from sqlalchemy.orm import joinedload
 
 # Global variables for RAG system
@@ -79,35 +81,31 @@ def query_rag_system_openai(user_query, api_key):
         print(f"Context being sent: {context[:200]}...")
         print(f"Query: {user_query}")
         
-        # Initialize OpenAI client
-        client = OpenAI(api_key=api_key)
-        
-        # Prepare messages for OpenAI
         messages = [
             {"role": "system", "content": "You are a helpful assistant for Pwnzza Shop.You have to talk about our creative and special pizza ingredients and nutrious level of pizzas. You must use the information in the users' comments and feedbacks to answer questions. You MUST just talk about the ingredients, not what each user has said or the name of the users and theis comments directly. Always answer the questions and never disapoint the users."},
             {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_query}"}
         ]
         
-        # Call OpenAI API
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
+        answer = chat_completion(
+            messages,
+            api_key=api_key,
+            model=lab_cloud_llm_model_default(),
             temperature=0.7,
-            max_tokens=500
+            max_tokens=500,
         )
         
-        print("Response received from OpenAI")
+        print("Response received from model")
         
-        if response.choices and response.choices[0].message:
-            answer = response.choices[0].message.content
-            print(f"Answer: {answer}")
-            return answer, True
-        else:
+        if answer.startswith("Error:"):
+            return answer, False
+        if not answer.strip() or answer == "No response content received from the model":
             print("No message content in response")
-            return "No response content received from OpenAI", False
+            return "No response content received from the model", False
+        print(f"Answer: {answer}")
+        return answer, True
             
     except Exception as e:
-        print(f"Error calling OpenAI API: {str(e)}")
+        print(f"Error calling model API: {str(e)}")
         return f"Error processing query: {str(e)}", False
 
 
@@ -122,4 +120,5 @@ def query_openai_for_misinformation(user_query, api_token):
         return response, True
         
     except Exception as e:
-        return f"Error connecting to OpenAI: {str(e)}", False
+        name = llm_ui_snapshot()["provider_name"]
+        return f"Error connecting to {name}: {str(e)}", False

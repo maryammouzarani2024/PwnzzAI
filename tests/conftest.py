@@ -13,9 +13,27 @@ sys.path.insert(0, str(project_root))
 
 # Set environment variable to prevent route initialization during tests
 os.environ['TESTING'] = 'True'
+os.environ.setdefault('OPENAI_MODEL', 'gpt-4o-mini')
 
 from application import app, db
-from application.model import User, Pizza, Comment, Order
+from application.model import User, Pizza, Comment, Order, RoutingFlag
+
+# Clear cloud LLM env after app import: LiteLLM calls load_dotenv() on import and
+# would otherwise pull LITELLM_* / LAB_CLOUD_* from the repo-root .env into tests.
+for _k in (
+    'LITELLM_MODEL',
+    'GEMINI_MODEL',
+    'LAB_CLOUD_LLM_MODEL',
+    'LAB_CLOUD_LLM_MODEL_EXCESSIVE_AGENCY',
+    'LLM_UI_PROVIDER_NAME',
+    'LLM_UI_KEY_LABEL',
+    'LLM_UI_KEY_PLACEHOLDER',
+    'LLM_UI_DOCS_URL',
+    'LLM_UI_DOCS_ANCHOR',
+    'LLM_UI_LAB_HEADING',
+    'LLM_UI_LAB_DESCRIPTION',
+):
+    os.environ.pop(_k, None)
 
 
 @pytest.fixture
@@ -24,6 +42,7 @@ def test_app():
     # Set testing configuration
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory database
+    app.config['SQLALCHEMY_BINDS'] = {'catering_sql': 'sqlite:///:memory:'}
     app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
     app.config['SECRET_KEY'] = 'test-secret-key'
 
@@ -89,6 +108,10 @@ def _create_sample_data():
 
     db.session.add(alice)
     db.session.add(bob)
+    db.session.commit()
+
+    db.session.add(RoutingFlag(username="alice", flag_code="RT-ALICE7A"))
+    db.session.add(RoutingFlag(username="bob", flag_code="RT-BOB9F2"))
     db.session.commit()
 
     # Create pizzas

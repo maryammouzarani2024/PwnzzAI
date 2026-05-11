@@ -6,9 +6,10 @@ import requests
 import random
 import json
 from datetime import datetime
+from sqlalchemy.exc import OperationalError
 
 import application
-from application.model import Pizza, Comment, User, Order
+from application.model import Pizza, Comment, User, Order, RoutingFlag
 
 from application.vulnerabilities import data_poisoning
 from application.vulnerabilities import model_theft
@@ -17,10 +18,106 @@ from application import sentiment_model
 
 from application.vulnerabilities.ollama_indirect_prompt_injection import chat_with_ollama_indirect, decode_qr, UPLOAD_FOLDER
 from application.vulnerabilities.openai_indirect_prompt_injection import chat_with_openai_indirect_prompt_injection
-from application.provider_config import OLLAMA_HOST, OLLAMA_MODEL, get_openai_api_key
+from application.provider_config import (
+    OLLAMA_HOST,
+    OLLAMA_MODEL,
+    api_response_model_type,
+    cloud_api_key_valid,
+    cloud_provider_prefix,
+    get_openai_api_key,
+    llm_ui_snapshot,
+    resolve_provider,
+)
 from werkzeug.utils import secure_filename
 
 OLLAMA_BASE_URL = OLLAMA_HOST
+_DB_READY_CHECKED = False
+
+
+def _ollama_status_snapshot() -> tuple[bool, list[str], str | None]:
+    """Best-effort Ollama status probe without side effects."""
+    try:
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=4)
+        if response.status_code != 200:
+            return False, [], f"status={response.status_code}"
+        models_data = response.json()
+        models = [model.get("name", "") for model in models_data.get("models", []) if model.get("name")]
+        return True, models, None
+    except Exception as e:
+        return False, [], str(e)
+
+
+def _ollama_unavailable_message(feature_name: str) -> str:
+    return (
+        f"Ollama is unavailable for {feature_name}. "
+        "Start Ollama (Lab Setup -> Setup Ollama) and retry."
+    )
+
+
+def _ollama_remote_gate_enabled() -> bool:
+    """Skip live Ollama HTTP probes under pytest / Flask test client (monkeypatch targets)."""
+    if (os.environ.get("TESTING") or "").strip().lower() in {"1", "true", "yes"}:
+        return False
+    try:
+        from flask import current_app, has_request_context
+
+        if has_request_context() and getattr(current_app, "testing", False):
+            return False
+    except RuntimeError:
+        pass
+    return True
+
+
+def _seed_minimum_app_data() -> None:
+    """Ensure essential DB objects exist so root/login never hard-fail."""
+    application.db.create_all()
+
+    if Pizza.query.count() == 0:
+        pizzas = [
+            Pizza(name='Margherita', description='Classic pizza with tomato sauce, mozzarella, and basil', price=9.99, image='margherita.jpg'),
+            Pizza(name='Pepperoni', description='Pizza topped with tomato sauce, mozzarella, and pepperoni slices', price=11.99, image='pepperoni.jpg'),
+            Pizza(name='Veggie Supreme', description='Loaded with bell peppers, onions, mushrooms, olives, and tomatoes', price=12.99, image='veggie.jpg'),
+        ]
+        for pizza in pizzas:
+            application.db.session.add(pizza)
+        application.db.session.commit()
+
+    if User.query.filter_by(username='alice').first() is None:
+        alice = User(username='alice')
+        alice.set_password('alice')
+        application.db.session.add(alice)
+    if User.query.filter_by(username='bob').first() is None:
+        bob = User(username='bob')
+        bob.set_password('bob')
+        application.db.session.add(bob)
+    application.db.session.commit()
+
+    if RoutingFlag.query.filter_by(username="alice").first() is None:
+        application.db.session.add(RoutingFlag(username="alice", flag_code="RT-ALICE7A"))
+    if RoutingFlag.query.filter_by(username="bob").first() is None:
+        application.db.session.add(RoutingFlag(username="bob", flag_code="RT-BOB9F2"))
+    application.db.session.commit()
+
+
+def _ensure_db_ready() -> None:
+    """Self-heal local runtime if DB tables are missing."""
+    global _DB_READY_CHECKED
+    if _DB_READY_CHECKED:
+        return
+    try:
+        Pizza.query.limit(1).all()
+        User.query.limit(1).all()
+        RoutingFlag.query.limit(1).all()
+        _DB_READY_CHECKED = True
+    except OperationalError:
+        application.db.session.rollback()
+        _seed_minimum_app_data()
+        _DB_READY_CHECKED = True
+
+
+@application.app.before_request
+def _before_request_ensure_db_ready():
+    _ensure_db_ready()
 
 
 
@@ -126,6 +223,11 @@ if not os.environ.get('TESTING'):
             application.db.session.add(bob)
             application.db.session.commit()
 
+        if RoutingFlag.query.count() == 0:
+            application.db.session.add(RoutingFlag(username="alice", flag_code="RT-ALICE7A"))
+            application.db.session.add(RoutingFlag(username="bob", flag_code="RT-BOB9F2"))
+            application.db.session.commit()
+
 # Authentication routes
 @application.app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -223,7 +325,7 @@ def test_openai_leakage():
         # If no API token provided, return clear error message
         if not api_token:
             return jsonify({
-                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['missing_key_error'],
                 'has_leakage': False,
                 'leaked_info': [],
                 'model_type': 'error'
@@ -265,7 +367,20 @@ def test_ollama_leakage():
     """API endpoint for testing Ollama model for training data leakage"""
     try:
         from application.vulnerabilities.ollama_sensitive_data_leakage import query_rag_system, detect_sensitive_info
-        
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                msg = _ollama_unavailable_message("training-data-leak/ollama")
+                return jsonify(
+                    {
+                        'response': msg,
+                        'has_leakage': False,
+                        'leaked_info': [],
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
+
         data = request.get_json()
         user_query = data.get('query', '')
         
@@ -447,23 +562,113 @@ def chat_with_pizza_assistant_direct_prompt():
         data = request.get_json()
         message = data.get('message', '')
         level = data.get("level", "1")  # default to level 1
-        
-        
+        escalation_stage = data.get("escalation_stage")
+        history = data.get("history")
+
         if not message:
             return jsonify({'error': 'No message provided'}), 400
-        
-        # Import the conversational model plugin system
+
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                return jsonify(
+                    {
+                        'response': _ollama_unavailable_message("direct prompt injection"),
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
+
+        if escalation_stage is not None:
+            from application.vulnerabilities.direct_prompt_escalation import run_escalation_ollama
+
+            try:
+                stage_i = int(escalation_stage)
+            except (TypeError, ValueError):
+                return jsonify({'error': 'escalation_stage must be an integer 0-9'}), 400
+            response, esc_meta = run_escalation_ollama(
+                message, stage_i, history=history, model_name=OLLAMA_MODEL
+            )
+            return jsonify({"response": response, "escalation_meta": esc_meta})
+
         from application.vulnerabilities.ollama_direct_prompt_injection import chat_with_ollama_direct_prompt_injection
-        
-        # The vulnerability: Directly passing user message to the LLM+plugin system
-        # where the LLM can control function execution
+
         response = chat_with_ollama_direct_prompt_injection(message, level=level, model_name=OLLAMA_MODEL)
 
-
         return jsonify({'response': response})
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+def _parse_openai_style_messages(messages):
+    """Strip system roles; last user content is the active prompt; prior turns are history."""
+    if not messages:
+        return "", None
+    clean: list[dict] = []
+    for m in messages:
+        if not isinstance(m, dict):
+            continue
+        role = str(m.get("role", "")).lower().strip()
+        if role == "system":
+            continue
+        if role in ("user", "assistant"):
+            clean.append({"role": role, "content": str(m.get("content", ""))})
+    if not clean:
+        return "", None
+    last = clean[-1]
+    if last.get("role") != "user":
+        return "", clean
+    prior = clean[:-1] if len(clean) > 1 else None
+    return str(last.get("content", "")), prior
+
+
+@application.app.route("/api/lab/direct-prompt-escalation/stages", methods=["GET"])
+def api_direct_prompt_escalation_stages():
+    from application.vulnerabilities.direct_prompt_escalation import escalation_stage_metadata
+
+    return jsonify({"stages": escalation_stage_metadata()})
+
+
+@application.app.route("/v1/lab/chat/completions", methods=["POST"])
+def lab_chat_completions_openai_shape():
+    """
+    OpenAI-shaped completions for scanner-style clients (local Ollama backend).
+    Requires JSON field ``pwnzz_escalation_stage`` (0-9). Optional ``pwnzz_history``.
+    """
+    try:
+        from application.vulnerabilities.direct_prompt_escalation import (
+            openai_style_completion_response,
+            run_escalation_ollama,
+        )
+
+        data = request.get_json(silent=True) or {}
+        messages = data.get("messages") or []
+        stage_raw = data.get("pwnzz_escalation_stage")
+        if stage_raw is None:
+            return jsonify(
+                {"error": "pwnzz_escalation_stage (integer 0-9) is required for this lab endpoint."}
+            ), 400
+        try:
+            stage_i = int(stage_raw)
+        except (TypeError, ValueError):
+            return jsonify({"error": "pwnzz_escalation_stage must be an integer 0-9"}), 400
+
+        user_msg, hist_from_messages = _parse_openai_style_messages(messages)
+        history = data.get("pwnzz_history")
+        if history is None:
+            history = hist_from_messages
+        if not user_msg:
+            return jsonify({"error": "messages must include at least one user turn"}), 400
+
+        text, esc_meta = run_escalation_ollama(
+            user_msg, stage_i, history=history, model_name=OLLAMA_MODEL
+        )
+        body = openai_style_completion_response(text)
+        body["pwnzz_escalation_meta"] = esc_meta
+        return jsonify(body)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -482,12 +687,12 @@ def chat_with_openai_plugin():
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
         
         # Import the OpenAI insecure plugin
         from application.vulnerabilities.openai_insecure_plugin import chat_with_openai
         
-        # VULNERABLE: Directly using user-provided API key with OpenAI
+        # VULNERABLE: Directly using user-provided API key with the configured cloud LLM
         response = chat_with_openai(message, openai_api_key)
         
         return jsonify({'response': response})
@@ -584,6 +789,18 @@ def data_poisoning_main():
     model_data=data_poisoning.create_sentiment_model()
     
     return render_template('data_poisoning.html', model_data=model_data)
+
+
+@application.app.route('/data-poisoning/catering-rag')
+def catering_rag_poisoning_page():
+    """Corporate catering vector / RAG poisoning lab (LLM04-adjacent scenario)."""
+    return render_template('catering_rag_poisoning.html')
+
+
+@application.app.route('/agentic-tools')
+def agentic_tools():
+    """Catering agentic SQL / tool routing lab (RAG sibling lives on data poisoning)."""
+    return render_template('agentic_tools.html')
 
 @application.app.route('/dos-attack')
 def dos_attack():
@@ -769,13 +986,13 @@ def test_openai_order_access():
                 'response': "You need to be logged in to access order information.",
                 'has_access_violation': False,
                 'accessed_info': [],
-                'model_type': 'openai'
+                'model_type': api_response_model_type()
             })
         
         # If no API token, return error
         if not api_token:
             return jsonify({
-                'response': "Error: No OpenAI API key found in session. Please set up your API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['missing_key_error'],
                 'has_access_violation': False,
                 'accessed_info': [],
                 'model_type': 'error'
@@ -864,7 +1081,7 @@ def test_openai_excessive_agency():
             
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please set up your OpenAI API key in the Lab Setup section.",
+                'response': llm_ui_snapshot()['excessive_agency_token_error'],
                 'model_type': 'error'
             })
         
@@ -895,22 +1112,51 @@ def glossary():
 # Lab Setup Routes
 @application.app.route('/save-openai-api-key', methods=['POST'])
 def save_openai_api_key():
-    """Save OpenAI API key to session"""
+    """Save cloud LLM API key to session (OpenAI/Gemini/etc via LiteLLM route)."""
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         api_key = data.get('api_key', '').strip()
+        provider_hint = (data.get('provider') or '').strip()
+        model_hint = (data.get('model') or '').strip()
+        # Backward-compatible default for existing clients calling /save-openai-api-key.
+        if not provider_hint and not model_hint:
+            provider_hint = "openai"
+        effective_prefix = cloud_provider_prefix(provider_hint=provider_hint, model_hint=model_hint)
         
         if not api_key:
             return jsonify({'success': False, 'error': 'No API key provided'})
         
-        # Basic validation - OpenAI keys start with 'sk-'
-        if not api_key.startswith('sk-'):
-            return jsonify({'success': False, 'error': 'Invalid API key format. OpenAI keys start with sk-'})
+        if not cloud_api_key_valid(api_key, provider_hint=provider_hint, model_hint=model_hint):
+            guidance = (
+                "OpenAI-style keys usually start with sk-."
+                if effective_prefix == "openai"
+                else "Use your configured provider key (for Gemini/Vertex, use the API key from AI Studio/Vertex)."
+            )
+            error_msg = (
+                "Invalid API key format. OpenAI keys typically start with sk-"
+                if effective_prefix == "openai"
+                else f"Invalid API key format for provider '{effective_prefix}'. Check your key and try again."
+            )
+            return jsonify(
+                {
+                    'success': False,
+                    'error': error_msg,
+                    'provider_prefix': effective_prefix,
+                    'guidance': guidance,
+                }
+            )
         
         # Store in session
         session['openai_api_key'] = api_key
-        print("api key is:  ", api_key)
-        return jsonify({'success': True, 'message': 'API key saved successfully'})
+        session['cloud_provider_prefix'] = effective_prefix
+        return jsonify(
+            {
+                'success': True,
+                'message': 'API key saved successfully',
+                'provider_prefix': effective_prefix,
+                'provider_name': llm_ui_snapshot()['provider_name'],
+            }
+        )
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -919,10 +1165,13 @@ def save_openai_api_key():
 def check_openai_api_key():
     """Check if OpenAI API key is saved in session"""
     has_key = get_openai_api_key(session) != ''
-    print("Session check - has openai_api_key:", has_key)
-    if has_key:
-        print("Session openai_api_key value:", get_openai_api_key(session)[:10] + "...")
-    return jsonify({'has_key': has_key})
+    return jsonify(
+        {
+            'has_key': has_key,
+            'llm_ui': llm_ui_snapshot(),
+            'provider_prefix': session.get('cloud_provider_prefix') or cloud_provider_prefix(),
+        }
+    )
 
 @application.app.route('/setup-ollama', methods=['POST'])
 def setup_ollama():
@@ -994,22 +1243,8 @@ def setup_ollama_stream():
 def check_ollama_status():
     """Check current Ollama status"""
     try:
-        from application.ollama_setup import ensure_ollama_running
-
-        if ensure_ollama_running(base_url=OLLAMA_BASE_URL):
-            # Get available models
-            response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
-            if response.status_code == 200:
-                models_data = response.json()
-                models = [model['name'] for model in models_data.get('models', [])]
-                return jsonify({
-                    'available': True,
-                    'models': models
-                })
-            else:
-                return jsonify({'available': True, 'models': []})
-        else:
-            return jsonify({'available': False, 'models': []})
+        available, models, err = _ollama_status_snapshot()
+        return jsonify({'available': available, 'models': models, 'error': err})
             
     except Exception as e:
         return jsonify({'available': False, 'models': [], 'error': str(e)})
@@ -1019,7 +1254,19 @@ def test_ollama_misinformation():
     """Test Ollama model for misinformation using comments"""
     try:
         from application.vulnerabilities.ollama_misinformation import query_ollama_for_misinformation
-        
+        if _ollama_remote_gate_enabled():
+            available, _, _ = _ollama_status_snapshot()
+            if not available:
+                return jsonify(
+                    {
+                        'response': _ollama_unavailable_message("misinformation/ollama"),
+                        'has_misinformation': False,
+                        'misinformation_detected': [],
+                        'model_type': 'error',
+                        'ollama_available': False,
+                    }
+                )
+
         data = request.get_json()
         user_query = data.get('query', '')
         
@@ -1081,7 +1328,7 @@ def test_openai_misinformation():
         # If no API token, return error
         if not api_token:
             return jsonify({
-                'response': "Error: No valid OpenAI API token provided. Please connect to the OpenAI API first by entering your API key.",
+                'response': llm_ui_snapshot()['misinformation_connect_hint'],
                 'has_misinformation': False,
                 'misinformation_detected': [],
                 'model_type': 'error'
@@ -1323,6 +1570,188 @@ def test_poisoned_model():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@application.app.route("/api/catering-rag/reset", methods=["POST"])
+def api_catering_rag_reset():
+    from application.vulnerabilities import catering_rag_lab as catering_rag_lab
+
+    catering_rag_lab.reset_corpus()
+    return jsonify({"ok": True})
+
+
+@application.app.route("/api/catering-rag/upload-doc", methods=["POST"])
+def api_catering_rag_upload_doc():
+    from application.vulnerabilities import catering_rag_lab as catering_rag_lab
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    filename = secure_filename(file.filename)
+    ext = os.path.splitext(filename)[1].lower()
+    allowed = {".txt", ".md", ".csv", ".json", ".log"}
+    if ext and ext not in allowed:
+        return jsonify({"error": f"Unsupported file type: {ext}. Allowed: {', '.join(sorted(allowed))}"}), 400
+
+    try:
+        raw = file.read()
+        text = raw.decode("utf-8", errors="replace")
+    except Exception as e:
+        return jsonify({"error": f"Could not read uploaded file: {e}"}), 400
+
+    trusted = str(request.form.get("trusted", "")).lower() in ("1", "true", "yes", "on")
+    if not text.strip():
+        return jsonify({"error": "Uploaded file is empty"}), 400
+
+    try:
+        out = catering_rag_lab.ingest_custom_document(filename, text, trusted=trusted)
+        return jsonify(out)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@application.app.route("/api/catering-rag/query", methods=["POST"])
+def api_catering_rag_query():
+    from application.vulnerabilities import catering_rag_lab as catering_rag_lab
+
+    data = request.get_json(silent=True) or {}
+    q = (data.get("query") or data.get("q") or "").strip()
+    if not q:
+        return jsonify({"error": "query required"}), 400
+    hardened = bool(data.get("hardened"))
+    preferred = (data.get("provider") or "auto").strip().lower()
+    api_token = get_openai_api_key(session)
+    provider = resolve_provider(preferred=preferred, has_openai_key=bool(api_token))
+    model_name = data.get("model") or (OLLAMA_MODEL if provider == "ollama" else None)
+    out = catering_rag_lab.answer_catering_query(
+        q,
+        hardened=hardened,
+        model_name=model_name,
+        api_key=(api_token if provider == "openai" else None),
+    )
+    out["model_type"] = "ollama" if provider == "ollama" else api_response_model_type()
+    out["provider"] = provider
+    return jsonify(out)
+
+
+@application.app.route("/api/catering-sql/chat", methods=["POST"])
+def api_catering_sql_chat():
+    from application.vulnerabilities.catering_sql_tool_lab import run_catering_sql_chat
+
+    data = request.get_json(silent=True) or {}
+    msg = (data.get("message") or "").strip()
+    if not msg:
+        return jsonify({"error": "message required"}), 400
+    try:
+        level = int(data.get("level", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "level must be an integer 0-4"}), 400
+    hardened = bool(data.get("hardened"))
+    attacker = (session.get("username") or data.get("attacker_username") or "alice").lower()
+    preferred = (data.get("provider") or "auto").strip().lower()
+    api_token = get_openai_api_key(session)
+    provider = resolve_provider(preferred=preferred, has_openai_key=bool(api_token))
+    model_name = data.get("model") or (OLLAMA_MODEL if provider == "ollama" else None)
+    history = data.get("history")
+    if history is not None and not isinstance(history, list):
+        return jsonify({"error": "history must be a list of {role, content} objects"}), 400
+    try:
+        out = run_catering_sql_chat(
+            msg,
+            level=level,
+            hardened=hardened,
+            attacker_username=attacker,
+            model_name=model_name,
+            api_key=(api_token if provider == "openai" else None),
+            history=history if isinstance(history, list) else None,
+        )
+        out["model_type"] = "ollama" if provider == "ollama" else api_response_model_type()
+        out["provider"] = provider
+        return jsonify(out)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@application.app.route("/promotion-photo-claim")
+def promotion_photo_claim_page():
+    return render_template("promotion_photo_claim.html")
+
+
+@application.app.route("/api/promotion-photo/claim", methods=["POST"])
+def api_promotion_photo_claim():
+    from application.vulnerabilities.promotion_indirect_injection import process_promotion_photo
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "Empty filename"}), 400
+    path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    file.save(path)
+    hardened = str(request.form.get("hardened", "")).lower() in ("1", "true", "yes", "on")
+    preferred = (request.form.get("provider") or "auto").strip().lower()
+    api_token = get_openai_api_key(session)
+    provider = resolve_provider(preferred=preferred, has_openai_key=bool(api_token))
+    try:
+        out = process_promotion_photo(
+            path,
+            hardened=hardened,
+            model_name=(OLLAMA_MODEL if provider == "ollama" else None),
+            api_key=(api_token if provider == "openai" else None),
+        )
+        out["model_type"] = "ollama" if provider == "ollama" else api_response_model_type()
+        out["provider"] = provider
+        return jsonify(out)
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+@application.app.route("/customer-support-safety")
+def customer_support_safety_page():
+    from application.vulnerabilities.toxicity_support_lab import ONBOARDING_ASSISTANT_PRIMER
+
+    return render_template(
+        "customer_support_safety.html",
+        support_onboarding_assistant=ONBOARDING_ASSISTANT_PRIMER,
+    )
+
+
+@application.app.route("/api/customer-support-safety/chat", methods=["POST"])
+def api_customer_support_safety_chat():
+    from application.vulnerabilities.toxicity_support_lab import chat_support_lab
+
+    data = request.get_json(silent=True) or {}
+    msg = (data.get("message") or "").strip()
+    if not msg:
+        return jsonify({"error": "message required"}), 400
+    guarded = bool(data.get("guarded"))
+    history = data.get("history")
+    if history is not None and not isinstance(history, list):
+        return jsonify({"error": "history must be a list of {role, content} objects"}), 400
+    preferred = (data.get("provider") or "auto").strip().lower()
+    api_token = get_openai_api_key(session)
+    provider = resolve_provider(preferred=preferred, has_openai_key=bool(api_token))
+    model_name = data.get("model") or (OLLAMA_MODEL if provider == "ollama" else None)
+    out = chat_support_lab(
+        msg,
+        guarded=guarded,
+        model_name=model_name,
+        api_key=(api_token if provider == "openai" else None),
+        history=history,
+    )
+    out["model_type"] = "ollama" if provider == "ollama" else api_response_model_type()
+    out["provider"] = provider
+    return jsonify(out)
+
+
 # Define API endpoint for the LLM DoS simulation demonstration
 @application.app.route('/api/llm-query', methods=['POST'])
 def llm_query():
@@ -1486,7 +1915,7 @@ def chat_with_openai_dos():
             return jsonify({'error': 'No message provided'}), 400
             
         if not openai_api_key:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
         
         # Import the OpenAI DoS module
         from application.vulnerabilities.openai_dos import chat_with_openai
@@ -1509,7 +1938,9 @@ def chat_with_openai_plugin_direct_prompt():
         data = request.get_json()
         message = data.get('message', '')
         level = data.get('level', '1')
-        
+        escalation_stage = data.get("escalation_stage")
+        history = data.get("history")
+
         # Use OpenAI API key from session instead of user input
         api_token = get_openai_api_key(session)
 
@@ -1517,7 +1948,19 @@ def chat_with_openai_plugin_direct_prompt():
             return jsonify({'error': 'No message provided'}), 400
 
         if not api_token:
-            return jsonify({'error': 'No OpenAI API key found in session. Please set up your API key in the Lab Setup section.'}), 400
+            return jsonify({'error': llm_ui_snapshot()['missing_key_error']}), 400
+
+        if escalation_stage is not None:
+            from application.vulnerabilities.direct_prompt_escalation import run_escalation_openai
+
+            try:
+                stage_i = int(escalation_stage)
+            except (TypeError, ValueError):
+                return jsonify({'error': 'escalation_stage must be an integer 0-9'}), 400
+            response, esc_meta = run_escalation_openai(
+                message, stage_i, history=history, api_token=api_token
+            )
+            return jsonify({"response": response, "escalation_meta": esc_meta})
 
         from application.vulnerabilities.openai_direct_prompt_injection import chat_with_openai_direct_prompt_injection
 
@@ -1603,7 +2046,7 @@ def upload_qr_openai():
     # Get the OpenAI API key from the user's session
     api_token = get_openai_api_key(session)
     if not api_token:
-        return jsonify({'error': 'OpenAI API key not found in session. Please set it in the Lab Setup.'}), 400
+        return jsonify({'error': llm_ui_snapshot()['session_key_missing_short']}), 400
 
     # Get the injection level from the form data sent by the JavaScript
     level = request.form.get('level', '1')

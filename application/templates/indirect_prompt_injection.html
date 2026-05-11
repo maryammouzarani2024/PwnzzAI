@@ -55,7 +55,7 @@
                 <div class="model-tabs">
                     <div class="tab-headers">
                         <div class="tab-header active" data-tab="blenderbot-model">Free Model</div>
-                        <div class="tab-header" data-tab="openai-model">OpenAI Model</div>
+                        <div class="tab-header" data-tab="openai-model">{{ llm_ui.tab_cloud_title }}</div>
                     </div>
 
                     <!-- BlenderBot Tab Content -->
@@ -110,12 +110,12 @@
                         </div> 
                             <!-- OpenAI Status Section -->
                             <div class="token-section openai-token-section">
-                                <h3>OpenAI API Status</h3>
+                                <h3>{{ llm_ui.provider_name }} API status</h3>
                                 <div id="openai-api-status" class="api-status disconnected">
                                     <i class="fas fa-circle-xmark"></i> Checking API key...
                                 </div>
                                 <p class="help-text">
-                                    <small>Set up your OpenAI API key in the <a href="{{ url_for('basics') }}">Lab Setup</a> section to use this feature.</small>
+                                    <small>Set your API key in <a href="{{ url_for('basics') }}">Lab Setup</a> to use this feature.</small>
                                 </p>
                                 </div>
                             
@@ -176,11 +176,25 @@
                     </section>
                 </div>
             </details>
+
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Defense Playbook (Incident Response)</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p><strong>Detect:</strong> model outputs that follow instructions embedded in QR payloads or file metadata rather than operator policy.</p>
+                        <p><strong>Contain:</strong> stop auto-processing uploads; quarantine images pending human review.</p>
+                        <p><strong>Eradicate:</strong> strip metadata channels before model context; rotate secrets referenced in legacy QR tests.</p>
+                        <p><strong>Recover:</strong> redeploy parsers that treat uploads as data-only; verify downstream agents ignore hidden channels.</p>
+                        <p><strong>Lessons learned:</strong> multimodal and file metadata are untrusted prompt surfaces—sign and classify sources.</p>
+                    </section>
+                </div>
+            </details>
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
             
             // Level selectors
             const dpiLevelSelector = document.getElementById('dpi-level');
@@ -199,20 +213,21 @@
                     const data = await response.json();
                     
                     if (data.has_key) {
+                        const ui = data.llm_ui || LLM_UI_DEFAULT;
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status connected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> Connected to OpenAI API';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected;
                         }
                         // Add welcome message if chat is empty
                         if (openaiChatMessages && openaiChatMessages.children.length <= 2) {
-                            addBotMessage(openaiChatMessages, "Hi, I'm your pizza assistant, powered by an OpenAI model. Upload a QR code to get started!");
+                            addBotMessage(openaiChatMessages, "Hi, I'm your pizza assistant, powered by " + ui.provider_name + ". Upload a QR code to get started!");
                         }
                     } 
                     else {
 
                         if (openaiApiStatus) {
                             openaiApiStatus.className = 'api-status disconnected';
-                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found - please set up in Lab Setup section';
+                            openaiApiStatus.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found. Please set it in Lab Setup.';
                         }
                     }
                 } catch (error) {
@@ -298,7 +313,7 @@
             document.getElementById('process-qr-openai').addEventListener('click', () => {
                 const fileInput = document.getElementById('qr-upload-openai');
                 if (fileInput.files.length === 0) {
-                    alert("Please select a QR code image for the OpenAI model.");
+                    alert("Please select a QR code image for the " + LLM_UI_DEFAULT.tab_cloud_title + ".");
                     return;
                 }
 

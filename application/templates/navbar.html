@@ -22,14 +22,25 @@
         <ul class="nav-items">
             <li><a href="{{ url_for('basics') }}" {% if request.path == url_for('basics') %}class="active"{% endif %}><i class="fas"></i> <span>Basics</span></a></li>
             <li><a href="{{ url_for('model_theft_main') }}" {% if request.path == url_for('model_theft_main') %}class="active"{% endif %}><i class="fas "></i> <span>Model Theft</span></a></li>
-            <li><a href="{{ url_for('data_poisoning_main') }}" {% if request.path == url_for('data_poisoning_main') %}class="active"{% endif %}><i class="fas "></i> <span>Data and Model Poisoning</span></a></li>
+            <li class="nav-item-group">
+                <a href="{{ url_for('data_poisoning_main') }}" class="nav-item-group-title{% if request.path == url_for('data_poisoning_main') or request.path == url_for('catering_rag_poisoning_page') %} active{% endif %}"><i class="fas"></i> <span>Data and Model Poisoning</span></a>
+                <ul class="nav-subitems">
+                    <li>
+                        <a href="{{ url_for('catering_rag_poisoning_page') }}" class="nav-subitem-link{% if request.path == url_for('catering_rag_poisoning_page') %} active{% endif %}" title="Corporate catering — vector / RAG poisoning"><i class="fas fa-database"></i> <span>Corporate catering — RAG</span></a>
+                    </li>
+                </ul>
+            </li>
             <li><a href="{{ url_for('supply_chain') }}" {% if request.path == url_for('supply_chain') %}class="active"{% endif %}><i class="fas "></i> <span>Supply Chain Vulnerability</span></a></li>
             <li><a href="{{ url_for('insecure_plugin') }}" {% if request.path == url_for('insecure_plugin') %}class="active"{% endif %}><i class="fas "></i> <span>Insecure Output Handling</span></a></li>
             <li><a href="{{ url_for('direct_prompt_injection') }}" {% if request.path == url_for('direct_prompt_injection') %}class="active"{% endif %}><i class="fas"></i> <span>Direct Prompt Injection</span> </a></li>
             <li><a href="{{ url_for('indirect_prompt_injection') }}" {% if request.path == url_for('indirect_prompt_injection') %}class="active"{% endif %}><i class="fas "></i> <span>Indirect Prompt Injection</span></a></li>
+            <li><a href="{{ url_for('promotion_photo_claim_page') }}" {% if request.path == url_for('promotion_photo_claim_page') %}class="active"{% endif %}><i class="fas fa-camera"></i> <span>Promotion photo claim</span></a></li>
+            <li><a href="{{ url_for('customer_support_safety_page') }}" {% if request.path == url_for('customer_support_safety_page') %}class="active"{% endif %}><i class="fas fa-headset"></i> <span>Customer support safety</span></a></li>
             <li><a href="{{ url_for('dos_attack') }}" {% if request.path == url_for('dos_attack') or request.path == url_for('real_dos_attack') %}class="active"{% endif %}><i class="fas"></i> <span>Unbounded Consumption</span></a></li>
             <li><a href="{{ url_for('sensitive_info') }}" {% if request.path == url_for('sensitive_info') %}class="active"{% endif %}><i class="fas"></i> <span>Sensitive Information Disclosure</span></a></li>
             <li><a href="{{ url_for('excessive_agency') }}" {% if request.path == url_for('excessive_agency') %}class="active"{% endif %}><i class="fas"></i> <span>Excessive Agency</span></a></li>
+            <li class="sidebar-heading">Agents &amp; tools</li>
+            <li><a href="{{ url_for('agentic_tools') }}" {% if request.path == url_for('agentic_tools') %}class="active"{% endif %}><i class="fas fa-network-wired"></i> <span>Agentic SQL &amp; routing</span></a></li>
             <li><a href="{{ url_for('misinformation') }}" {% if request.path == url_for('misinformation') %}class="active"{% endif %}><i class="fas"></i> <span>Misinformation</span></a></li>
             <li><a href="{{ url_for('glossary') }}" {% if request.path == url_for('glossary') %}class="active"{% endif %}><i class="fas"></i> <span>Glossary</span></a></li>
 

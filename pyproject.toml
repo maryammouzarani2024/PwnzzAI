@@ -1,0 +1,14 @@
+[tool.ruff]
+# Avoid stray workshop trees and local artifacts (CI runs `ruff check .`).
+exclude = [
+  "tmp",
+  "docs/tmp",
+  ".venv",
+  "venv",
+  "instance",
+  "uploads",
+]
+
+[tool.ruff.lint]
+# CI workflow ignores these; keep aligned.
+ignore = ["E402", "F401", "F841"]
