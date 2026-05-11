@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion photo claim — PwnzzAI Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Promotion: Pizza-Box Photo Claim</h1>
+        <div class="direct-prompt-injection-content">
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Scenario</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p>Customers upload a pizza-box photo to unlock rewards. Hidden metadata can steer the assistant in vulnerable mode, while hardened mode treats extracted text as untrusted data only.</p>
+                        <p><strong>Solve:</strong> make the assistant output <code>Dust from venus</code> in vulnerable mode.</p>
+                    </section>
+                </div>
+            </details>
+
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Upload</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <div class="model-tabs">
+                            <div class="tab-headers">
+                                <div class="tab-header active" data-tab="promo-ollama">Free Model</div>
+                                <div class="tab-header" data-tab="promo-cloud">{{ llm_ui.tab_cloud_title }}</div>
+                            </div>
+
+                            <div class="tab-content active" id="promo-ollama-tab">
+                                <div class="model-implementation-section">
+                                    <form id="promo-form-ollama">
+                                        <div class="form-group">
+                                            <label for="promo-file-ollama">Pizza box image</label>
+                                            <input type="file" id="promo-file-ollama" accept="image/*" required class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><input type="checkbox" id="promo-hardened-ollama"> Hardened mode</label>
+                                        </div>
+                                        <button type="submit" class="btn">Run challenge</button>
+                                    </form>
+                                    <div class="chat-export">
+                                        <button type="button" class="export-button" id="promo-export-ollama">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="promo-verify-ollama">Verify solve</button>
+                                        <div id="promo-verify-result-ollama" class="verify-result"></div>
+                                    </div>
+                                    <pre id="promo-out-ollama" class="section-box" style="margin-top:12px;white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:480px;overflow:auto;"></pre>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="promo-cloud-tab">
+                                <div class="model-implementation-section">
+                                    <div class="token-section openai-token-section">
+                                        <h3>{{ llm_ui.provider_name }} API status</h3>
+                                        <div id="promo-cloud-api-status" class="api-status disconnected">
+                                            <i class="fas fa-circle-xmark"></i> Checking API key...
+                                        </div>
+                                        <p class="help-text"><small>Set up your API key in <a href="{{ url_for('basics') }}">Lab Setup</a>.</small></p>
+                                    </div>
+                                    <form id="promo-form-cloud">
+                                        <div class="form-group">
+                                            <label for="promo-file-cloud">Pizza box image</label>
+                                            <input type="file" id="promo-file-cloud" accept="image/*" required class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><input type="checkbox" id="promo-hardened-cloud"> Hardened mode</label>
+                                        </div>
+                                        <button type="submit" class="btn">Run challenge</button>
+                                    </form>
+                                    <div class="chat-export">
+                                        <button type="button" class="export-button" id="promo-export-cloud">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="promo-verify-cloud">Verify solve</button>
+                                        <div id="promo-verify-result-cloud" class="verify-result"></div>
+                                    </div>
+                                    <pre id="promo-out-cloud" class="section-box" style="margin-top:12px;white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:480px;overflow:auto;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </details>
+
+            <details class="description-dropdown">
+                <summary class="dropdown-title">Defense Playbook (Incident Response)</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p><strong>Detect:</strong> odd ingredient phrases not in catalog.</p>
+                        <p><strong>Contain:</strong> disable auto LLM promotion review.</p>
+                        <p><strong>Eradicate:</strong> strip/ignore hidden metadata instructions.</p>
+                        <p><strong>Recover:</strong> rerun claims through hardened pipeline.</p>
+                        <p><strong>Lessons learned:</strong> uploaded files are untrusted prompt surfaces.</p>
+                    </section>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
+
+            function initTabs() {
+                const tabHeaders = document.querySelectorAll('.model-tabs .tab-header');
+                tabHeaders.forEach(header => {
+                    header.addEventListener('click', function () {
+                        document.querySelector('.model-tabs .tab-header.active')?.classList.remove('active');
+                        document.querySelector('.model-tabs .tab-content.active')?.classList.remove('active');
+                        this.classList.add('active');
+                        document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+                    });
+                });
+            }
+
+            async function checkSessionApiKey() {
+                const statusEl = document.getElementById('promo-cloud-api-status');
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    const ui = data.llm_ui || LLM_UI_DEFAULT;
+                    if (data.has_key) {
+                        statusEl.className = 'api-status connected';
+                        statusEl.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected;
+                    } else {
+                        statusEl.className = 'api-status disconnected';
+                        statusEl.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found';
+                    }
+                } catch (e) {
+                    statusEl.className = 'api-status disconnected';
+                    statusEl.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                }
+            }
+
+            async function submitPromo(formId, fileId, hardenedId, outId, provider) {
+                const f = document.getElementById(fileId).files[0];
+                if (!f) return;
+                const fd = new FormData();
+                fd.append('file', f);
+                fd.append('provider', provider);
+                if (document.getElementById(hardenedId).checked) fd.append('hardened', 'true');
+                const r = await fetch('/api/promotion-photo/claim', { method: 'POST', body: fd });
+                const t = await r.text();
+                try { document.getElementById(outId).textContent = JSON.stringify(JSON.parse(t), null, 2); }
+                catch { document.getElementById(outId).textContent = t; }
+            }
+
+            function exportText(filename, content) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            function parseOutputJson(preId) {
+                const text = document.getElementById(preId).textContent || '';
+                try { return JSON.parse(text); } catch { return null; }
+            }
+
+            function setVerifyResult(elId, ok, msg) {
+                const el = document.getElementById(elId);
+                el.textContent = (ok ? '✅ ' : '❌ ') + msg;
+                el.style.color = ok ? 'green' : 'red';
+            }
+
+            document.getElementById('promo-form-ollama').addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitPromo('promo-form-ollama', 'promo-file-ollama', 'promo-hardened-ollama', 'promo-out-ollama', 'ollama');
+            });
+            document.getElementById('promo-form-cloud').addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitPromo('promo-form-cloud', 'promo-file-cloud', 'promo-hardened-cloud', 'promo-out-cloud', 'openai');
+            });
+
+            document.getElementById('promo-export-ollama').addEventListener('click', () => {
+                exportText('promotion_claim_ollama.txt', document.getElementById('promo-out-ollama').textContent || '');
+            });
+            document.getElementById('promo-export-cloud').addEventListener('click', () => {
+                exportText('promotion_claim_cloud.txt', document.getElementById('promo-out-cloud').textContent || '');
+            });
+            document.getElementById('promo-verify-ollama').addEventListener('click', () => {
+                const data = parseOutputJson('promo-out-ollama');
+                if (!data) return setVerifyResult('promo-verify-result-ollama', false, 'Run the challenge first.');
+                const ok = Boolean(data.solve_phrase_present);
+                setVerifyResult('promo-verify-result-ollama', ok, ok ? 'Solve confirmed.' : 'Solve conditions not met.');
+            });
+            document.getElementById('promo-verify-cloud').addEventListener('click', () => {
+                const data = parseOutputJson('promo-out-cloud');
+                if (!data) return setVerifyResult('promo-verify-result-cloud', false, 'Run the challenge first.');
+                const ok = Boolean(data.solve_phrase_present);
+                setVerifyResult('promo-verify-result-cloud', ok, ok ? 'Solve confirmed.' : 'Solve conditions not met.');
+            });
+
+            initTabs();
+            checkSessionApiKey();
+        });
+    </script>
+</body>
+</html>

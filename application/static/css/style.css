@@ -74,6 +74,9 @@ header {
   padding: 20px 0;
   z-index: 100;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-container {
@@ -109,12 +112,13 @@ header {
   width: 100%;
 }
 
-.nav-items li {
+.nav-items > li {
   margin-bottom: 5px;
   width: 100%;
 }
 
-.nav-items li a {
+/* Top-level sidebar links (not nested under .nav-item-group) */
+.nav-items > li > a {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-weight: 500;
@@ -127,18 +131,58 @@ header {
   left: 0;
 }
 
-.nav-items li a:hover, .nav-items li a.active {
+.nav-items > li > a:hover,
+.nav-items > li > a.active {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--primary-color);
   border-left: 4px solid var(--primary-color);
 }
 
-.nav-items li a i {
+.nav-items > li > a i {
   margin-right: 5px;
   width: 20px;
   text-align: center;
   font-size: 1.1rem;
   padding:  0;
+}
+
+.nav-subitems {
+  list-style: none;
+  padding: 0 0 4px 0;
+  margin: 0;
+  width: 100%;
+}
+
+.nav-subitems li {
+  margin-bottom: 2px;
+  width: 100%;
+}
+
+.nav-subitems li a.nav-subitem-link {
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 0.875rem;
+  padding: 8px 20px 8px 42px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  width: 100%;
+  border-left: 4px solid transparent;
+  line-height: 1.35;
+}
+
+.nav-subitems li a.nav-subitem-link:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.nav-subitems li a.nav-subitem-link i {
+  margin-right: 6px;
+  width: 18px;
+  text-align: center;
+  font-size: 0.95rem;
+  opacity: 0.9;
 }
 
 /* Pizza Cards */
@@ -626,21 +670,30 @@ textarea.form-control {
   /* Adjust navbar for mobile */
   .nav-menu {
     width: 60px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   
-  .nav-items li a span {
+  .nav-items > li > a span,
+  .nav-subitems li a span {
     display: none;
   }
   
-  .nav-items li a i {
+  .nav-items > li > a i,
+  .nav-subitems li a i {
     margin-right: 0;
     font-size: 1.3rem;
   }
   
-  .nav-items li a {
+  .nav-items > li > a,
+  .nav-subitems li a {
     padding: 15px;
     justify-content: center;
+  }
+
+  .nav-subitems li a.nav-subitem-link {
+    padding-left: 15px;
+    padding-right: 15px;
   }
   
   /* Adjust container for mobile */

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic SQL &amp; routing — PwnzzAI Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <h1>Agentic SQL &amp; routing</h1>
+
+        <div class="insecure-plugin-content">
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Related lab</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p>The <strong>vector / RAG poisoning</strong> counterpart for the same fictional catering org is on
+                            <a href="{{ url_for('catering_rag_poisoning_page') }}">Data and Model Poisoning → Corporate catering — RAG lab</a>.</p>
+                    </section>
+                </div>
+            </details>
+
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Catering Routing — Agentic SQL/Tool Abuse Lab</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p><strong>Scenario:</strong> You are on the catering operations team during a busy lunch rush. Dispatch asks the assistant for routing details, but a malicious insider wants to pull another teammate’s private routing token to reroute deliveries. The assistant can emit tool lines such as <code>RUN_ROUTE_LOOKUP("…")</code>, <code>LIST_SQL_TABLES()</code>, or <code>RUN_ROUTE_TABLE_LOOKUP("…", "…")</code>; the server builds SQL from those lines (intentionally unsafe at low tiers).</p>
+                        <p>Defense tiers F0–F4 escalate discovery and filtering (F1 bans LIKE wildcards, bob variants, and very short fragments; those filters are inherited by higher tiers). Each API response includes a <code>generated_sql</code> array showing what ran. <strong>Solve:</strong> while logged in as <code>alice</code>, get Bob’s routing token <code>RT-BOB9F2</code> to appear in the combined model output. <strong>Hardened mode</strong> ignores attacker-controlled fragments and returns only the current user’s own row. Use a capable local model (for example <code>mistral:7b</code>); very small models may garble the required tool line.</p>
+                        <div class="model-tabs">
+                            <div class="tab-headers">
+                                <div class="tab-header active" data-tab="sql-ollama">Free Model</div>
+                                <div class="tab-header" data-tab="sql-cloud">{{ llm_ui.tab_cloud_title }}</div>
+                            </div>
+                            <div class="tab-content active" id="sql-ollama-tab">
+                                <div class="model-implementation-section">
+                                    <div class="form-group">
+                                        <label for="catering-sql-level-ollama">Defense level (F0–F4)</label>
+                                        <select id="catering-sql-level-ollama" class="form-control" style="max-width:120px">
+                                            <option value="0">F0 — Raw LIKE (routing_flag)</option>
+                                            <option value="1">F1 — Keywords + no %/_ + no bob variants + len>=3</option>
+                                            <option value="2">F2 — Random table + LIST_SQL_TABLES</option>
+                                            <option value="3">F3 — Bob/Alice split tables + TABLE_LOOKUP</option>
+                                            <option value="4">F4 — F3 + strict fragment allowlist</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><input type="checkbox" id="catering-sql-hardened-ollama"> Hardened tool path (tenant scoped)</label>
+                                        <p class="help-text"><small>Changing defense level or hardened resets this thread.</small></p>
+                                    </div>
+                                    <div class="chat-container">
+                                        <div id="catering-sql-messages-ollama" class="chat-messages"></div>
+                                        <div class="chat-input">
+                                            <input type="text" id="catering-sql-input-ollama" placeholder="Message the routing assistant…" autocomplete="off">
+                                            <button type="button" id="catering-sql-send-ollama">Send</button>
+                                        </div>
+                                    </div>
+                                    <div class="chat-export" style="margin-top:10px;">
+                                        <button type="button" class="export-button" id="catering-sql-export-ollama">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="catering-sql-verify-ollama">Verify solve</button>
+                                        <div id="catering-sql-verify-result-ollama" class="verify-result"></div>
+                                    </div>
+                                    <p class="help-text" style="margin-top:8px;"><small>Last API response (JSON):</small></p>
+                                    <pre id="catering-sql-out-ollama" class="section-box" style="margin-top:4px;white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:240px;overflow:auto;font-size:12px;"></pre>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="sql-cloud-tab">
+                                <div class="model-implementation-section">
+                                    <div class="token-section openai-token-section">
+                                        <h3>{{ llm_ui.provider_name }} API status</h3>
+                                        <div id="sql-cloud-api-status" class="api-status disconnected">
+                                            <i class="fas fa-circle-xmark"></i> Checking API key...
+                                        </div>
+                                        <p class="help-text"><small>Set up your API key in <a href="{{ url_for('basics') }}">Lab Setup</a>.</small></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="catering-sql-level-cloud">Defense level (F0–F4)</label>
+                                        <select id="catering-sql-level-cloud" class="form-control" style="max-width:120px">
+                                            <option value="0">F0 — Raw LIKE (routing_flag)</option>
+                                            <option value="1">F1 — Keywords + no %/_ + no bob variants + len>=3</option>
+                                            <option value="2">F2 — Random table + LIST_SQL_TABLES</option>
+                                            <option value="3">F3 — Bob/Alice split tables + TABLE_LOOKUP</option>
+                                            <option value="4">F4 — F3 + strict fragment allowlist</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><input type="checkbox" id="catering-sql-hardened-cloud"> Hardened tool path (tenant scoped)</label>
+                                        <p class="help-text"><small>Changing defense level or hardened resets this thread.</small></p>
+                                    </div>
+                                    <div class="chat-container">
+                                        <div id="catering-sql-messages-cloud" class="chat-messages"></div>
+                                        <div class="chat-input">
+                                            <input type="text" id="catering-sql-input-cloud" placeholder="Message the routing assistant…" autocomplete="off" disabled>
+                                            <button type="button" id="catering-sql-send-cloud" disabled>Send</button>
+                                        </div>
+                                    </div>
+                                    <div class="chat-export" style="margin-top:10px;">
+                                        <button type="button" class="export-button" id="catering-sql-export-cloud">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="catering-sql-verify-cloud">Verify solve</button>
+                                        <div id="catering-sql-verify-result-cloud" class="verify-result"></div>
+                                    </div>
+                                    <p class="help-text" style="margin-top:8px;"><small>Last API response (JSON):</small></p>
+                                    <pre id="catering-sql-out-cloud" class="section-box" style="margin-top:4px;white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:240px;overflow:auto;font-size:12px;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <section class="section-box" style="margin-top:1rem;">
+                            <h3>Defense Playbook (Incident Response)</h3>
+                            <p><strong>Detect:</strong> assistant replies containing foreign <code>RT-…</code> tokens; SQL logs showing broad LIKE patterns from chat traffic.</p>
+                            <p><strong>Contain:</strong> disable dynamic SQL from LLM; switch to read-only canned queries.</p>
+                            <p><strong>Eradicate:</strong> revoke over-broad DB roles; remove string-concatenated SQL helpers.</p>
+                            <p><strong>Recover:</strong> ship parameterized templates + per-tenant authorization on tool results.</p>
+                            <p><strong>Lessons learned:</strong> LLM outputs are code; execute them with the same controls as application code.</p>
+                        </section>
+                    </section>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
+            const SQL_CHAT_OPENER = 'Routing desk: you are on catering operations. Ask about routes, audits, driver tokens, or warehouse batches — the assistant may emit RUN_ROUTE_LOOKUP("…") lines when it answers.';
+
+            const state = {
+                ollama: { apiHistory: [] },
+                cloud: { apiHistory: [] },
+            };
+
+            function initTabs() {
+                document.querySelectorAll('.model-tabs .tab-header').forEach((header) => {
+                    header.addEventListener('click', function () {
+                        const group = header.closest('.model-tabs');
+                        group.querySelectorAll('.tab-header').forEach((h) => h.classList.remove('active'));
+                        group.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+                        header.classList.add('active');
+                        const tabId = header.getAttribute('data-tab') + '-tab';
+                        group.querySelector('#' + tabId)?.classList.add('active');
+                    });
+                });
+            }
+
+            function addUserBubble(container, text) {
+                const d = document.createElement('div');
+                d.className = 'message user-message';
+                d.textContent = text;
+                container.appendChild(d);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function addBotBubble(container, text) {
+                const d = document.createElement('div');
+                d.className = 'message bot-message';
+                d.style.whiteSpace = 'pre-wrap';
+                d.textContent = text;
+                container.appendChild(d);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function addThinking(container) {
+                const d = document.createElement('div');
+                d.className = 'message bot-message thinking-message';
+                d.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Thinking…';
+                container.appendChild(d);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function resetThread(which) {
+                const messagesEl = document.getElementById(which === 'ollama' ? 'catering-sql-messages-ollama' : 'catering-sql-messages-cloud');
+                const outEl = document.getElementById(which === 'ollama' ? 'catering-sql-out-ollama' : 'catering-sql-out-cloud');
+                const verifyId = which === 'ollama' ? 'catering-sql-verify-result-ollama' : 'catering-sql-verify-result-cloud';
+                state[which].apiHistory = [];
+                messagesEl.innerHTML = '';
+                addBotBubble(messagesEl, SQL_CHAT_OPENER);
+                outEl.textContent = '';
+                const vr = document.getElementById(verifyId);
+                vr.textContent = '';
+                vr.style.color = '';
+            }
+
+            async function checkSessionApiKey() {
+                const statusEl = document.getElementById('sql-cloud-api-status');
+                const input = document.getElementById('catering-sql-input-cloud');
+                const btn = document.getElementById('catering-sql-send-cloud');
+                try {
+                    const response = await fetch('/check-openai-api-key');
+                    const data = await response.json();
+                    const ui = data.llm_ui || LLM_UI_DEFAULT;
+                    if (data.has_key) {
+                        statusEl.className = 'api-status connected';
+                        statusEl.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected;
+                        input.disabled = false;
+                        btn.disabled = false;
+                    } else {
+                        statusEl.className = 'api-status disconnected';
+                        statusEl.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found';
+                        input.disabled = true;
+                        btn.disabled = true;
+                    }
+                } catch (e) {
+                    statusEl.className = 'api-status disconnected';
+                    statusEl.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                    input.disabled = true;
+                    btn.disabled = true;
+                }
+            }
+
+            function assistantDisplay(j) {
+                if (j.error) return String(j.error);
+                if (j.combined_text != null) return String(j.combined_text);
+                const parts = [j.assistant];
+                if (j.tool_outputs && j.tool_outputs.length) parts.push('\n\n' + j.tool_outputs.join('\n'));
+                return parts.filter(Boolean).join('');
+            }
+
+            async function sendTurn(which) {
+                const inputId = which === 'ollama' ? 'catering-sql-input-ollama' : 'catering-sql-input-cloud';
+                const levelId = which === 'ollama' ? 'catering-sql-level-ollama' : 'catering-sql-level-cloud';
+                const hardenedId = which === 'ollama' ? 'catering-sql-hardened-ollama' : 'catering-sql-hardened-cloud';
+                const messagesId = which === 'ollama' ? 'catering-sql-messages-ollama' : 'catering-sql-messages-cloud';
+                const outId = which === 'ollama' ? 'catering-sql-out-ollama' : 'catering-sql-out-cloud';
+                const provider = which === 'ollama' ? 'ollama' : 'openai';
+
+                const input = document.getElementById(inputId);
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                const messagesEl = document.getElementById(messagesId);
+                const s = state[which];
+                const level = parseInt(document.getElementById(levelId).value, 10);
+                const hardened = document.getElementById(hardenedId).checked;
+                const historyPayload = [...s.apiHistory];
+
+                addUserBubble(messagesEl, msg);
+                input.value = '';
+                input.disabled = true;
+                const sendBtn = document.getElementById(which === 'ollama' ? 'catering-sql-send-ollama' : 'catering-sql-send-cloud');
+                sendBtn.disabled = true;
+                addThinking(messagesEl);
+
+                try {
+                    const r = await fetch('/api/catering-sql/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: msg,
+                            history: historyPayload,
+                            level,
+                            hardened,
+                            provider,
+                        }),
+                    });
+                    const j = await r.json();
+                    messagesEl.querySelector('.thinking-message')?.remove();
+                    document.getElementById(outId).textContent = JSON.stringify(j, null, 2);
+                    const answer = assistantDisplay(j);
+                    addBotBubble(messagesEl, answer || '(empty reply)');
+                    const combinedForHistory = j.combined_text != null ? String(j.combined_text) : answer;
+                    s.apiHistory = [
+                        ...historyPayload,
+                        { role: 'user', content: msg },
+                        { role: 'assistant', content: combinedForHistory },
+                    ];
+                } catch (e) {
+                    messagesEl.querySelector('.thinking-message')?.remove();
+                    addBotBubble(messagesEl, 'Network error — try again.');
+                    console.error(e);
+                } finally {
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
+            }
+
+            function exportTranscript(messagesId, filename) {
+                const root = document.getElementById(messagesId);
+                let text = '';
+                root.querySelectorAll('.message').forEach((el) => {
+                    const who = el.classList.contains('user-message') ? 'You' : 'Assistant';
+                    text += who + ': ' + el.textContent.trim() + '\n\n';
+                });
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            function parseOutputJson(preId) {
+                const t = document.getElementById(preId).textContent || '';
+                try { return JSON.parse(t); } catch { return null; }
+            }
+
+            function setVerifyResult(resultId, ok, msg) {
+                const el = document.getElementById(resultId);
+                el.textContent = (ok ? '✅ ' : '❌ ') + msg;
+                el.style.color = ok ? 'green' : 'red';
+            }
+
+            ['catering-sql-level-ollama', 'catering-sql-hardened-ollama'].forEach((id) => {
+                document.getElementById(id).addEventListener('change', () => resetThread('ollama'));
+            });
+            ['catering-sql-level-cloud', 'catering-sql-hardened-cloud'].forEach((id) => {
+                document.getElementById(id).addEventListener('change', () => resetThread('cloud'));
+            });
+
+            document.getElementById('catering-sql-send-ollama').addEventListener('click', () => sendTurn('ollama'));
+            document.getElementById('catering-sql-input-ollama').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendTurn('ollama');
+            });
+            document.getElementById('catering-sql-send-cloud').addEventListener('click', () => sendTurn('cloud'));
+            document.getElementById('catering-sql-input-cloud').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendTurn('cloud');
+            });
+
+            document.getElementById('catering-sql-export-ollama').addEventListener('click', () => {
+                exportTranscript('catering-sql-messages-ollama', 'catering_sql_ollama.txt');
+            });
+            document.getElementById('catering-sql-export-cloud').addEventListener('click', () => {
+                exportTranscript('catering-sql-messages-cloud', 'catering_sql_cloud.txt');
+            });
+            document.getElementById('catering-sql-verify-ollama').addEventListener('click', () => {
+                const data = parseOutputJson('catering-sql-out-ollama');
+                if (!data) return setVerifyResult('catering-sql-verify-result-ollama', false, 'Run at least one turn first.');
+                const ok = Boolean(data.solved && !data.hardened);
+                setVerifyResult('catering-sql-verify-result-ollama', ok, ok ? 'Routing exfiltration solve confirmed.' : 'Solve conditions not met.');
+            });
+            document.getElementById('catering-sql-verify-cloud').addEventListener('click', () => {
+                const data = parseOutputJson('catering-sql-out-cloud');
+                if (!data) return setVerifyResult('catering-sql-verify-result-cloud', false, 'Run at least one turn first.');
+                const ok = Boolean(data.solved && !data.hardened);
+                setVerifyResult('catering-sql-verify-result-cloud', ok, ok ? 'Routing exfiltration solve confirmed.' : 'Solve conditions not met.');
+            });
+
+            initTabs();
+            resetThread('ollama');
+            resetThread('cloud');
+            checkSessionApiKey();
+        });
+    </script>
+</body>
+</html>

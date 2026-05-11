@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate catering — RAG poisoning — PwnzzAI Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <main class="container">
+        <p class="section-box" style="margin-bottom: 0.75rem; padding: 10px 14px; font-size: 0.9rem;">
+            <a href="{{ url_for('data_poisoning_main') }}">Data and Model Poisoning</a>
+            <span aria-hidden="true"> / </span>
+            <span>Corporate catering — RAG</span>
+        </p>
+        <h1>Corporate Catering — Vector/RAG Poisoning Lab</h1>
+
+        <div class="data-poisoning-content">
+            <details class="description-dropdown" open>
+                <summary class="dropdown-title">Lab</summary>
+                <div class="dropdown-content">
+                    <section class="section-box">
+                        <p>This lab simulates a small “catering policy” knowledge base used by office managers. You can inject a fake policy document ("poison") and try to make the assistant trust it over the real policy.</p>
+                        <p>For the companion <strong>agentic SQL / tool routing</strong> challenge in the same catering setting, open <a href="{{ url_for('agentic_tools') }}">Agents &amp; tools → Agentic SQL &amp; routing</a>.</p>
+                        <p>The retriever ranks text chunks with <strong>TF-IDF scoring</strong>: it gives higher scores to chunks that share important query words. In plain terms, the chunk with the highest word-overlap score is treated as most relevant. An attacker can abuse this by stuffing poison text with words likely to appear in user questions, so the poison chunk ranks first.</p>
+                        <p><strong>Vulnerable mode success criteria:</strong> after clicking <em>Ingest poison policy document</em>, run a query about large office packages. The retrieved context should include the poison chunk, and the assistant response should follow the poisoned instruction (for example, recommending pineapple on pizza even though that is not part of trusted policy).</p>
+                        <p><strong>Hardened mode (trusted sources only):</strong> when enabled, untrusted/poisoned chunks are excluded before the model sees context. The assistant should rely only on approved baseline policy content.</p>
+                        <div class="model-tabs">
+                            <div class="tab-headers">
+                                <div class="tab-header active" data-tab="rag-ollama">Free Model</div>
+                                <div class="tab-header" data-tab="rag-cloud">{{ llm_ui.tab_cloud_title }}</div>
+                            </div>
+                            <div class="tab-content active" id="rag-ollama-tab">
+                                <div class="model-implementation-section">
+                                    <button type="button" class="btn" id="catering-rag-reset-ollama">Reset corpus (baseline only)</button>
+                                    <div class="form-group" style="margin-top:12px;">
+                                        <label for="catering-rag-file-ollama">Upload custom knowledge doc (.txt, .md, .csv, .json, .log)</label>
+                                        <input type="file" id="catering-rag-file-ollama" class="form-control" style="max-width:520px;" accept=".txt,.md,.csv,.json,.log,text/plain,text/markdown,text/csv,application/json">
+                                        <button type="button" class="btn" id="catering-rag-upload-ollama" style="margin-top:8px;">Upload and index document</button>
+                                    </div>
+                                    <div class="form-group" style="margin-top:12px;">
+                                        <label><input type="checkbox" id="catering-rag-hardened-ollama"> Hardened retrieval (trusted sources only)</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" id="catering-rag-query-ollama" class="form-control" style="max-width:520px" value="What must we include for large office catering packages (25+ pizzas)?" />
+                                        <button type="button" class="btn" id="catering-rag-run-ollama">Run challenge</button>
+                                    </div>
+                                    <div class="chat-export">
+                                        <button type="button" class="export-button" id="catering-rag-export-ollama">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="catering-rag-verify-ollama">Verify solve</button>
+                                        <div id="catering-rag-verify-result-ollama" class="verify-result"></div>
+                                    </div>
+                                    <pre id="catering-rag-out-ollama" class="section-box" style="white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:420px;overflow:auto;"></pre>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="rag-cloud-tab">
+                                <div class="model-implementation-section">
+                                    <div class="token-section openai-token-section">
+                                        <h3>{{ llm_ui.provider_name }} API status</h3>
+                                        <div id="rag-cloud-api-status" class="api-status disconnected">
+                                            <i class="fas fa-circle-xmark"></i> Checking API key...
+                                        </div>
+                                        <p class="help-text"><small>Set up your API key in <a href="{{ url_for('basics') }}">Lab Setup</a>.</small></p>
+                                    </div>
+                                    <button type="button" class="btn" id="catering-rag-reset-cloud">Reset corpus (baseline only)</button>
+                                    <div class="form-group" style="margin-top:12px;">
+                                        <label for="catering-rag-file-cloud">Upload custom knowledge doc (.txt, .md, .csv, .json, .log)</label>
+                                        <input type="file" id="catering-rag-file-cloud" class="form-control" style="max-width:520px;" accept=".txt,.md,.csv,.json,.log,text/plain,text/markdown,text/csv,application/json">
+                                        <button type="button" class="btn" id="catering-rag-upload-cloud" style="margin-top:8px;">Upload and index document</button>
+                                    </div>
+                                    <div class="form-group" style="margin-top:12px;">
+                                        <label><input type="checkbox" id="catering-rag-hardened-cloud"> Hardened retrieval (trusted sources only)</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" id="catering-rag-query-cloud" class="form-control" style="max-width:520px" value="What must we include for large office catering packages (25+ pizzas)?" />
+                                        <button type="button" class="btn" id="catering-rag-run-cloud">Run challenge</button>
+                                    </div>
+                                    <div class="chat-export">
+                                        <button type="button" class="export-button" id="catering-rag-export-cloud">Export transcript (.txt)</button>
+                                    </div>
+                                    <div class="chat-verify">
+                                        <button type="button" class="verify-button" id="catering-rag-verify-cloud">Verify solve</button>
+                                        <div id="catering-rag-verify-result-cloud" class="verify-result"></div>
+                                    </div>
+                                    <pre id="catering-rag-out-cloud" class="section-box" style="white-space:pre-wrap;background:#1e1e1e;color:#eee;padding:12px;max-height:420px;overflow:auto;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <section class="section-box" style="margin-top:1rem;">
+                            <h3>Defense Playbook (Incident Response)</h3>
+                            <p><strong>Detect:</strong> sudden policy contradictions in assistant answers; retrieval debug shows unknown <code>userdoc_*</code> ids from recent uploads.</p>
+                            <p><strong>Contain:</strong> disable ingestion endpoint; freeze RAG index version; stop auto-publishing retrieved snippets to customers.</p>
+                            <p><strong>Eradicate:</strong> remove poison chunks; rotate assistant prompts; invalidate bad embeddings.</p>
+                            <p><strong>Recover:</strong> rebuild index from signed corpus; re-run regression queries; enable provenance tags on chunks.</p>
+                            <p><strong>Lessons learned:</strong> treat ingestion as supply chain; require trust metadata before retrieval ranking.</p>
+                        </section>
+                    </section>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <script>
+        const LLM_UI_DEFAULT = {{ llm_ui | tojson }};
+
+        function initializeModelTabs() {
+            const tabGroups = document.querySelectorAll('.model-tabs');
+            tabGroups.forEach((group) => {
+                const headers = group.querySelectorAll('.tab-header');
+                headers.forEach((header) => {
+                    header.addEventListener('click', function() {
+                        group.querySelector('.tab-header.active')?.classList.remove('active');
+                        group.querySelector('.tab-content.active')?.classList.remove('active');
+                        this.classList.add('active');
+                        const tabId = this.getAttribute('data-tab') + '-tab';
+                        group.querySelector('#' + tabId)?.classList.add('active');
+                    });
+                });
+            });
+        }
+
+        async function checkSessionApiKey() {
+            const statusEls = [document.getElementById('rag-cloud-api-status')].filter(Boolean);
+            try {
+                const response = await fetch('/check-openai-api-key');
+                const data = await response.json();
+                const ui = data.llm_ui || LLM_UI_DEFAULT;
+                statusEls.forEach((el) => {
+                    if (data.has_key) {
+                        el.className = 'api-status connected';
+                        el.innerHTML = '<i class="fas fa-circle-check"></i> ' + ui.status_connected;
+                    } else {
+                        el.className = 'api-status disconnected';
+                        el.innerHTML = '<i class="fas fa-circle-xmark"></i> No API key found';
+                    }
+                });
+            } catch (error) {
+                statusEls.forEach((el) => {
+                    el.className = 'api-status disconnected';
+                    el.innerHTML = '<i class="fas fa-circle-xmark"></i> Error checking API key';
+                });
+            }
+        }
+
+        async function postJson(url, body) {
+            const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+            const t = await r.text();
+            try { return JSON.parse(t); } catch { return { _raw: t, _status: r.status }; }
+        }
+
+        function exportText(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function parseOutputJson(preId) {
+            const text = document.getElementById(preId).textContent || '';
+            try {
+                return JSON.parse(text);
+            } catch {
+                return null;
+            }
+        }
+
+        function setVerifyResult(resultId, ok, msg) {
+            const el = document.getElementById(resultId);
+            el.textContent = (ok ? '✅ ' : '❌ ') + msg;
+            el.style.color = ok ? 'green' : 'red';
+        }
+
+        async function runRag(provider, suffix) {
+            const q = document.getElementById(`catering-rag-query-${suffix}`).value.trim();
+            const hardened = document.getElementById(`catering-rag-hardened-${suffix}`).checked;
+            const j = await postJson('/api/catering-rag/query', { query: q, hardened, provider });
+            document.getElementById(`catering-rag-out-${suffix}`).textContent = JSON.stringify(j, null, 2);
+        }
+        async function resetRag(suffix) {
+            const j = await postJson('/api/catering-rag/reset', {});
+            document.getElementById(`catering-rag-out-${suffix}`).textContent = JSON.stringify(j, null, 2);
+        }
+        async function uploadRagDoc(suffix) {
+            const input = document.getElementById(`catering-rag-file-${suffix}`);
+            const file = input?.files?.[0];
+            if (!file) {
+                alert('Choose a file first.');
+                return;
+            }
+            const form = new FormData();
+            form.append('file', file);
+            const r = await fetch('/api/catering-rag/upload-doc', { method: 'POST', body: form });
+            const t = await r.text();
+            let j;
+            try {
+                j = JSON.parse(t);
+            } catch {
+                j = { error: `Unexpected response (${r.status})`, raw: t };
+            }
+            document.getElementById(`catering-rag-out-${suffix}`).textContent = JSON.stringify(j, null, 2);
+            if (!r.ok) {
+                alert(j.error || `Upload failed (${r.status})`);
+            } else {
+                input.value = '';
+            }
+        }
+
+        document.getElementById('catering-rag-reset-ollama').addEventListener('click', () => resetRag('ollama'));
+        document.getElementById('catering-rag-upload-ollama').addEventListener('click', () => uploadRagDoc('ollama'));
+        document.getElementById('catering-rag-run-ollama').addEventListener('click', () => runRag('ollama', 'ollama'));
+
+        document.getElementById('catering-rag-reset-cloud').addEventListener('click', () => resetRag('cloud'));
+        document.getElementById('catering-rag-upload-cloud').addEventListener('click', () => uploadRagDoc('cloud'));
+        document.getElementById('catering-rag-run-cloud').addEventListener('click', () => runRag('openai', 'cloud'));
+        document.getElementById('catering-rag-export-ollama').addEventListener('click', () => {
+            exportText('catering_rag_ollama.txt', document.getElementById('catering-rag-out-ollama').textContent || '');
+        });
+        document.getElementById('catering-rag-export-cloud').addEventListener('click', () => {
+            exportText('catering_rag_cloud.txt', document.getElementById('catering-rag-out-cloud').textContent || '');
+        });
+        document.getElementById('catering-rag-verify-ollama').addEventListener('click', () => {
+            const data = parseOutputJson('catering-rag-out-ollama');
+            if (!data) return setVerifyResult('catering-rag-verify-result-ollama', false, 'Run the lab first.');
+            const ok = Boolean(data.poison_in_retrieval && data.poison_signal_in_answer && !data.hardened);
+            setVerifyResult('catering-rag-verify-result-ollama', ok, ok ? 'Poisoning solve confirmed.' : 'Solve conditions not met.');
+        });
+        document.getElementById('catering-rag-verify-cloud').addEventListener('click', () => {
+            const data = parseOutputJson('catering-rag-out-cloud');
+            if (!data) return setVerifyResult('catering-rag-verify-result-cloud', false, 'Run the lab first.');
+            const ok = Boolean(data.poison_in_retrieval && data.poison_signal_in_answer && !data.hardened);
+            setVerifyResult('catering-rag-verify-result-cloud', ok, ok ? 'Poisoning solve confirmed.' : 'Solve conditions not met.');
+        });
+
+        initializeModelTabs();
+        checkSessionApiKey();
+    </script>
+</body>
+</html>

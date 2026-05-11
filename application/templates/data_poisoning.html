@@ -33,6 +33,7 @@
                         </ul>
                         
                        <p>This page demonstrates <strong>LLM04: Data and Model Poisoning</strong>, as defined in the <a href="https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/">OWASP Top 10 for LLM Applications 2025</a>.</p>
+                        <p>A separate <strong>corporate catering RAG poisoning</strong> lab (vector retrieval + ingestion abuse) lives on <a href="{{ url_for('catering_rag_poisoning_page') }}">Corporate catering — RAG</a> under the same sidebar category.</p>
                         <p> For more information, see <a href="https://owaspai.org/docs/3_development_time_threats/#31-broad-model-poisoning-development-time"> OWASP AI Exchange Development-time threats</a>, <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-MOD-03_Testing_for_Poisoned_Training_Sets.md"> OWASP Testing for Poisoned Training Sets</a>, <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-MOD-02_Testing_for_Runtime_Model_Poisoning.md">OWASP Testing for Runtime Model Poisoning</a> and <a href="https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/content/tests/AITG-INF-05_Testing_for_Fine-tuning_Poisoning.md"> OWASP Testing for fine Tuning Poisoning</a>.<p>
                     </section>
                 </div>
@@ -213,6 +214,7 @@
                     </section>
                 </div>
             </details>
+
         </div>
     </main>
 
@@ -477,6 +479,10 @@
     </style>
     
     <script>
+        if (window.location.hash === '#catering-rag-lab') {
+            window.location.replace('{{ url_for("catering_rag_poisoning_page") }}');
+        }
+
         // Store the original model weights for comparison
         window.originalWeights = {{ model_data.all_weights|tojson }};
         
