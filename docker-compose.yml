@@ -32,6 +32,8 @@ services:
       - SECRET_KEY=dev-secret-key-change-in-production
       # Point to Ollama service
       - OLLAMA_HOST=http://ollama:11434
+      # Default small model for compose/E2E; override when you need a different tag
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
 
 volumes:
   ollama_data:

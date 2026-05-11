@@ -189,6 +189,11 @@ class TestVulnerabilityPages:
         response = client.get('/data-poisoning')
         assert response.status_code == 200
 
+    def test_catering_rag_poisoning_page(self, client):
+        """Test corporate catering RAG lab page loads."""
+        response = client.get('/data-poisoning/catering-rag')
+        assert response.status_code == 200
+
     def test_dos_attack_page(self, client):
         """Test DoS attack demonstration page loads."""
         response = client.get('/dos-attack')
@@ -207,6 +212,11 @@ class TestVulnerabilityPages:
     def test_excessive_agency_page(self, client):
         """Test excessive agency page loads."""
         response = client.get('/excessive-agency')
+        assert response.status_code == 200
+
+    def test_agentic_tools_page(self, client):
+        """Test agentic tools / SQL lab page loads."""
+        response = client.get('/agentic-tools')
         assert response.status_code == 200
 
     def test_misinformation_page(self, client):

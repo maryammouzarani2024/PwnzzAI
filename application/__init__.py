@@ -9,6 +9,14 @@ os.environ['OLLAMA_KEEP_ALIVE'] = '-1'
 app = Flask(__name__)
 
 app.config.from_object(Config)
+
+# Tests: keep the catering lab on an in-memory SQLite so the suite does not touch disk.
+if os.environ.get("TESTING"):
+    app.config["SQLALCHEMY_BINDS"] = {
+        **(app.config.get("SQLALCHEMY_BINDS") or {}),
+        "catering_sql": "sqlite:///:memory:",
+    }
+
 db = SQLAlchemy(app)
 
 
